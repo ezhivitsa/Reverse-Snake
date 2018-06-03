@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/schenes/main.unity
+  isLoaded: 1
+  isActive: 1
