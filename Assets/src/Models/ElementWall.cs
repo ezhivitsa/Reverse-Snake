@@ -6,7 +6,7 @@ namespace Assets.src.Models
     {
         public Element Element { get; set; }
 
-        public WallSide Side { get; set; }
+        public DirectionEnum Side { get; set; }
 
         public bool IsClosed { get; set; }
     }

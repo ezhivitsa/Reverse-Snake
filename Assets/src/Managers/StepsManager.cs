@@ -18,6 +18,14 @@ namespace Assets.src.Managers
             }
         }
 
+        public bool CanGetTarget
+        {
+            get
+            {
+                return _leftSteps == 1 || _leftSteps == 2;
+            }
+        }
+
         public StepsManager(int availableSteps)
         {
             _availableSteps = availableSteps;

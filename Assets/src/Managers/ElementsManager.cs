@@ -1,4 +1,5 @@
-﻿using Assets.src.Models;
+﻿using Assets.src.Enums;
+using Assets.src.Models;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,9 +16,35 @@ namespace Assets.src.Managers
             _elements = new List<Element>();
         }
 
-        public void Add(Element element)
+        public void Add(Element element, PositionsManager positionsManager)
         {
             _elements.Add(element);
+
+            var allDirections = new List<DirectionEnum>
+            {
+                DirectionEnum.Top,
+                DirectionEnum.Right,
+                DirectionEnum.Bottom,
+                DirectionEnum.Left,
+            };
+            allDirections.ForEach((direction) =>
+            {
+                var neighborPos = positionsManager.GetPosition(direction, element.BoartPosition);
+                var neighbor = GetElementAtPosition(neighborPos);
+                if (neighbor != null)
+                {
+                    element.Neighbors.Add(new NeighborElement
+                    {
+                        Direction = direction,
+                        Element = neighbor,
+                    });
+                    neighbor.Neighbors.Add(new NeighborElement
+                    {
+                        Direction = positionsManager.GetReverseDirection(direction),
+                        Element = element,
+                    });
+                }
+            });
         }
 
         public void AddWall(int from, int to)

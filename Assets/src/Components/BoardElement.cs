@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Target : MonoBehaviour {
+public class BoardElement : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {

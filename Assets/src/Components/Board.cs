@@ -1,4 +1,5 @@
-﻿using Assets.src.Managers;
+﻿using Assets.src.Enums;
+using Assets.src.Managers;
 using Assets.src.Models;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,15 +9,16 @@ namespace Assets.src
     public class Board : MonoBehaviour
     {
         public GameObject Element;
-
         public GameObject Step;
-
         public GameObject Target;
-        
+
+        public Material WallClose;
+
         private StepsManager _stepManager;
         private TargetsManager _targetManager;
         private ElementsManager _elementsManager;
         private WallsManager _wallsManager;
+        private PositionsManager _positionsManager;
 
         public void Start()
         {
@@ -24,6 +26,7 @@ namespace Assets.src
             _targetManager = new TargetsManager();
             _elementsManager = new ElementsManager();
             _wallsManager = new WallsManager(AppConstants.AddNewWallOnStep);
+            _positionsManager = new PositionsManager(AppConstants.FieldHeight, AppConstants.FieldWidth);
 
             GenerateBoard();
             AddStartStep();
@@ -32,43 +35,15 @@ namespace Assets.src
 
         public void Update()
         {
-            int position = GetMovePosition();
-            if (position < 0)
+            var direction = InputToDirection();
+            if (direction == DirectionEnum.None)
             {
                 return;
             }
 
-            var hasSteps = _stepManager.HasSteps;
-
-            var element = _elementsManager.GetElementAtPosition(position);
-            if (element.ChildTarget != null && hasSteps)
-            {
-                _stepManager.IncreaseAvailableSteps(element.ChildTarget.Value);
-            }
-
-            var isReset = !hasSteps || element.ChildTarget != null;
-            if (isReset)
-            {
-                var stepPositions = _stepManager.Reset();
-                RemoveElements(stepPositions);
-
-                var targetPositions = _targetManager.Reset();
-                RemoveElements(targetPositions);
-            }
-
-            AddStepElement(element);
-
-            if (isReset)
-            {
-                AddStartTarget();
-            }
-
-            _wallsManager.DoStep();
-            if (_wallsManager.ShouldAddWall)
-            {
-                _wallsManager.AddWall();
-                AddWall();
-            }
+            var currentStep = _elementsManager.GetElementAtPosition(_stepManager.LastPosition());
+            var newStep = currentStep.GetNeighbor(direction);
+            DoStep(currentStep, newStep);
         }
 
         private void GenerateBoard()
@@ -77,12 +52,8 @@ namespace Assets.src
             {
                 for (var j = 0; j < AppConstants.FieldWidth; j++)
                 {
-                    var position = new Vector3(
-                        (AppConstants.BoardElementWidth + AppConstants.BorderWidth) * j - AppConstants.OffsetX,
-                        0.01F,
-                        (AppConstants.BoardElementWidth + AppConstants.BorderWidth) * i - AppConstants.OffsetZ
-                    );
-                    var positionNum = i * AppConstants.FieldHeight + j;
+                    var position = _positionsManager.GetPositionVector(i, j);
+                    var positionNum = _positionsManager.GetPositionNumber(i, j);
 
                     var element = new Element
                     {
@@ -92,7 +63,7 @@ namespace Assets.src
 
                     Instantiate(Element, position, Quaternion.identity, transform);
 
-                    _elementsManager.Add(element);
+                    _elementsManager.Add(element, _positionsManager);
                 }
             }
         }
@@ -124,7 +95,7 @@ namespace Assets.src
             Instantiate(
                 gameObject,
                 new Vector3(
-                    position.x + AppConstants.BorderWidth,
+                    position.x + AppConstants.BorderWidth - 5,
                     position.y + 2,
                     position.z + AppConstants.BorderWidth
                 ),
@@ -133,27 +104,27 @@ namespace Assets.src
             );
         }
 
-        private int GetMovePosition()
+        private DirectionEnum InputToDirection()
         {
-            int position = -1;
+            DirectionEnum direction = DirectionEnum.None;
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                position = _stepManager.LastPosition() - AppConstants.FieldHeight;
+                direction = DirectionEnum.Left;
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                position = _stepManager.LastPosition() + AppConstants.FieldHeight;
+                direction = DirectionEnum.Right;
             }
             else if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                position = _stepManager.LastPosition() - 1;
+                direction = DirectionEnum.Top;
             }
             else if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                position = _stepManager.LastPosition() + 1;
+                direction = DirectionEnum.Bottom;
             }
 
-            return position;
+            return direction;
         }
 
         private void AddStepElement(Element element)
@@ -195,7 +166,86 @@ namespace Assets.src
         private void AddWall()
         {
             var wall = _elementsManager.GetRandomOpenWall();
-            var element = wall.Element;
+            var boardElement = wall.Element;
+            var boardNeighbor = boardElement.GetNeighbor(wall.Side);
+
+            AddWallToElement(boardElement, wall.Side);
+            AddWallToElement(boardNeighbor, _positionsManager.GetReverseDirection(wall.Side));
+        }
+
+        private void AddWallToElement(Element boardElement, DirectionEnum side)
+        {
+            var element = transform.GetChild(boardElement.BoartPosition);
+
+            MonoBehaviour wallElement = null;
+            switch (side)
+            {
+                case DirectionEnum.Top:
+                    wallElement = element.GetComponentInChildren<RightWall>();
+                    break;
+
+                case DirectionEnum.Right:
+                    wallElement = element.GetComponentInChildren<BottomWall>();
+                    break;
+
+                case DirectionEnum.Bottom:
+                    wallElement = element.GetComponentInChildren<LeftWall>();
+                    break;
+
+                case DirectionEnum.Left:
+                    wallElement = element.GetComponentInChildren<TopWall>();
+                    break;
+            }
+
+            var renderer = wallElement.GetComponent<Renderer>();
+            renderer.material = WallClose;
+            wallElement.transform.localScale += new Vector3(0, 0, 3.5F);
+
+            boardElement.CloseWall(side);
+        }
+
+        private void DoStep(Element from, Element to)
+        {
+            var isAvailableWay = from.CanGoTo(to);
+
+            if (
+                to.ContainsStep ||
+                (to.ChildTarget != null && !_stepManager.CanGetTarget && _stepManager.HasSteps) ||
+                !isAvailableWay
+            )
+            {
+                return;
+            }
+
+            var hasSteps = _stepManager.HasSteps;
+            if (to.ChildTarget != null && _stepManager.CanGetTarget)
+            {
+                _stepManager.IncreaseAvailableSteps(to.ChildTarget.Value);
+            }
+
+            var isReset = !hasSteps || (to.ChildTarget != null && _stepManager.CanGetTarget);
+            if (isReset)
+            {
+                var stepPositions = _stepManager.Reset();
+                RemoveElements(stepPositions);
+
+                var targetPositions = _targetManager.Reset();
+                RemoveElements(targetPositions);
+            }
+
+            AddStepElement(to);
+
+            if (isReset)
+            {
+                AddStartTarget();
+            }
+
+            _wallsManager.DoStep();
+            if (_wallsManager.ShouldAddWall)
+            {
+                _wallsManager.AddWall();
+                AddWall();
+            }
         }
     }
 }

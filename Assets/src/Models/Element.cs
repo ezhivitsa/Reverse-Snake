@@ -15,7 +15,9 @@ namespace Assets.src.Models
 
         public TargetElement ChildTarget { get; set; }
 
-        public List<ElementWall> _walls { get; set; }
+        private List<ElementWall> _walls { get; set; }
+
+        public List<NeighborElement> Neighbors { get; set; }
 
         public bool IsFree
         {
@@ -45,14 +47,39 @@ namespace Assets.src.Models
         {
             _walls = new List<ElementWall>
             {
-                GetWall(WallSide.Top),
-                GetWall(WallSide.Right),
-                GetWall(WallSide.Bottom),
-                GetWall(WallSide.Left),
+                CreateWall(DirectionEnum.Top),
+                CreateWall(DirectionEnum.Right),
+                CreateWall(DirectionEnum.Bottom),
+                CreateWall(DirectionEnum.Left),
             };
+            Neighbors = new List<NeighborElement>();
         }
 
-        private ElementWall GetWall(WallSide side)
+        public Element GetNeighbor(DirectionEnum direction)
+        {
+            var neighbor = Neighbors.Find(n => n.Direction == direction);
+            return neighbor != null ? neighbor.Element : null;
+        }
+
+        public NeighborElement GetNeighbor(Element element)
+        {
+            return Neighbors.Find(n => n.Element == element);
+        }
+
+        public void CloseWall(DirectionEnum direction)
+        {
+            var wall = _walls.Find(w => w.Side == direction);
+            wall.IsClosed = true;
+        }
+
+        public bool CanGoTo(Element element)
+        {
+            var neighbor = GetNeighbor(element);
+            var wall = _walls.Find(w => w.Side == neighbor.Direction);
+            return !wall.IsClosed;
+        }
+
+        private ElementWall CreateWall(DirectionEnum side)
         {
             return new ElementWall
             {
