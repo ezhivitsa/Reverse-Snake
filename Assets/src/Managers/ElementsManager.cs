@@ -9,7 +9,6 @@ namespace Assets.src.Managers
     public class ElementsManager
     {
         private List<Element> _elements;
-        private List<Wall> _walls;
 
         public ElementsManager()
         {
@@ -47,18 +46,6 @@ namespace Assets.src.Managers
             });
         }
 
-        public void AddWall(int from, int to)
-        {
-            var fromElement = _elements.Find(e => e.BoartPosition == from);
-            var toElement = _elements.Find(e => e.BoartPosition == from);
-
-            _walls.Add(new Wall
-            {
-                From = fromElement,
-                To = toElement,
-            });
-        }
-
         public List<Element> GetFree()
         {
             return _elements.Where(e => e.IsFree).ToList();
@@ -78,11 +65,12 @@ namespace Assets.src.Managers
 
         public ElementWall GetRandomOpenWall()
         {
-            var elements = _elements.Where(e => e.CanAddWall).ToList();
-            var num = Random.Range(0, elements.Count);
-
-            var walls = elements[num].OpenWalls;
+            var walls = _elements
+                .SelectMany(e => e.GetAvailableWalls())
+                .ToList();
             var wallNum = Random.Range(0, walls.Count);
+            Debug.Log(walls.Count);
+
             return walls[wallNum];
         }
     }

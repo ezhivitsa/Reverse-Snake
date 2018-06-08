@@ -27,14 +27,6 @@ namespace Assets.src.Models
             }
         }
 
-        public bool CanAddWall
-        {
-            get
-            {
-                return OpenWalls.Count > 2;
-            }
-        }
-
         public List<ElementWall> OpenWalls
         {
             get
@@ -87,6 +79,15 @@ namespace Assets.src.Models
                 IsClosed = false,
                 Side = side,
             };
+        }
+
+        public List<ElementWall> GetAvailableWalls()
+        {
+            return _walls.Where((w) =>
+            {
+                var neighbor = Neighbors.Find(n => n.Direction == w.Side);
+                return neighbor.Element.OpenWalls.Count > 2;
+            }).ToList();
         }
     }
 }

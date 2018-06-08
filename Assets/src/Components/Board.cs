@@ -17,7 +17,6 @@ namespace Assets.src
         private StepsManager _stepManager;
         private TargetsManager _targetManager;
         private ElementsManager _elementsManager;
-        private WallsManager _wallsManager;
         private PositionsManager _positionsManager;
 
         public void Start()
@@ -25,7 +24,6 @@ namespace Assets.src
             _stepManager = new StepsManager(AppConstants.StartStepsCount);
             _targetManager = new TargetsManager();
             _elementsManager = new ElementsManager();
-            _wallsManager = new WallsManager(AppConstants.AddNewWallOnStep);
             _positionsManager = new PositionsManager(AppConstants.FieldHeight, AppConstants.FieldWidth);
 
             GenerateBoard();
@@ -223,7 +221,8 @@ namespace Assets.src
                 _stepManager.IncreaseAvailableSteps(to.ChildTarget.Value);
             }
 
-            var isReset = !hasSteps || (to.ChildTarget != null && _stepManager.CanGetTarget);
+            var isAchiveTarget = (to.ChildTarget != null && _stepManager.CanGetTarget);
+            var isReset = !hasSteps || isAchiveTarget;
             if (isReset)
             {
                 var stepPositions = _stepManager.Reset();
@@ -240,10 +239,8 @@ namespace Assets.src
                 AddStartTarget();
             }
 
-            _wallsManager.DoStep();
-            if (_wallsManager.ShouldAddWall)
+            if (isReset && !isAchiveTarget)
             {
-                _wallsManager.AddWall();
                 AddWall();
             }
         }

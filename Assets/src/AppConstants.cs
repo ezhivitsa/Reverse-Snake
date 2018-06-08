@@ -17,7 +17,5 @@
         public const int StartStepsCount = 2;
 
         public const int TargetValue = -1;
-
-        public const int AddNewWallOnStep = 3;
     }
 }
