@@ -14,15 +14,6 @@ namespace Assets.src.Managers
             _width = width;
         }
 
-        public Vector3 GetPositionVector(int heightPos, int widthPos)
-        {
-            return new Vector3(
-                (AppConstants.BoardElementWidth + AppConstants.BorderWidth) * widthPos - AppConstants.OffsetX,
-                0.01F,
-                (AppConstants.BoardElementWidth + AppConstants.BorderWidth) * heightPos - AppConstants.OffsetZ
-            );
-        }
-
         public int GetPositionNumber(int heightPos, int widthPos)
         {
             return heightPos * _height + widthPos;
