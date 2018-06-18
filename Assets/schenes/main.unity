@@ -187,13 +187,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 236238468}
-  m_LocalRotation: {x: 0.4321707, y: -0.55966824, z: 0.4321707, w: 0.55966824}
+  m_LocalRotation: {x: -0.07575363, y: -0.70303726, z: 0.70303726, w: 0.07575363}
   m_LocalPosition: {x: 25, y: 79, z: 4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 75.35, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 77.7, y: -90, z: 90}
 --- !u!1 &263116430
 GameObject:
   m_ObjectHideFlags: 0
@@ -409,7 +409,6 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1640250123}
-  - component: {fileID: 1640250122}
   - component: {fileID: 1640250124}
   m_Layer: 0
   m_Name: Bootstrap
@@ -418,31 +417,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1640250122
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1640250121}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af328d037851a13448e123823b9e5945, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SnakeStepMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 3}
-  SnakeStepMaterial: {fileID: 2100000, guid: 6fa0186691977db4fb449b9a96561de8, type: 2}
-  BoardElementMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 3}
-  BoardElementMaterial: {fileID: 2100000, guid: bbb961b423a6d87469377f78ba8be7be,
-    type: 2}
-  BoardElementWallMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 3}
-  BoardElementWallMaterial: {fileID: 2100000, guid: b24ef29935684294589ecc3317985c77,
-    type: 2}
-  BoardWidth: 6
-  BoardHeigth: 6
-  BoardElementHeight: 1
-  BoardElementWidth: 1
-  BoardElementWallHeight: 1
-  BoardElementWallWidth: 1
 --- !u!4 &1640250123
 Transform:
   m_ObjectHideFlags: 0
@@ -469,4 +443,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Lines: 6
   Columns: 6
-  Element: {fileID: 1491294002768904, guid: fadcfcce54e8d80439d8bb6c59cb94a8, type: 2}
+  Element: {fileID: 1208609817701762, guid: fadcfcce54e8d80439d8bb6c59cb94a8, type: 2}
+  Wall: {fileID: 1890700370061536, guid: f44893dc51469254f9267dd8c69e262e, type: 2}

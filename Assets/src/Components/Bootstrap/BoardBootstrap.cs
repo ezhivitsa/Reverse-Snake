@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.src.Enums;
+using UnityEngine;
 
 public class BoardBootstrap : MonoBehaviour {
 
@@ -7,6 +8,7 @@ public class BoardBootstrap : MonoBehaviour {
     public int Columns;
 
     public GameObject Element;
+    public GameObject Wall;
 
 	// Use this for initialization
 	void Start () {
@@ -28,6 +30,15 @@ public class BoardBootstrap : MonoBehaviour {
                 var position = item.GetComponent<BoardElementPosition>();
                 position.RowPosition = i;
                 position.ColumnPosition = j;
+
+                // create top wall
+                GameObject topWall = Instantiate(Wall, new Vector3(0, 0, 0), Quaternion.identity, transform) as GameObject;
+                var wallPosition = topWall.GetComponent<WallPosition>();
+                wallPosition.RowPosition = i;
+                wallPosition.ColumnPosition = j;
+
+                var wallData = topWall.GetComponent<WallData>();
+                wallData.Directon = DirectionEnum.Top;
             }
         }
     }
