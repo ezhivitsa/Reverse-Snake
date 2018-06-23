@@ -410,13 +410,26 @@ GameObject:
   m_Component:
   - component: {fileID: 1640250123}
   - component: {fileID: 1640250124}
+  - component: {fileID: 1640250122}
   m_Layer: 0
-  m_Name: Bootstrap
+  m_Name: Board
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1640250122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1640250121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f6839629e489024ca2e04c7494f8042, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SnakeStep: {fileID: 1153502898178060, guid: 97d453ecfc7511141b7ba231021d4b07, type: 2}
 --- !u!4 &1640250123
 Transform:
   m_ObjectHideFlags: 0
@@ -445,3 +458,5 @@ MonoBehaviour:
   Columns: 6
   Element: {fileID: 1208609817701762, guid: fadcfcce54e8d80439d8bb6c59cb94a8, type: 2}
   Wall: {fileID: 1890700370061536, guid: f44893dc51469254f9267dd8c69e262e, type: 2}
+  SnakeStep: {fileID: 1153502898178060, guid: 97d453ecfc7511141b7ba231021d4b07, type: 2}
+  Target: {fileID: 1771809526645378, guid: 3997f9e8c18056349b4eff906080ffce, type: 2}

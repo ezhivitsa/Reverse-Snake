@@ -20,6 +20,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4172093462965652}
   - component: {fileID: 114792227440730006}
+  - component: {fileID: 114649151392750514}
+  - component: {fileID: 114697027020716158}
   m_Layer: 0
   m_Name: SnakeStep
   m_TagString: Untagged
@@ -69,7 +71,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1153502898178060}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.3191, y: 2.1017, z: -4.1128}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4862894544463714}
@@ -84,7 +86,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1897130304029192}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.00002, y: -1, z: 2}
+  m_LocalPosition: {x: 2, y: -1, z: 2}
   m_LocalScale: {x: 4, y: 2, z: 4}
   m_Children: []
   m_Father: {fileID: 4172093462965652}
@@ -96,13 +98,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1437451821053074}
-  m_LocalRotation: {x: 0.5, y: -0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0.28463, y: 0, z: 0.5}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0.7071068, w: 0}
+  m_LocalPosition: {x: 2, y: 0, z: 2}
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_Children: []
   m_Father: {fileID: 4172093462965652}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 90, y: -90, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: -180, z: 0}
 --- !u!23 &23094041450249076
 MeshRenderer:
   m_ObjectHideFlags: 1
@@ -203,8 +205,8 @@ TextMesh:
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1
-  m_Anchor: 0
-  m_Alignment: 0
+  m_Anchor: 4
+  m_Alignment: 1
   m_TabSize: 4
   m_FontSize: 60
   m_FontStyle: 0
@@ -213,6 +215,31 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4289738817
+--- !u!114 &114649151392750514
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1153502898178060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db20a2b3cca763941bf1043067b02a07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RowPosition: 0
+  ColumnPosition: 0
+--- !u!114 &114697027020716158
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1153502898178060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f7628d04678d9a48b703c105188e351, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Number: 0
 --- !u!114 &114792227440730006
 MonoBehaviour:
   m_ObjectHideFlags: 1

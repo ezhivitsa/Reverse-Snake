@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Assets.src;
+using Unity.Entities;
 using UnityEngine;
 
 public class SnakeStepSystem : ComponentSystem
@@ -6,18 +7,27 @@ public class SnakeStepSystem : ComponentSystem
     private struct Group
     {
         public Transform Transform;
-        public SnakeStepInput SnakeStepInput;
+        public SnakeStepPosition SnakePosition;
+        public SnakeStepData Data;
     }
 
     protected override void OnUpdate()
     {
         foreach (var entity in GetEntities<Group>())
         {
-            entity.Transform.position = new Vector3(
-                entity.SnakeStepInput.PositionX,
-                0,
-                entity.SnakeStepInput.PositionY
+            entity.Transform.position = GetPositionVector(
+                entity.SnakePosition.RowPosition,
+                entity.SnakePosition.ColumnPosition
             );
         }
+    }
+
+    private Vector3 GetPositionVector(int rowPos, int columnPos)
+    {
+        return new Vector3(
+            (AppConstants.BoardElementWidth + AppConstants.BorderWidth) * (columnPos - 1) - AppConstants.OffsetX,
+            1F,
+            (AppConstants.BoardElementWidth + AppConstants.BorderWidth) * rowPos - AppConstants.OffsetZ + AppConstants.BorderWidth
+        );
     }
 }

@@ -14,7 +14,7 @@
 
         public const float BoardElementWidth = 4F;
 
-        public const int StartStepsCount = 2;
+        public const int StartStepsCount = 3;
 
         public const int TargetValue = -1;
     }
