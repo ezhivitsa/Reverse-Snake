@@ -30,16 +30,23 @@ public class BoardBootstrap : MonoBehaviour {
                 var position = item.GetComponent<BoardElementPosition>();
                 position.RowPosition = i;
                 position.ColumnPosition = j;
-
-                // create top wall
-                GameObject topWall = Instantiate(Wall, new Vector3(0, 0, 0), Quaternion.identity, transform) as GameObject;
-                var wallPosition = topWall.GetComponent<WallPosition>();
-                wallPosition.RowPosition = i;
-                wallPosition.ColumnPosition = j;
-
-                var wallData = topWall.GetComponent<WallData>();
-                wallData.Directon = DirectionEnum.Top;
+                
+                GenerateWall(i, j, DirectionEnum.Top);
+                GenerateWall(i, j, DirectionEnum.Bottom);
+                GenerateWall(i, j, DirectionEnum.Left);
+                GenerateWall(i, j, DirectionEnum.Right);
             }
         }
+    }
+
+    private void GenerateWall(int i, int j, DirectionEnum direction)
+    {
+        GameObject topWall = Instantiate(Wall, new Vector3(0, 0, 0), Quaternion.identity, transform) as GameObject;
+        var wallPosition = topWall.GetComponent<WallPosition>();
+        wallPosition.RowPosition = i;
+        wallPosition.ColumnPosition = j;
+
+        var wallData = topWall.GetComponent<WallData>();
+        wallData.Directon = direction;
     }
 }

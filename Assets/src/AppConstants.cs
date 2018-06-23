@@ -6,13 +6,13 @@
 
         public const int FieldWidth = 6;
 
-        public const int OffsetX = 10;
+        public const float OffsetX = 10F;
 
-        public const int OffsetZ = 12;
+        public const float OffsetZ = 12F;
 
         public const float BorderWidth = 0.5F;
 
-        public const int BoardElementWidth = 4;
+        public const float BoardElementWidth = 4F;
 
         public const int StartStepsCount = 2;
 
