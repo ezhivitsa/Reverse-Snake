@@ -121,6 +121,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2470493dfef7244bb6edba02be1c99b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  WallClose: {fileID: 2100000, guid: e609bc59ed2e23843b21eb8aa249a5de, type: 2}
+  WallOpen: {fileID: 2100000, guid: b24ef29935684294589ecc3317985c77, type: 2}
   Direction: 0
   IsActive: 0
 --- !u!114 &114987803864189296

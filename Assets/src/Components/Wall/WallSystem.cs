@@ -11,6 +11,7 @@ namespace Assets.src.Components.Wall
             public Transform Transform;
             public WallData WallData;
             public WallPosition Position;
+            public MeshRenderer Renderer;
         }
 
         protected override void OnUpdate()
@@ -23,6 +24,8 @@ namespace Assets.src.Components.Wall
                     entity.Position.ColumnPosition
                 );
                 entity.Transform.rotation = GetRotationQuaternion(entity.WallData);
+
+                entity.Renderer.material = GetMaterial(entity.WallData);
             }
         }
 
@@ -83,6 +86,11 @@ namespace Assets.src.Components.Wall
                 default:
                     return Quaternion.Euler(0, 0, 0);
             }
+        }
+
+        private Material GetMaterial(WallData data)
+        {
+            return data.IsActive ? data.WallClose : data.WallOpen;
         }
     }
 }

@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class WallData : MonoBehaviour
 {
+    public Material WallClose;
+    public Material WallOpen;
+
     public DirectionEnum Direction;
 
     public bool IsActive;

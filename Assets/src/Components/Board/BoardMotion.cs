@@ -326,6 +326,17 @@ public class BoardMotion : BoardBase
             wall.Direction
         );
 
+        wall.IsActive = true;
+
         var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
+        var reverseWall = availableWalls.Find((w) =>
+        {
+            var pos = w.GetComponent<WallPosition>();
+            return pos.ColumnPosition == nextPosition.Column &&
+                pos.RowPosition == nextPosition.Row &&
+                w.Direction == reverseDirection;
+        });
+
+        reverseWall.IsActive = true;
     }
 }
