@@ -31,7 +31,7 @@ namespace Assets.src.Components.Wall
             var yPos = wallData.IsActive ? 0.01F : -0.95F;
             Vector3 result;
 
-            switch (wallData.Directon)
+            switch (wallData.Direction)
             {
                 case DirectionEnum.Top:
                     result = new Vector3(
@@ -74,7 +74,7 @@ namespace Assets.src.Components.Wall
 
         private Quaternion GetRotationQuaternion(WallData wallData)
         {
-            switch (wallData.Directon)
+            switch (wallData.Direction)
             {
                 case DirectionEnum.Left:
                 case DirectionEnum.Right:

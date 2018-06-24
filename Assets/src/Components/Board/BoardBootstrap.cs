@@ -1,11 +1,9 @@
-﻿using System.Linq;
-using Assets.src.Enums;
-using System.Collections.Generic;
+﻿using Assets.src.Enums;
 using UnityEngine;
 using Assets.src;
 
-public class BoardBootstrap : MonoBehaviour {
-
+public class BoardBootstrap : BoardBase
+{
     public int Lines;
 
     public int Columns;
@@ -19,7 +17,7 @@ public class BoardBootstrap : MonoBehaviour {
     void Start () {
         GenerateBoard();
         GenerateSnakeStep();
-        GenerateTarget();
+        GenerateTarget(Target);
     }
 	
 	// Update is called once per frame
@@ -64,20 +62,6 @@ public class BoardBootstrap : MonoBehaviour {
         data.ContainsSnakeStep = true;
     }
 
-    private void GenerateTarget()
-    {
-        var element = GetRandomAvailableElement();
-        var position = element.GetComponentInChildren<BoardElementPosition>();
-        var data = element.GetComponentInChildren<BoardElementData>();
-
-        GameObject target = Instantiate(Target, new Vector3(0, 0, 0), Quaternion.identity, transform) as GameObject;
-        var targetPosition = target.GetComponent<TargetPosition>();
-        targetPosition.RowPosition = position.RowPosition;
-        targetPosition.ColumnPosition = position.ColumnPosition;
-
-        data.ContainsTarget = true;
-    }
-
     private void GenerateWall(int i, int j, DirectionEnum direction)
     {
         GameObject topWall = Instantiate(Wall, new Vector3(0, 0, 0), Quaternion.identity, transform) as GameObject;
@@ -86,24 +70,6 @@ public class BoardBootstrap : MonoBehaviour {
         wallPosition.ColumnPosition = j;
 
         var wallData = topWall.GetComponent<WallData>();
-        wallData.Directon = direction;
-    }
-
-    private List<BoardElement> GetAvailableElements()
-    {
-        return GetComponentsInChildren<BoardElement>()
-            .Where((element) =>
-            {
-                var data = element.GetComponentInChildren<BoardElementData>();
-                return !data.ContainsSnakeStep && !data.ContainsTarget;
-            })
-            .ToList();
-    }
-
-    private BoardElement GetRandomAvailableElement()
-    {
-        var elements = GetAvailableElements();
-        var num = Random.Range(0, elements.Count);
-        return elements[num];
+        wallData.Direction = direction;
     }
 }

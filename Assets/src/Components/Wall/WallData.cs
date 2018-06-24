@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class WallData : MonoBehaviour
 {
-    public DirectionEnum Directon;
+    public DirectionEnum Direction;
 
     public bool IsActive;
 
