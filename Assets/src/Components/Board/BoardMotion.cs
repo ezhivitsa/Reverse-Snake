@@ -4,6 +4,7 @@ using UnityEngine;
 using Assets.src.Models;
 using System.Collections.Generic;
 using Assets.src.Helpers;
+using Assets.src.InputController;
 
 public class BoardMotion : BoardBase
 {
@@ -19,7 +20,7 @@ public class BoardMotion : BoardBase
 	// Update is called once per frame
 	void Update ()
     {
-        var direction = InputToDirection();
+        InputController.GetInputArg(out DirectionEnum direction);
         
         if (direction != DirectionEnum.None)
         {
@@ -92,29 +93,6 @@ public class BoardMotion : BoardBase
                 }
             }
         }
-    }
-
-    private DirectionEnum InputToDirection()
-    {
-        DirectionEnum direction = DirectionEnum.None;
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            direction = DirectionEnum.Left;
-        }
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            direction = DirectionEnum.Right;
-        }
-        else if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            direction = DirectionEnum.Top;
-        }
-        else if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            direction = DirectionEnum.Bottom;
-        }
-
-        return direction;
     }
 
     private SnakeStepData GetLastSnakeStepData()
