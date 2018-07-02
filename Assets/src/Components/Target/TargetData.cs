@@ -16,4 +16,9 @@ public class TargetData : MonoBehaviour
     {
 
     }
+
+    void RemoveTargetMessage()
+    {
+        gameObject.SetActive(false);
+    }
 }

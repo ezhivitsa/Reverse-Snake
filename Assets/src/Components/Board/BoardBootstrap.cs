@@ -48,28 +48,22 @@ public class BoardBootstrap : BoardBase
     {
         var element = GetRandomAvailableElement();
         var position = element.GetComponentInChildren<BoardElementPosition>();
-        var data = element.GetComponentInChildren<BoardElementData>();
-
-        GameObject step = Instantiate(SnakeStep, new Vector3(0, 0, 0), Quaternion.identity, transform) as GameObject;
-        var stepPosition = step.GetComponent<SnakeStepPosition>();
-        stepPosition.RowPosition = position.RowPosition;
-        stepPosition.ColumnPosition = position.ColumnPosition;
-
-        var stepData = step.GetComponent<SnakeStepData>();
-        stepData.Number = AppConstants.StartStepsCount;
-        stepData.StartNumber = AppConstants.StartStepsCount;
-
-        data.ContainsSnakeStep = true;
+        GenerateSnakeStep(
+            SnakeStep,
+            position.ColumnPosition,
+            position.RowPosition,
+            AppConstants.StartStepsCount,
+            AppConstants.StartStepsCount
+        );
     }
 
     private void GenerateWall(int i, int j, DirectionEnum direction)
     {
         GameObject topWall = Instantiate(Wall, new Vector3(0, 0, 0), Quaternion.identity, transform) as GameObject;
         var wallPosition = topWall.GetComponent<WallPosition>();
+
         wallPosition.RowPosition = i;
         wallPosition.ColumnPosition = j;
-
-        var wallData = topWall.GetComponent<WallData>();
-        wallData.Direction = direction;
+        wallPosition.Direction = direction;
     }
 }

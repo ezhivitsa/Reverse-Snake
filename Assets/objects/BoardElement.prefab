@@ -531,3 +531,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RowPosition: 0
   ColumnPosition: 0
+  OffsetX: 10
+  OffsetZ: 12

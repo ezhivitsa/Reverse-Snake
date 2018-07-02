@@ -3,57 +3,47 @@ using UnityEngine;
 using System.Collections.Generic;
 using Assets.src.Helpers;
 using Assets.src.Enums;
-using Assets.src.Models;
-using Assets.src.InputController;
-using System;
 
 
 namespace Assets.src.InputController
 {
     public static class InputController
     {
-        internal static void GetInputArg(out DirectionEnum input)
+        internal static DirectionEnum GetInputArg()
         {
-#if UNITY_EDITOR
-			PCInput(out input);
-#elif UNITY_IOS || UNITY_ANDROID
-			MobileInput(out input);
-#endif
+            #if UNITY_EDITOR
+			    return PCInput();
+            #elif UNITY_IOS || UNITY_ANDROID
+			    return MobileInput();
+            #endif
         }
 
-        private static void PCInput(out DirectionEnum input)
+        private static DirectionEnum PCInput()
         {
-            DirectionEnum direction = DirectionEnum.None;
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                input = DirectionEnum.Left;
-                Debug.Log("Left");
+                return DirectionEnum.Left;
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                input = DirectionEnum.Right;
-                Debug.Log("Right");
+                return DirectionEnum.Right;
             }
             else if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                input = DirectionEnum.Top;
-                Debug.Log("Top");
+                return DirectionEnum.Top;
             }
             else if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                input = DirectionEnum.Bottom;
-                Debug.Log("Bottom");
+                return DirectionEnum.Bottom;
             }
             else
             {
-                input = DirectionEnum.None;
-                Debug.Log("None");
+                return DirectionEnum.None;
             }
-            
         }
 
         private static Vector2 fingerDown;
-        private static void MobileInput(out DirectionEnum input)
+        private static DirectionEnum MobileInput()
         {
             foreach (Touch touch in Input.touches)
             {
@@ -74,32 +64,28 @@ namespace Assets.src.InputController
                     {
                         if (delta.x > 0)
                         {
-                            input = DirectionEnum.Right;
-                            return;
+                            return DirectionEnum.Right;
                         }
                         else
                         {
-                            input = DirectionEnum.Left;
-                            return;
+                            return DirectionEnum.Left;
                         }
                     }
                     else
                     {
                         if (delta.y > 0)
                         {
-                            input = DirectionEnum.Top;
-                            return;
+                            return DirectionEnum.Top;
                         }
                         else
                         {
-                            input = DirectionEnum.Bottom;
-                            return;
+                            return DirectionEnum.Bottom;
                         }
                     }
                 }
             }
 
-            input = DirectionEnum.None;
+            return DirectionEnum.None;
         }
     }
 }

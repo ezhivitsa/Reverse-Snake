@@ -20,52 +20,35 @@ namespace Assets.src.Components.Wall
             {
                 entity.Transform.position = GetPositionVector(
                     entity.WallData,
-                    entity.Position.RowPosition,
-                    entity.Position.ColumnPosition
+                    entity.Position
                 );
-                entity.Transform.rotation = GetRotationQuaternion(entity.WallData);
+                entity.Transform.rotation = GetRotationQuaternion(entity.Position);
 
                 entity.Renderer.material = GetMaterial(entity.WallData);
             }
         }
 
-        private Vector3 GetPositionVector(WallData wallData, float rowPos, float columnPos)
+        private Vector3 GetPositionVector(WallData wallData, WallPosition position)
         {
             var yPos = wallData.IsActive ? 0.01F : -0.95F;
             Vector3 result;
 
-            switch (wallData.Direction)
+            switch (position.Direction)
             {
                 case DirectionEnum.Top:
-                    result = new Vector3(
-                        AppConstants.BoardElementWidth * (columnPos - 1/2F) + AppConstants.BorderWidth * (columnPos - 1),
-                        yPos,
-                        AppConstants.BoardElementWidth * rowPos + AppConstants.BorderWidth * (rowPos + 1/2F)
-                    );
+                    result = CalculatePosition(position.ColumnPosition, position.RowPosition, -1/2F, -1, yPos, 0, 1/2F);
                     break;
 
                 case DirectionEnum.Bottom:
-                    result = new Vector3(
-                        AppConstants.BoardElementWidth * (columnPos - 1/2F) + AppConstants.BorderWidth * (columnPos - 1),
-                        yPos,
-                        AppConstants.BoardElementWidth * (rowPos + 1) + AppConstants.BorderWidth * (rowPos + 3/2F)
-                    );
+                    result = CalculatePosition(position.ColumnPosition, position.RowPosition, -1/2F, -1, yPos, 1, 3/2F);
                     break;
 
                 case DirectionEnum.Left:
-                    result = new Vector3(
-                        AppConstants.BoardElementWidth * columnPos + AppConstants.BorderWidth * (columnPos - 1/2F),
-                        yPos,
-                        AppConstants.BoardElementWidth * (rowPos + 1/2F) + AppConstants.BorderWidth * (rowPos + 1)
-                    );
+                    result = CalculatePosition(position.ColumnPosition, position.RowPosition, 0, -1/2F, yPos, 1/2F, 1);
                     break;
 
                 case DirectionEnum.Right:
-                    result = new Vector3(
-                        AppConstants.BoardElementWidth * (columnPos - 1) + AppConstants.BorderWidth * (columnPos - 3/2F),
-                        yPos,
-                        AppConstants.BoardElementWidth * (rowPos + 1/2F) + AppConstants.BorderWidth * (rowPos + 1)
-                    );
+                    result = CalculatePosition(position.ColumnPosition, position.RowPosition, -1, -3/2F, yPos, 1/2F, 1);
                     break;
 
                 default:
@@ -75,9 +58,26 @@ namespace Assets.src.Components.Wall
             return result - new Vector3(AppConstants.OffsetX, 0, AppConstants.OffsetZ);
         }
 
-        private Quaternion GetRotationQuaternion(WallData wallData)
+        private Vector3 CalculatePosition(
+            float columnPos,
+            float rowPos,
+            float elementXCoeff,
+            float borderXCoeff,
+            float yPos,
+            float elementZCoeff,
+            float borderZCoeff
+        )
         {
-            switch (wallData.Direction)
+            return new Vector3(
+                AppConstants.BoardElementWidth * (columnPos + elementXCoeff) + AppConstants.BorderWidth * (columnPos + borderXCoeff),
+                yPos,
+                AppConstants.BoardElementWidth * (rowPos + elementZCoeff) + AppConstants.BorderWidth * (rowPos + borderZCoeff)
+            );
+        }
+
+        private Quaternion GetRotationQuaternion(WallPosition wallPosition)
+        {
+            switch (wallPosition.Direction)
             {
                 case DirectionEnum.Left:
                 case DirectionEnum.Right:

@@ -2,10 +2,6 @@
 {
     public static class AppConstants
     {
-        public const int FieldHeight = 6;
-
-        public const int FieldWidth = 6;
-
         public const float OffsetX = 10F;
 
         public const float OffsetZ = 12F;

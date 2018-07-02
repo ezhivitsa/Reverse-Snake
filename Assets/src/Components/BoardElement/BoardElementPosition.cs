@@ -6,8 +6,8 @@ public class BoardElementPosition : MonoBehaviour
 
     public int ColumnPosition;
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start ()
     {
 		
 	}

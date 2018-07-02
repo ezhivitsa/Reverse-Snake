@@ -8,13 +8,23 @@ public class SnakeStepData : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        var textElement = transform.GetChild(0).GetComponent<TextMesh>();
-        textElement.text = Number.ToString();
+        SetNumberText();
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    public void SetNumberText()
+    {
+        var textElement = transform.GetChild(0).GetComponent<TextMesh>();
+        textElement.text = Number.ToString();
+    }
+
+    void RemoveAllStepsMessage()
+    {
+        gameObject.SetActive(false);
     }
 }

@@ -17,4 +17,14 @@ public class BoardElementData : MonoBehaviour
     {
 
     }
+
+    void RemoveAllStepsMessage()
+    {
+        ContainsSnakeStep = false;
+    }
+
+    void RemoveTargetMessage()
+    {
+        ContainsTarget = false;
+    }
 }

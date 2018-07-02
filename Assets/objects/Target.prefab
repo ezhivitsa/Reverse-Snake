@@ -226,7 +226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a99fdce287493614f8b9a842d4f78aba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Value: 0
+  Value: -1
 --- !u!114 &114780310616247432
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -238,8 +238,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ada3193bd6234d4d84e01a21fd350d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RowPosition: 0
-  ColumnPosition: 0
+  RowPosition: 2
+  ColumnPosition: 5
 --- !u!114 &114832480245267584
 MonoBehaviour:
   m_ObjectHideFlags: 1

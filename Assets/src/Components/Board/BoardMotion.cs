@@ -20,77 +20,78 @@ public class BoardMotion : BoardBase
 	// Update is called once per frame
 	void Update ()
     {
-        InputController.GetInputArg(out DirectionEnum direction);
-        
-        if (direction != DirectionEnum.None)
+        var direction = InputController.GetInputArg();
+        if (direction == DirectionEnum.None)
         {
-            var stepData = GetLastSnakeStepData();
-            var position = stepData.GetComponent<SnakeStepPosition>();
+            return;
+        }
 
-            var isWallClosed = IsWallOnWay(position.ColumnPosition, position.RowPosition, direction);
-            if (isWallClosed)
-            {
-                return;
-            }
+        var stepData = GetLastSnakeStepData();
+        var position = stepData.GetComponent<SnakeStepPosition>();
 
-            if (stepData.Number == 1)
+        var isWallClosed = IsWallOnWay(position.ColumnPosition, position.RowPosition, direction);
+        if (isWallClosed)
+        {
+            return;
+        }
+
+        if (stepData.Number == 1)
+        {
+            RemoveAllSteps();
+            RemoveTarget();
+
+            AddNewStep(
+                position.ColumnPosition,
+                position.RowPosition,
+                stepData.StartNumber + 2,
+                stepData.StartNumber + 1,
+                direction
+            );
+            GenerateTarget(Target);
+
+            AddNewWall();
+        }
+        else
+        {
+            var isTargetReached = IsTargetReached(
+                position.ColumnPosition,
+                position.RowPosition,
+                stepData.Number,
+                direction
+            );
+            if (isTargetReached)
             {
+                var targetValue = GetTargetValue();
                 RemoveAllSteps();
                 RemoveTarget();
 
                 AddNewStep(
                     position.ColumnPosition,
                     position.RowPosition,
-                    stepData.StartNumber + 2,
-                    stepData.StartNumber + 1,
+                    stepData.StartNumber + 2 + targetValue,
+                    stepData.StartNumber + 1 + targetValue,
                     direction
                 );
                 GenerateTarget(Target);
-
-                AddNewWall();
             }
             else
             {
-                var isTargetReached = IsTargetReached(
+                var isNextBusy = IsNextPositionBusy(
+                    position.ColumnPosition,
+                    position.RowPosition,
+                    direction
+                );
+                if (isNextBusy)
+                {
+                    return;
+                }
+                AddNewStep(
                     position.ColumnPosition,
                     position.RowPosition,
                     stepData.Number,
+                    stepData.StartNumber,
                     direction
                 );
-                if (isTargetReached)
-                {
-                    var targetValue = GetTargetValue();
-                    RemoveAllSteps();
-                    RemoveTarget();
-
-                    AddNewStep(
-                        position.ColumnPosition,
-                        position.RowPosition,
-                        stepData.StartNumber + 2 + targetValue,
-                        stepData.StartNumber + 1 + targetValue,
-                        direction
-                    );
-                    GenerateTarget(Target);
-                }
-                else
-                {
-                    var isNextBusy = IsNextPositionBusy(
-                        position.ColumnPosition,
-                        position.RowPosition,
-                        direction
-                    );
-                    if (isNextBusy)
-                    {
-                        return;
-                    }
-                    AddNewStep(
-                        position.ColumnPosition,
-                        position.RowPosition,
-                        stepData.Number,
-                        stepData.StartNumber,
-                        direction
-                    );
-                }
             }
         }
     }
@@ -102,62 +103,16 @@ public class BoardMotion : BoardBase
             .First();
     }
 
-    private BoardElement GetBoardElementAtPosition(int column, int row)
-    {
-        return GetComponentsInChildren<BoardElement>()
-            .First((element) =>
-            {
-                var position = element.GetComponentInChildren<BoardElementPosition>();
-                return position.ColumnPosition == column && position.RowPosition == row;
-            });
-    }
-
     private PositionModel GetNextPosition(int column, int row, DirectionEnum direction)
     {
-        var result = new PositionModel()
-        {
-            Column = column,
-            Row = row,
-        };
-
-        switch (direction)
-        {
-            case DirectionEnum.Top:
-                result.Row -= 1;
-                break;
-
-            case DirectionEnum.Right:
-                result.Column -= 1;
-                break;
-
-            case DirectionEnum.Bottom:
-                result.Row += 1;
-                break;
-
-            case DirectionEnum.Left:
-                result.Column += 1;
-                break;
-        }
-
         var bootstrap = GetComponent<BoardBootstrap>();
-        if (result.Column < 0)
-        {
-            result.Column = bootstrap.Columns - 1;
-        }
-        else if (result.Column >= bootstrap.Columns)
-        {
-            result.Column = 0;
-        }
-        else if (result.Row < 0)
-        {
-            result.Row = bootstrap.Lines - 1;
-        }
-        else if (result.Row >= bootstrap.Lines)
-        {
-            result.Row = 0;
-        }
-
-        return result;
+        return PositionHelper.GetNextPosition(
+            bootstrap.Columns,
+            bootstrap.Lines,
+            column,
+            row,
+            direction
+        );
     }
 
     private void AddNewStep(
@@ -169,49 +124,17 @@ public class BoardMotion : BoardBase
     )
     {
         var newPosition = GetNextPosition(columnPosition, rowPosition, direction);
-
-        var element = GetBoardElementAtPosition(newPosition.Column, newPosition.Row);
-        var data = element.GetComponentInChildren<BoardElementData>();
-
-        GameObject step = Instantiate(SnakeStep, new Vector3(0, 0, 0), Quaternion.identity, transform) as GameObject;
-        var stepPosition = step.GetComponent<SnakeStepPosition>();
-        stepPosition.RowPosition = newPosition.Row;
-        stepPosition.ColumnPosition = newPosition.Column;
-
-        var newStepData = step.GetComponent<SnakeStepData>();
-        newStepData.Number = currentNumber - 1;
-        newStepData.StartNumber = startNumber;
-
-        data.ContainsSnakeStep = true;
+        GenerateSnakeStep(SnakeStep, newPosition.Column, newPosition.Row, currentNumber, startNumber);
     }
 
     private void RemoveAllSteps()
     {
-        var steps = GetComponentsInChildren<SnakeStepData>().ToList();
-        steps.ForEach((step) =>
-        {
-            Destroy(step.gameObject);
-        });
-
-        GetComponentsInChildren<BoardElementData>()
-            .ToList()
-            .ForEach((element) =>
-            {
-                element.ContainsSnakeStep = false;
-            });
+        BroadcastMessage("RemoveAllStepsMessage");
     }
 
     private void RemoveTarget()
     {
-        var target = GetComponentInChildren<TargetData>();
-        Destroy(target.gameObject);
-
-        GetComponentsInChildren<BoardElementData>()
-            .ToList()
-            .ForEach((element) =>
-            {
-                element.ContainsTarget = false;
-            });
+        BroadcastMessage("RemoveTargetMessage");
     }
 
     private bool IsTargetReached(
@@ -240,18 +163,17 @@ public class BoardMotion : BoardBase
 
     private WallData GetWall(int column, int row, DirectionEnum direction)
     {
-        var walls = GetComponentsInChildren<WallPosition>()
-            .Where((w) =>
-            {
-                return w.RowPosition == row && w.ColumnPosition == column;
-            })
-            .ToList();
+        var positions = GetComponentsInChildren<WallPosition>().ToList();
+        return GetWall(positions, column, row, direction);
+    }
 
-        var wall = walls
-            .Select(w => w.GetComponent<WallData>())
-            .First(w => w.Direction == direction);
+    private WallData GetWall(List<WallPosition> positions, int column, int row, DirectionEnum direction)
+    {
+        var wall = positions.Find(w => {
+            return w.RowPosition == row && w.ColumnPosition == column && w.Direction == direction;
+        });
 
-        return wall;
+        return wall.GetComponent<WallData>();
     }
 
     private bool IsNextPositionBusy(int column, int row, DirectionEnum direction)
@@ -270,15 +192,14 @@ public class BoardMotion : BoardBase
 
         var notActiveWallPositions = notActiveWalls.Select(w => w.GetComponent<WallPosition>()).ToList();
 
-        var availableWalls = notActiveWalls.Where((w) => {
-            var position = w.GetComponent<WallPosition>();
+        var availableWalls = notActiveWallPositions.Where((position) => {
             var wallsOnPosition = GetWallsOnPosition(
                 notActiveWallPositions,
                 position.ColumnPosition,
                 position.ColumnPosition
            );
 
-            var nextPos = GetNextPosition(position.ColumnPosition, position.RowPosition, w.Direction);
+            var nextPos = GetNextPosition(position.ColumnPosition, position.RowPosition, position.Direction);
             var wallsOnNextPosition = GetWallsOnPosition(notActiveWallPositions, nextPos.Column, nextPos.Row);
 
             return wallsOnPosition.Count > 2 && wallsOnNextPosition.Count > 2;
@@ -295,26 +216,21 @@ public class BoardMotion : BoardBase
             .ToList();
     }
 
-    private void CloseWall(WallData wall, List<WallData> availableWalls)
+    private void CloseWall(WallPosition wallPosition, List<WallPosition> availableWalls)
     {
-        var wallPosition = wall.GetComponent<WallPosition>();
+        var wall = wallPosition.GetComponent<WallData>();
+        wall.IsActive = true;
+
         var nextPosition = GetNextPosition(
             wallPosition.ColumnPosition,
             wallPosition.RowPosition,
-            wall.Direction
+            wallPosition.Direction
         );
 
-        wall.IsActive = true;
+        var reverseDirection = DirectionHelper.GetReverseDirection(wallPosition.Direction);
+        var reverseWallPos = GetWall(availableWalls, nextPosition.Column, nextPosition.Row, reverseDirection);
 
-        var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
-        var reverseWall = availableWalls.Find((w) =>
-        {
-            var pos = w.GetComponent<WallPosition>();
-            return pos.ColumnPosition == nextPosition.Column &&
-                pos.RowPosition == nextPosition.Row &&
-                w.Direction == reverseDirection;
-        });
-
+        var reverseWall = reverseWallPos.GetComponent<WallData>();
         reverseWall.IsActive = true;
     }
 }
