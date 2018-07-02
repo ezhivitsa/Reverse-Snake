@@ -48,8 +48,6 @@ public class BoardMotion : BoardBase
                 direction
             );
             GenerateTarget(Target);
-
-            AddNewWall();
         }
         else
         {
@@ -73,6 +71,8 @@ public class BoardMotion : BoardBase
                     direction
                 );
                 GenerateTarget(Target);
+
+                AddNewWall();
             }
             else
             {
@@ -196,7 +196,7 @@ public class BoardMotion : BoardBase
             var wallsOnPosition = GetWallsOnPosition(
                 notActiveWallPositions,
                 position.ColumnPosition,
-                position.ColumnPosition
+                position.RowPosition
            );
 
             var nextPos = GetNextPosition(position.ColumnPosition, position.RowPosition, position.Direction);
