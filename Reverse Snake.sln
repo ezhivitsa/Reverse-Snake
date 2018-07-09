@@ -1,7 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reverse Snake", "LeopotamGroup.Ecs.UnityIntegration.csproj", "{2E21F689-776A-2A55-36B3-5860675C64DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reverse Snake", "LeopotamGroup.Ecs.csproj", "{98F72E42-A7D5-21B7-9EDB-120E72279555}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reverse Snake", "Assembly-CSharp.csproj", "{4BEA53D9-A3EC-6EE7-B60A-86794286CF1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reverse Snake", "LeopotamGroup.Ecs.UnityIntegration.Editor.csproj", "{0F306549-7463-9ABD-09CD-5533595BD3FF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +15,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E21F689-776A-2A55-36B3-5860675C64DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E21F689-776A-2A55-36B3-5860675C64DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E21F689-776A-2A55-36B3-5860675C64DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E21F689-776A-2A55-36B3-5860675C64DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98F72E42-A7D5-21B7-9EDB-120E72279555}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98F72E42-A7D5-21B7-9EDB-120E72279555}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98F72E42-A7D5-21B7-9EDB-120E72279555}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98F72E42-A7D5-21B7-9EDB-120E72279555}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4BEA53D9-A3EC-6EE7-B60A-86794286CF1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4BEA53D9-A3EC-6EE7-B60A-86794286CF1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BEA53D9-A3EC-6EE7-B60A-86794286CF1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BEA53D9-A3EC-6EE7-B60A-86794286CF1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F306549-7463-9ABD-09CD-5533595BD3FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F306549-7463-9ABD-09CD-5533595BD3FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F306549-7463-9ABD-09CD-5533595BD3FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F306549-7463-9ABD-09CD-5533595BD3FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
