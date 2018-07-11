@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets.src;
 
-public class CameraHelper : MonoBehaviour
+public class CameraComponent : MonoBehaviour
 {
     void Awake ()
     {
