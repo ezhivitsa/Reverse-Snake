@@ -5,6 +5,7 @@ using System.Linq;
 using Assets.ReverseSnake.Scripts.Extensions;
 using LeopotamGroup.Ecs.UnityIntegration;
 using Assets.ReverseSnake.Scripts.Enums;
+using System.Collections.Generic;
 
 [EcsInject]
 public class TargetSystem : IEcsInitSystem, IEcsRunSystem
@@ -19,7 +20,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsInitSystem.OnInitialize()
     {
-        var boardElement = GetRandomBoardElement();
+        var boardElement = GetRandomBoardElement(1);
 
         var entity = _world.CreateEntity();
         var element = _world.AddComponent<Target>(entity);
@@ -43,7 +44,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
             for (var j = 0; j < _targetFilter.EntitiesCount; j++)
             {
-                var boardElement = GetRandomBoardElement();
+                var boardElement = GetRandomBoardElement(eventEntity.Round);
                 SetTargetData(_targetFilter.Components1[j], boardElement, eventEntity.Round);
                 UpdateTargetPosition(_targetFilter.Entities[j], boardElement);
             }
@@ -53,16 +54,14 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsInitSystem.OnDestroy() { }
 
-    private BoardElement GetRandomBoardElement()
+    private BoardElement GetRandomBoardElement(int round)
     {
-        var enitity = _boardElements.Entities
-            .ToList()
-            .Where((e) => {
-                var el = _world.GetComponent<BoardElement>(e);
-                return !el.ContainsSnakeStep;
+        return _boardElements
+            .ToEntitiesList()
+            .Where((el) => {
+                return !el.ContainsSnakeStep || el.Round != round;
             })
             .RandomElement();
-        return _world.GetComponent<BoardElement>(enitity);
     }
 
     private void SetTargetData(Target element, BoardElement boardElement, int round)

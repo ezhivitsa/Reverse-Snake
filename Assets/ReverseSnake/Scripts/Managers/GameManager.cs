@@ -41,6 +41,8 @@ namespace Assets.ReverseSnake.Scripts.Managers
             TriggerUpdateTargetEvent(round);
 
             TriggerAddWallEvent();
+
+            TriggerIncreaseScoreEvent();
         }
 
         public void NewRound(Step lastStep, DirectionEnum direction)
@@ -96,6 +98,12 @@ namespace Assets.ReverseSnake.Scripts.Managers
         private void TriggerAddWallEvent()
         {
             _world.CreateEntityWith<AddWallEvent>();
+        }
+
+        private void TriggerIncreaseScoreEvent()
+        {
+            var data = _world.CreateEntityWith<ScoreChangeEvent>();
+            data.Amount = 1;
         }
     }
 }
