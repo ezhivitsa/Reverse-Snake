@@ -1,4 +1,6 @@
 # Reverse-Snake Game
+[![AUR](https://img.shields.io/aur/license/yaourt.svg)](https://github.com/ezhivitsa/Reverse-Snake/LICENSE)
+
 Reverse-Snake is the logic-game where you collect cubes with a -1 point and should not to get lost in walls and your tail.
 >**Note:**  you can collect points only on last or 2rd remaining steps of the snake tail
 
@@ -17,3 +19,7 @@ In our game we used:
 4. In **Edit -> Project Settings -> Player** write a Company Name and a Product Name
 5. In **File -> Build Settings -> Platforms** select Android and ensure that chosen **Build System** is **Internal**
 6.  Connect your phone to a computer (USB debugging should be enabled on your phone) and press **Build And Run** 
+
+## LICENSE
+GNU General Public License v3.0
+See [LICENSE](https://github.com/ezhivitsa/Reverse-Snake/LICENSE) to see the full text.
