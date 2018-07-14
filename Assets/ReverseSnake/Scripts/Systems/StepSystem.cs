@@ -23,8 +23,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsInitSystem.OnInitialize()
     {
-        var enitity = _boardElements.Entities.ToList().RandomElement();
-        var boardElement = _world.GetComponent<BoardElement>(enitity);
+        var boardElement = _boardElements.ToEntitiesList().RandomElement();
 
         CreateStep(boardElement, AppConstants.StartStepsCount, AppConstants.StartStepsCount, 1);
     }
@@ -72,7 +71,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
         prefab.Prefab.transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
 
         var textElement = prefab.Prefab.transform.GetChild(0).GetComponent<TextMesh>();
-        textElement.text = element.Number.ToString();
+        textElement.text = GetStepText(element.Number);
 
         prefab.Prefab.SetActive(true);
     }
@@ -127,5 +126,10 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
             _world.RemoveEntity(_clearEventFilter.Entities[i]);
         }
+    }
+
+    private string GetStepText(int number)
+    {
+        return (number - 1).ToString();
     }
 }

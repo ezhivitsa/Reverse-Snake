@@ -17,6 +17,7 @@ public class GameStartup : MonoBehaviour {
             .Add(new WallSystem())
             .Add(new StepSystem())
             .Add(new TargetSystem())
+            .Add(new ScoreSystem())
             .Add(new UserInputSystem());
 
         _systems.OnInitialize();

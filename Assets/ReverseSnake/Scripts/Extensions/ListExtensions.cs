@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Assets.ReverseSnake.Scripts.Extensions
 {
-    public static class ListExtensions
+    public static class List
     {
         public static T RandomElement<T>(this IEnumerable<T> enumerableList)
         {
