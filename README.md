@@ -1,5 +1,5 @@
 # Reverse-Snake Game
-[![AUR](https://img.shields.io/aur/license/yaourt.svg)](https://github.com/ezhivitsa/Reverse-Snake/LICENSE)
+[![AUR](https://img.shields.io/aur/license/yaourt.svg)](https://github.com/ezhivitsa/Reverse-Snake/blob/master/LICENSE)
 
 Reverse-Snake is the logic-game where you collect cubes with a -1 point and should not to get lost in walls and your tail.
 >**Note:**  you can collect points only on last or 2rd remaining steps of the snake tail
@@ -22,4 +22,4 @@ In our game we used:
 
 ## LICENSE
 GNU General Public License v3.0
-See [LICENSE](https://github.com/ezhivitsa/Reverse-Snake/LICENSE) to see the full text.
+See [LICENSE](https://github.com/ezhivitsa/Reverse-Snake/blob/master/LICENSE) to see the full text.
