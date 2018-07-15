@@ -109,7 +109,7 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
     {
         var nextBoardElement = GetNextBoardElement(row, column, direction);
         
-        return nextBoardElement.ContainsTarget && (currentNumber == 2 || currentNumber == 3);
+        return nextBoardElement.ContainsTarget && TargetHelper.CanGetTargetElement(currentNumber);
     }
 
     private BoardElement GetNextBoardElement(int row, int column, DirectionEnum direction)

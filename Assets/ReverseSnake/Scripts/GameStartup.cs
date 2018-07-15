@@ -18,7 +18,8 @@ public class GameStartup : MonoBehaviour {
             .Add(new StepSystem())
             .Add(new TargetSystem())
             .Add(new ScoreSystem())
-            .Add(new UserInputSystem());
+            .Add(new UserInputSystem())
+            .Add(new GameEndSystem());
 
         _systems.OnInitialize();
 

@@ -15,5 +15,16 @@ namespace Assets.ReverseSnake.Scripts.Extensions
 
             return result;
         }
+
+        public static List<int> ToEntitieNumbersList<T>(this EcsFilter<T> filter) where T : class, new()
+        {
+            var result = new List<int>();
+            for (var i = 0; i < filter.EntitiesCount; i++)
+            {
+                result.Add(filter.Entities[i]);
+            }
+
+            return result;
+        }
     }
 }

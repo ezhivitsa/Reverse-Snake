@@ -1,3 +1,4 @@
+using Assets.src;
 using LeopotamGroup.Ecs;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,10 +12,10 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
     EcsFilter<ScoreChangeEvent> _scoreChangeFilter = null;
 
     void IEcsInitSystem.OnInitialize () {
-        foreach (var ui in GameObject.FindObjectsOfType<Text>()) {
+        foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.ScoreTag)) {
             var score = _world.CreateEntityWith<Score>();
             score.Amount = 0;
-            score.Ui = ui;
+            score.Ui = ui.GetComponent<Text>();
             score.Ui.text = FormatText(score.Amount);
         }
     }

@@ -5,6 +5,7 @@ using System.Linq;
 using Assets.ReverseSnake.Scripts.Extensions;
 using LeopotamGroup.Ecs.UnityIntegration;
 using System.Collections.Generic;
+using Assets.ReverseSnake.Scripts.Managers;
 
 [EcsInject]
 public class StepSystem : IEcsInitSystem, IEcsRunSystem
@@ -19,12 +20,15 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<MovementEvent> _movementsFilter = null;
     EcsFilter<ClearStepEvent> _clearEventFilter = null;
 
-    static List<int> disabledSteps = new List<int>();
+    private StepManager _manager;
+
+    private List<int> _disabledSteps = new List<int>();
 
     void IEcsInitSystem.OnInitialize()
     {
-        var boardElement = _boardElements.ToEntitiesList().RandomElement();
+        _manager = new StepManager(_world);
 
+        var boardElement = _boardElements.ToEntitiesList().RandomElement();
         CreateStep(boardElement, AppConstants.StartStepsCount, AppConstants.StartStepsCount, 1);
     }
 
@@ -45,13 +49,13 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
         Step element = null;
         UnityPrefabComponent prefab = null;
 
-        if (disabledSteps.Count > 0)
+        if (_disabledSteps.Count > 0)
         {
-            entity = disabledSteps[0];
+            entity = _disabledSteps[0];
             element = _world.GetComponent<Step>(entity);
             prefab = _world.GetComponent<UnityPrefabComponent>(entity);
 
-            disabledSteps.RemoveAt(0);
+            _disabledSteps.RemoveAt(0);
         }
         else
         {
@@ -97,6 +101,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
                 .Find(e => e.Row == step.Row && e.Column == step.Column);
 
             CreateStep(boardElement, step.Number, step.StartNumber, step.Round);
+            _manager.StepCreated(step.Row, step.Column, step.Number, step.Round);
 
             _world.RemoveEntity(_movementsFilter.Entities[i]);
         }
@@ -120,7 +125,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
                     element.Active = false;
 
                     prefab.Prefab.SetActive(false);
-                    disabledSteps.Add(entity);
+                    _disabledSteps.Add(entity);
                 }
             }
 

@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Board
   - Score
+  - GameOver
+  - UI
   layers:
   - Default
   - TransparentFX
