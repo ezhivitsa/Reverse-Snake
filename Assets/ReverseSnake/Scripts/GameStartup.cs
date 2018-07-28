@@ -7,7 +7,7 @@ public class GameStartup : MonoBehaviour {
     EcsSystems _systems;
 
     void OnEnable () {
-        _world = new EcsWorld ();
+        _world = new EcsWorld();
     #if UNITY_EDITOR
         LeopotamGroup.Ecs.UnityIntegration.EcsWorldObserver.Create(_world);
     #endif
@@ -24,15 +24,16 @@ public class GameStartup : MonoBehaviour {
         _systems.OnInitialize();
 
     #if UNITY_EDITOR
-        LeopotamGroup.Ecs.UnityIntegration.EcsSystemsObserver.Create (_systems);
+        LeopotamGroup.Ecs.UnityIntegration.EcsSystemsObserver.Create(_systems);
     #endif
     }
 
-    void Update () {
+    void Update ()
+    {
         _systems.Run();
     }
 
     void OnDisable () {
-        _systems.OnDestroy ();
+        _systems.OnDestroy();
     }
 }

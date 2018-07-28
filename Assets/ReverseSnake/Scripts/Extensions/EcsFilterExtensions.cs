@@ -1,4 +1,5 @@
 ﻿using LeopotamGroup.Ecs;
+using System;
 using System.Collections.Generic;
 
 namespace Assets.ReverseSnake.Scripts.Extensions
@@ -25,6 +26,15 @@ namespace Assets.ReverseSnake.Scripts.Extensions
             }
 
             return result;
+        }
+
+        public static void HandleEvents<T>(this EcsFilter<T> filter, EcsWorld _world, Action<T> action) where T : class, new()
+        {
+            for (var i = 0; i < filter.EntitiesCount; i++)
+            {
+                action(filter.Components1[i]);
+                _world.RemoveEntity(filter.Entities[i]);
+            }
         }
     }
 }

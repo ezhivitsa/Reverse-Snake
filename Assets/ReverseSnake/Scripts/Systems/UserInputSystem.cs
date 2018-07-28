@@ -1,15 +1,15 @@
 using Assets.ReverseSnake.Scripts.Enums;
 using LeopotamGroup.Ecs;
-using UnityEngine;
 using System.Linq;
 using Assets.ReverseSnake.Scripts.Helpers;
 using System.Collections.Generic;
 using Assets.ReverseSnake.Scripts.Managers;
+using Assets.ReverseSnake.Scripts.Extensions;
 
 [EcsInject]
 sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
 {
-    private static Vector2 fingerDown;
+    private bool _isGameActive = false;
 
     EcsWorld _world = null;
 
@@ -17,11 +17,14 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
     EcsFilter<Wall> _wallFilter = null;
     EcsFilter<BoardElement> _boardElementsFilter = null;
 
+    EcsFilter<GameStartEvent> _gameStartFilter = null;
+
     private GameManager _manager;
 
     void IEcsInitSystem.OnInitialize()
     {
         _manager = new GameManager(_world);
+        _isGameActive = true;
     }
 
     void IEcsInitSystem.OnDestroy()
@@ -30,6 +33,13 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
 
     void IEcsRunSystem.OnUpdate()
     {
+        HandleGameStartEvent();
+
+        if (!_isGameActive)
+        {
+            return;
+        }
+
         var direction = InputHelper.GetInputArg();
         if (direction != DirectionEnum.None)
         {
@@ -63,6 +73,14 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
                 }
             }
         }
+    }
+
+    private void HandleGameStartEvent()
+    {
+        _gameStartFilter.HandleEvents(_world, (gameStart) =>
+        {
+            _isGameActive = gameStart.IsActive;
+        });
     }
 
     private Step GetLastStep()

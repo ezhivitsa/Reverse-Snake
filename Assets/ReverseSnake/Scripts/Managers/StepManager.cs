@@ -1,5 +1,4 @@
 ﻿using LeopotamGroup.Ecs;
-using UnityEngine;
 
 namespace Assets.ReverseSnake.Scripts.Managers
 {

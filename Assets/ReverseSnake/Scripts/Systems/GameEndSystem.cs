@@ -1,6 +1,7 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Helpers;
+using Assets.ReverseSnake.Scripts.Managers;
 using Assets.ReverseSnake.Scripts.Models;
 using Assets.src;
 using LeopotamGroup.Ecs;
@@ -9,10 +10,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 [EcsInject]
-public class GameEndSystem : IEcsRunSystem
+public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 {
+    private GameStartManager _manager;
+
     EcsWorld _world = null;
 
     EcsFilter<BoardElement> _boardElementsFilter = null;
@@ -20,14 +24,29 @@ public class GameEndSystem : IEcsRunSystem
     EcsFilter<Step> _stepsFilter = null;
     EcsFilter<Target> _targetsFilter = null;
 
+    EcsFilter<Score> _scoreFilter = null;
+    EcsFilter<GameOver> _gameOverFilter = null;
+
     EcsFilter<CheckGameEndEvent> _gameEndEventFilter = null;
+
+    void IEcsInitSystem.OnInitialize()
+    {
+        _manager = new GameStartManager(_world);
+
+        foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.GameOverTag))
+        {
+            var gameOver = _world.CreateEntityWith<GameOver>();
+            gameOver.GameObject = ui;
+            ui.SetActive(false);
+
+            Button btn = ui.GetComponentInChildren<Button>();
+            btn.onClick.AddListener(OnNewGameClick);
+        }
+    }
 
     void IEcsRunSystem.OnUpdate()
     {
-        for (var i = 0; i < _gameEndEventFilter.EntitiesCount; i++)
-        {
-            var eventData = _gameEndEventFilter.Components1[i];
-
+        _gameEndEventFilter.HandleEvents(_world, (eventData) => {
             var directions = new List<DirectionEnum>
             {
                 DirectionEnum.Top,
@@ -44,12 +63,16 @@ public class GameEndSystem : IEcsRunSystem
             );
             if (!hasAvailablePosition)
             {
-                HideAll();
-                ShowGameOverScreen();
-            }
+                ShowScoreUI(false);
+                ShowGameOverScreen(true);
 
-            _world.RemoveEntity(_gameEndEventFilter.Entities[i]);
-        }
+                _manager.EndGame(eventData.Round);
+            }
+        });
+    }
+
+    public void OnDestroy()
+    {
     }
 
     private bool HasAvailablePosition(int column, int row, int round, int number, List<DirectionEnum> directions)
@@ -89,25 +112,27 @@ public class GameEndSystem : IEcsRunSystem
             .Find(e => e.Row == position.Row && e.Column == position.Column);
     }
 
-    private void HideAll()
+    private void ShowGameOverScreen(bool isActive)
     {
-        Action<int> hide = (entity) => {
-            var prefab = _world.GetComponent<UnityPrefabComponent>(entity);
-            prefab.Prefab.SetActive(false);
-        };
-
-        _boardElementsFilter.ToEntitieNumbersList().ForEach(hide);
-        _wallsFilter.ToEntitieNumbersList().ForEach(hide);
-        _stepsFilter.ToEntitieNumbersList().ForEach(hide);
-        _targetsFilter.ToEntitieNumbersList().ForEach(hide);
-
-        var ui = GameObject.FindGameObjectsWithTag(AppConstants.UITag);
-        ui.ToList().ForEach(el => el.SetActive(false));
+        _gameOverFilter.ToEntitiesList().ForEach((entity) =>
+        {
+            entity.GameObject.SetActive(isActive);
+        });
     }
 
-    private void ShowGameOverScreen()
+    private void ShowScoreUI(bool isActive)
     {
-        var gameOver = GameObject.FindGameObjectsWithTag(AppConstants.GameOverTag);
-        gameOver.ToList().ForEach(el => el.SetActive(true));
+        _scoreFilter.ToEntitiesList().ForEach((entity) =>
+        {
+            entity.GameObject.SetActive(isActive);
+        });
+    }
+
+    private void OnNewGameClick()
+    {
+        ShowScoreUI(true);
+        ShowGameOverScreen(false);
+
+        _manager.StartGame();
     }
 }

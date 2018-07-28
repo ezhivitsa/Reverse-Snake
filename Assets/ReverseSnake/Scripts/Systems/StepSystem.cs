@@ -93,26 +93,19 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
     private void HandleMovementEvent()
     {
-        for (var i = 0; i < _movementsFilter.EntitiesCount; i++)
-        {
-            var step = _movementsFilter.Components1[i];
+        _movementsFilter.HandleEvents(_world, (step) => {
             var boardElement = _boardElements.Components1
                 .ToList()
                 .Find(e => e.Row == step.Row && e.Column == step.Column);
 
             CreateStep(boardElement, step.Number, step.StartNumber, step.Round);
             _manager.StepCreated(step.Row, step.Column, step.Number, step.Round);
-
-            _world.RemoveEntity(_movementsFilter.Entities[i]);
-        }
+        });
     }
 
     private void HandleClearEvent()
     {
-        for (var i = 0; i < _clearEventFilter.EntitiesCount; i++)
-        {
-            var eventData = _clearEventFilter.Components1[i];
-
+        _clearEventFilter.HandleEvents(_world, (eventData) => {
             for (var j = 0; j < _stepFilter.EntitiesCount; j++)
             {
                 var step = _stepFilter.Components1[j];
@@ -128,9 +121,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
                     _disabledSteps.Add(entity);
                 }
             }
-
-            _world.RemoveEntity(_clearEventFilter.Entities[i]);
-        }
+        });
     }
 
     private string GetStepText(int number)

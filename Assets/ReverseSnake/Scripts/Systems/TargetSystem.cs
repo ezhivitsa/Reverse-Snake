@@ -12,11 +12,15 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 {
     const string BoardElementPath = "Objects/Target";
 
+    private int? _disabledTarget = null;
+
     EcsWorld _world = null;
 
     EcsFilter<BoardElement> _boardElements = null;
-    EcsFilter<UpdateTargetEvent> _updateTargetEventsFilter = null;
     EcsFilter<Target> _targetFilter = null;
+
+    EcsFilter<UpdateTargetEvent> _updateTargetEventsFilter = null;
+    EcsFilter<ClearTargetEvent> _clearTargetEventsFilter = null;
 
     void IEcsInitSystem.OnInitialize()
     {
@@ -38,21 +42,41 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsRunSystem.OnUpdate()
     {
-        for (var i = 0; i < _updateTargetEventsFilter.EntitiesCount; i++)
-        {
-            var eventEntity = _updateTargetEventsFilter.Components1[i];
+        HandleUpdateTarget();
+        HandleClearTarget();
+    }
 
+    void IEcsInitSystem.OnDestroy() { }
+
+    private void HandleUpdateTarget()
+    {
+        _updateTargetEventsFilter.HandleEvents(_world, (eventEntity) => {
             for (var j = 0; j < _targetFilter.EntitiesCount; j++)
             {
                 var boardElement = GetRandomBoardElement(eventEntity.Round);
                 SetTargetData(_targetFilter.Components1[j], boardElement, eventEntity.Round);
                 UpdateTargetPosition(_targetFilter.Entities[j], boardElement);
             }
-            _world.RemoveEntity(_updateTargetEventsFilter.Entities[i]);
-        }
+        });
     }
 
-    void IEcsInitSystem.OnDestroy() { }
+    private void HandleClearTarget()
+    {
+        _clearTargetEventsFilter.HandleEvents(_world, (eventData) => {
+            for (var j = 0; j < _targetFilter.EntitiesCount; j++)
+            {
+                var step = _targetFilter.Components1[j];
+                if (step.Round == eventData.Round)
+                {
+                    var entity = _targetFilter.Entities[j];
+                    var prefab = _world.GetComponent<UnityPrefabComponent>(entity);
+
+                    prefab.Prefab.SetActive(false);
+                    _disabledTarget = entity;
+                }
+            }
+        });
+    }
 
     private BoardElement GetRandomBoardElement(int round)
     {

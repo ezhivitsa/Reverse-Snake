@@ -1,3 +1,4 @@
+using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.src;
 using LeopotamGroup.Ecs;
 using UnityEngine;
@@ -15,6 +16,7 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
         foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.ScoreTag)) {
             var score = _world.CreateEntityWith<Score>();
             score.Amount = 0;
+            score.GameObject = ui;
             score.Ui = ui.GetComponent<Text>();
             score.Ui.text = FormatText(score.Amount);
         }
@@ -27,14 +29,15 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
     }
 
     void IEcsRunSystem.OnUpdate () {
-        for (var i = 0; i < _scoreChangeFilter.EntitiesCount; i++) {
-            var amount = _scoreChangeFilter.Components1[i].Amount;
-            for (var j = 0; j < _scoreUiFilter.EntitiesCount; j++) {
+        _scoreChangeFilter.HandleEvents(_world, (scoreEvent) =>
+        {
+            var amount = scoreEvent.Amount;
+            for (var j = 0; j < _scoreUiFilter.EntitiesCount; j++)
+            {
                 var score = _scoreUiFilter.Components1[j];
                 score.Amount += amount;
-                score.Ui.text = FormatText (score.Amount);
+                score.Ui.text = FormatText(score.Amount);
             }
-            _world.RemoveEntity(_scoreChangeFilter.Entities[i]);
-        }
+        });
     }
 }
