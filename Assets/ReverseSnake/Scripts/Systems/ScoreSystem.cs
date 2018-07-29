@@ -11,9 +11,12 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
     EcsFilter<Score> _scoreUiFilter = null;
 
     EcsFilter<ScoreChangeEvent> _scoreChangeFilter = null;
+    EcsFilter<ScoreSetEvent> _scoreSetFilter = null;
 
-    void IEcsInitSystem.OnInitialize () {
-        foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.ScoreTag)) {
+    void IEcsInitSystem.OnInitialize()
+    {
+        foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.ScoreTag))
+        {
             var score = _world.CreateEntityWith<Score>();
             score.Amount = 0;
             score.GameObject = ui;
@@ -22,22 +25,44 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
         }
     }
 
-    void IEcsInitSystem.OnDestroy () { }
-
-    string FormatText (int v) {
-        return string.Format ("Score: {0}", v);
+    void IEcsInitSystem.OnDestroy()
+    {
     }
 
-    void IEcsRunSystem.OnUpdate () {
+    void IEcsRunSystem.OnUpdate()
+    {
+        HandleChangeEvent();
+        HandleSetEvent();
+    }
+
+    private void HandleChangeEvent()
+    {
         _scoreChangeFilter.HandleEvents(_world, (scoreEvent) =>
         {
             var amount = scoreEvent.Amount;
-            for (var j = 0; j < _scoreUiFilter.EntitiesCount; j++)
+            _scoreUiFilter.ToEntitiesList().ForEach((score) =>
             {
-                var score = _scoreUiFilter.Components1[j];
+                score.Amount = amount;
+                score.Ui.text = FormatText(score.Amount);
+            });
+        });
+    }
+
+    private void HandleSetEvent()
+    {
+        _scoreSetFilter.HandleEvents(_world, (scoreEvent) =>
+        {
+            var amount = scoreEvent.Amount;
+            _scoreUiFilter.ToEntitiesList().ForEach((score) =>
+            {
                 score.Amount += amount;
                 score.Ui.text = FormatText(score.Amount);
-            }
+            });
         });
+    }
+
+    private string FormatText(int v)
+    {
+        return string.Format("Score: {0}", v);
     }
 }

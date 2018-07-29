@@ -18,6 +18,8 @@
 
         public const int Columns = 6;
 
+        public const int FirstRound = 1;
+
         public const string ScoreTag = "Score";
 
         public const string UITag = "UI";

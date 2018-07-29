@@ -5,8 +5,6 @@ using Assets.ReverseSnake.Scripts.Managers;
 using Assets.ReverseSnake.Scripts.Models;
 using Assets.src;
 using LeopotamGroup.Ecs;
-using LeopotamGroup.Ecs.UnityIntegration;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -21,8 +19,6 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     EcsFilter<BoardElement> _boardElementsFilter = null;
     EcsFilter<Wall> _wallsFilter = null;
-    EcsFilter<Step> _stepsFilter = null;
-    EcsFilter<Target> _targetsFilter = null;
 
     EcsFilter<Score> _scoreFilter = null;
     EcsFilter<GameOver> _gameOverFilter = null;
@@ -84,7 +80,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     {
         var position = PositionHelper.GetNextPosition(column, row, direction);
         var element = GetBoardElement(position);
-        var wall = GetWall(position);
+        var wall = GetWall(position, DirectionHelper.GetReverseDirection(direction));
 
         if (
             wall.IsActive ||
@@ -105,11 +101,11 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
             .Find(e => e.Row == position.Row && e.Column == position.Column);
     }
 
-    private Wall GetWall(PositionModel position)
+    private Wall GetWall(PositionModel position, DirectionEnum direction)
     {
         return _wallsFilter
             .ToEntitiesList()
-            .Find(e => e.Row == position.Row && e.Column == position.Column);
+            .Find(e => e.Row == position.Row && e.Column == position.Column && e.Direction == direction);
     }
 
     private void ShowGameOverScreen(bool isActive)
@@ -133,6 +129,23 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         ShowScoreUI(true);
         ShowGameOverScreen(false);
 
-        _manager.StartGame();
+        var boardElements = _boardElementsFilter.ToEntitiesList();
+        var targetElement = boardElements.RandomElement();
+        boardElements.Remove(targetElement);
+
+        var stepElement = boardElements.RandomElement();
+
+        var targetPosition = new PositionModel
+        {
+            Row = targetElement.Row,
+            Column = targetElement.Column,
+        };
+        var stepPosition = new PositionModel
+        {
+            Row = stepElement.Row,
+            Column = stepElement.Column,
+        };
+
+        _manager.StartGame(targetPosition, stepPosition);
     }
 }

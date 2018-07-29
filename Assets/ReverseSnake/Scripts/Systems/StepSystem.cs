@@ -29,7 +29,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
         _manager = new StepManager(_world);
 
         var boardElement = _boardElements.ToEntitiesList().RandomElement();
-        CreateStep(boardElement, AppConstants.StartStepsCount, AppConstants.StartStepsCount, 1);
+        CreateStep(boardElement, AppConstants.StartStepsCount, AppConstants.StartStepsCount, AppConstants.FirstRound);
     }
 
     void IEcsRunSystem.OnUpdate()
