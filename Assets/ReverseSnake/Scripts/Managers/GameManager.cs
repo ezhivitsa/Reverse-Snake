@@ -84,6 +84,8 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             var eventData = _world.CreateEntityWith<UpdateTargetEvent>();
             eventData.Round = round;
+            eventData.Column = null;
+            eventData.Row = null;
         }
 
         private void TriggerClearBoardEvent(int round)

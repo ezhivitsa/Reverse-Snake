@@ -18,8 +18,11 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
     EcsWorld _world = null;
 
-    EcsFilter<AddWallEvent> _addWallEventFilter = null;
     EcsFilter<Wall> _wallFilter = null;
+
+    EcsFilter<AddWallEvent> _addWallEventFilter = null;
+    EcsFilter<ClearWallEvent> _clearEventFilter = null;
+    EcsFilter<ShowWallEvent> _showEventFilter = null;
 
     void IEcsInitSystem.OnInitialize()
     {
@@ -37,14 +40,49 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsRunSystem.OnUpdate()
     {
-        for (var i = 0; i < _addWallEventFilter.EntitiesCount; i++)
-        {
-            AddWall();
-            _world.RemoveEntity(_addWallEventFilter.Entities[i]);
-        }
+        HandleAddWallEvent();
+        HandleClearWallEvent();
+        HandleShowWallEvent();
     }
 
     void IEcsInitSystem.OnDestroy() { }
+
+    private void HandleAddWallEvent()
+    {
+        _addWallEventFilter.HandleEvents(_world, (eventData) => {
+            AddWall();
+        });
+    }
+
+    private void HandleClearWallEvent()
+    {
+        _clearEventFilter.HandleEvents(_world, (eventData) => {
+            for (var i = 0; i < _wallFilter.EntitiesCount; i += 1)
+            {
+                var wall = _wallFilter.Components1[i];
+                if (wall.IsActive)
+                {
+                    wall.IsActive = false;
+
+                    var prefab = _world.GetComponent<UnityPrefabComponent>(_wallFilter.Entities[i]);
+                    prefab.Prefab.transform.position = GetPositionVector(false, wall.Row, wall.Column, wall.Direction);
+                    prefab.Prefab.transform.rotation = GetRotationQuaternion(wall.Direction);
+                    prefab.Prefab.gameObject.GetComponent<MeshRenderer>().material = GetMaterial(wall.IsActive);
+                }
+            }
+        });
+    }
+
+    private void HandleShowWallEvent()
+    {
+        _showEventFilter.HandleEvents(_world, (eventData) => {
+            for (var i = 0; i < _wallFilter.EntitiesCount; i += 1)
+            {
+                var prefab = _world.GetComponent<UnityPrefabComponent>(_wallFilter.Entities[i]);
+                prefab.Prefab.gameObject.SetActive(eventData.IsActive);
+            }
+        });
+    }
 
     private void GenerateWall(int row, int column, DirectionEnum direction)
     {
@@ -124,16 +162,11 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
     private void AddWall()
     {
-        List<int> allWalls = new List<int>();
-        for (var i = 0; i < _wallFilter.EntitiesCount; i++)
-        {
-            allWalls.Add(i);
-        }
+        var notActiveWalls = _wallFilter
+            .ToEntitiesList()
+            .Where(e => !e.IsActive).ToList();
 
-        var notActiveWalls = allWalls.Where(e => !_wallFilter.Components1[e].IsActive).ToList();
-
-        var availableWalls = notActiveWalls.Where((e) => {
-            var wall = _wallFilter.Components1[e];
+        var availableWalls = notActiveWalls.Where((wall) => {
             var wallsOnPosition = GetWallsOnPosition(notActiveWalls, wall.Row, wall.Column);
 
             var nextPos = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
@@ -146,21 +179,16 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         CloseWall(randomWall, availableWalls);
     }
 
-    private List<int> GetWallsOnPosition(List<int> walls, int row, int column)
+    private List<Wall> GetWallsOnPosition(List<Wall> walls, int row, int column)
     {
         return walls
-            .Where((e) =>
-            {
-                var wall = _wallFilter.Components1[e];
-                return wall.Column == column && wall.Row == row;
-            })
+            .Where(wall => wall.Column == column && wall.Row == row)
             .ToList();
     }
 
-    private void CloseWall(int entity, List<int> availableWalls)
+    private void CloseWall(Wall wall, List<Wall> availableWalls)
     {
-        var entityNum = _wallFilter.Entities[entity];
-        var wall = _wallFilter.Components1[entity];
+        var entityNum = GetEntity(wall);
         wall.IsActive = true;
 
         var prefab = _world.GetComponent<UnityPrefabComponent>(entityNum);
@@ -170,10 +198,9 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
 
         var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
-        var reverseEntity = GetWall(availableWalls, nextPosition.Row, nextPosition.Column, reverseDirection);
+        var reverseWall = GetWall(availableWalls, nextPosition.Row, nextPosition.Column, reverseDirection);
 
-        var reverseEntityNum = _wallFilter.Entities[reverseEntity];
-        var reverseWall = _wallFilter.Components1[reverseEntity];
+        var reverseEntityNum = GetEntity(reverseWall);
         reverseWall.IsActive = true;
 
         var rPrefab = _world.GetComponent<UnityPrefabComponent>(reverseEntityNum);
@@ -186,12 +213,22 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         rPrefab.Prefab.gameObject.GetComponent<MeshRenderer>().material = GetMaterial(reverseWall.IsActive);
     }
 
-    private int GetWall(List<int> walls, int row, int column, DirectionEnum direction)
+    private Wall GetWall(List<Wall> walls, int row, int column, DirectionEnum direction)
     {
-        return walls.Find(e => {
-            var w = _wallFilter.Components1[e];
-            return w.Column == column && w.Row == row && w.Direction == direction;
-        });
+        return walls.Find(w => w.Column == column && w.Row == row && w.Direction == direction);
+    }
+
+    private int GetEntity(Wall wall)
+    {
+        for (var i = 0; i < _wallFilter.EntitiesCount; i++)
+        {
+            if (_wallFilter.Components1[i] == wall)
+            {
+                return _wallFilter.Entities[i];
+            }
+        }
+
+        return 0;
     }
 
     private Material GetMaterial(bool isActive)

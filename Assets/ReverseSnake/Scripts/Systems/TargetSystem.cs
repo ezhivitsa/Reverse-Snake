@@ -11,12 +11,14 @@ using System.Collections.Generic;
 public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 {
     const string BoardElementPath = "Objects/Target";
-
+    
     EcsWorld _world = null;
 
     EcsFilter<BoardElement> _boardElements = null;
-    EcsFilter<UpdateTargetEvent> _updateTargetEventsFilter = null;
     EcsFilter<Target> _targetFilter = null;
+
+    EcsFilter<UpdateTargetEvent> _updateTargetEventsFilter = null;
+    EcsFilter<ShowTargetEvent> _showTargetEventsFilter = null;
 
     void IEcsInitSystem.OnInitialize()
     {
@@ -24,7 +26,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
         var entity = _world.CreateEntity();
         var element = _world.AddComponent<Target>(entity);
-        SetTargetData(element, boardElement, 1);
+        SetTargetData(element, boardElement, AppConstants.FirstRound);
 
         var prefab = _world.AddComponent<UnityPrefabComponent>(entity);
         prefab.Attach(BoardElementPath);
@@ -38,21 +40,53 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsRunSystem.OnUpdate()
     {
-        for (var i = 0; i < _updateTargetEventsFilter.EntitiesCount; i++)
-        {
-            var eventEntity = _updateTargetEventsFilter.Components1[i];
+        HandleUpdateTarget();
+        HandleShowTarget();
+    }
 
+    void IEcsInitSystem.OnDestroy()
+    {
+    }
+
+    private void HandleUpdateTarget()
+    {
+        _updateTargetEventsFilter.HandleEvents(_world, (eventEntity) =>
+        {
             for (var j = 0; j < _targetFilter.EntitiesCount; j++)
             {
-                var boardElement = GetRandomBoardElement(eventEntity.Round);
+                BoardElement boardElement = null;
+                if (eventEntity.Column != null && eventEntity.Row != null)
+                {
+                    boardElement = GetBoardElement(eventEntity.Column, eventEntity.Row);
+                }
+                else
+                {
+                    boardElement = GetRandomBoardElement(eventEntity.Round);
+                }
                 SetTargetData(_targetFilter.Components1[j], boardElement, eventEntity.Round);
                 UpdateTargetPosition(_targetFilter.Entities[j], boardElement);
             }
-            _world.RemoveEntity(_updateTargetEventsFilter.Entities[i]);
-        }
+        });
     }
 
-    void IEcsInitSystem.OnDestroy() { }
+    private void HandleShowTarget()
+    {
+        _showTargetEventsFilter.HandleEvents(_world, (eventData) =>
+        {
+            _targetFilter.ToEntitieNumbersList().ForEach((entity) =>
+            {
+                var prefab = _world.GetComponent<UnityPrefabComponent>(entity);
+                prefab.Prefab.SetActive(eventData.IsActive);
+            });
+        });
+    }
+
+    private BoardElement GetBoardElement(int? column, int? row)
+    {
+        return _boardElements
+            .ToEntitiesList()
+            .Find((el) => el.Column == column && el.Row == row);
+    }
 
     private BoardElement GetRandomBoardElement(int round)
     {
