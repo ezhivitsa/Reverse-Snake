@@ -17,7 +17,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     EcsWorld _world = null;
 
-    EcsFilter<BoardElement> _boardElementsFilter = null;
+    EcsFilterSingle<BoardElements> _boardElements = null;
     EcsFilter<Wall> _wallsFilter = null;
 
     EcsFilter<Score> _scoreFilter = null;
@@ -96,8 +96,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     private BoardElement GetBoardElement(PositionModel position)
     {
-        return _boardElementsFilter
-            .ToEntitiesList()
+        return _boardElements.Data.Elements
             .Find(e => e.Row == position.Row && e.Column == position.Column);
     }
 
@@ -129,11 +128,10 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         ShowScoreUI(true);
         ShowGameOverScreen(false);
 
-        var boardElements = _boardElementsFilter.ToEntitiesList();
-        var targetElement = boardElements.RandomElement();
-        boardElements.Remove(targetElement);
+        var boardElements = _boardElements.Data.Elements;
 
-        var stepElement = boardElements.RandomElement();
+        var targetElement = boardElements.RandomElement();
+        var stepElement = boardElements.Where(e => e != targetElement).RandomElement();
 
         var targetPosition = new PositionModel
         {

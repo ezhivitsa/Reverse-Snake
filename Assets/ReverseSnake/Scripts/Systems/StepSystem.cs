@@ -1,7 +1,6 @@
 ﻿using Assets.src;
 using LeopotamGroup.Ecs;
 using UnityEngine;
-using System.Linq;
 using Assets.ReverseSnake.Scripts.Extensions;
 using LeopotamGroup.Ecs.UnityIntegration;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
     EcsWorld _world = null;
 
-    EcsFilter<BoardElement> _boardElements = null;
+    EcsFilterSingle<BoardElements> _boardElements = null;
     EcsFilter<Step> _stepFilter = null;
 
     EcsFilter<MovementEvent> _movementsFilter = null;
@@ -28,7 +27,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
     {
         _manager = new StepManager(_world);
 
-        var boardElement = _boardElements.ToEntitiesList().RandomElement();
+        var boardElement = _boardElements.Data.Elements.RandomElement();
         CreateStep(boardElement, AppConstants.StartStepsCount, AppConstants.StartStepsCount, AppConstants.FirstRound);
     }
 
@@ -59,8 +58,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
         }
         else
         {
-            entity = _world.CreateEntity();
-            element = _world.AddComponent<Step>(entity);
+            entity = _world.CreateEntityWith(out element);
             prefab = _world.AddComponent<UnityPrefabComponent>(entity);
             prefab.Attach(BoardElementPath);
         }
@@ -94,8 +92,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
     private void HandleMovementEvent()
     {
         _movementsFilter.HandleEvents(_world, (step) => {
-            var boardElement = _boardElements.Components1
-                .ToList()
+            var boardElement = _boardElements.Data.Elements
                 .Find(e => e.Row == step.Row && e.Column == step.Column);
 
             CreateStep(boardElement, step.Number, step.StartNumber, step.Round);

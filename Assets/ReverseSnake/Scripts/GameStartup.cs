@@ -10,10 +10,12 @@ public class GameStartup : MonoBehaviour {
         _world = new EcsWorld();
     #if UNITY_EDITOR
         LeopotamGroup.Ecs.UnityIntegration.EcsWorldObserver.Create(_world);
-    #endif
+#endif
+
+        EcsFilterSingle<BoardElements>.Create(_world);
 
         _systems = new EcsSystems(_world)
-            .Add(new BoardElementSystem())
+            .Add(new BoardElementsSystem())
             .Add(new WallSystem())
             .Add(new StepSystem())
             .Add(new TargetSystem())
@@ -30,10 +32,12 @@ public class GameStartup : MonoBehaviour {
 
     void Update ()
     {
-        _systems.Run();
+        _systems.OnUpdate();
     }
 
     void OnDisable () {
-        _systems.OnDestroy();
+        _world.Dispose();
+        _systems = null;
+        _world = null;
     }
 }

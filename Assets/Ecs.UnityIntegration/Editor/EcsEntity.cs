@@ -14,18 +14,18 @@ using UnityEngine;
 namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
     [CustomEditor (typeof (EcsEntityObserver))]
     sealed class EcsEntityObserverInspector : UnityEditor.Editor {
-        static List<object> _componentsCache = new List<object> (16);
+        static object[] _componentsCache = new object[32];
 
         EcsEntityObserver _entity;
 
         public override void OnInspectorGUI () {
-            if (_entity.World == null) { return; }
-            _entity.World.GetComponents (_entity.Id, _componentsCache);
-            var guiEnabled = GUI.enabled;
-            GUI.enabled = true;
-            DrawComponents (_componentsCache);
-            GUI.enabled = guiEnabled;
-            EditorUtility.SetDirty (target);
+            if (_entity.World != null) {
+                var guiEnabled = GUI.enabled;
+                GUI.enabled = true;
+                DrawComponents ();
+                GUI.enabled = guiEnabled;
+                EditorUtility.SetDirty (target);
+            }
         }
 
         void OnEnable () {
@@ -33,12 +33,14 @@ namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
         }
 
         void OnDisable () {
-            _componentsCache.Clear ();
             _entity = null;
         }
 
-        void DrawComponents (List<object> componentsCache) {
-            foreach (var component in componentsCache) {
+        void DrawComponents () {
+            var count = _entity.World.GetComponents (_entity.Id, ref _componentsCache);
+            for (var i = 0; i < count; i++) {
+                var component = _componentsCache[i];
+                _componentsCache[i] = null;
                 var type = component.GetType ();
                 GUILayout.BeginVertical (GUI.skin.box);
                 if (!EcsComponentInspectors.Render (type.Name, type, component)) {

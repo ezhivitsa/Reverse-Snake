@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using System.Linq;
+using Assets.ReverseSnake.Scripts.Attributes;
 
 namespace Assets.ReverseSnake.Scripts.Extensions
 {
@@ -47,6 +48,33 @@ namespace Assets.ReverseSnake.Scripts.Extensions
                 description = attribute.Description;
 
             return description;
+        }
+
+        public static float GetStartProbability(this object value)
+        {
+            var attribute = GetProbabilitiesAttribute(value);
+            return attribute != null ? attribute.StartProbability : 0f;
+        }
+
+        public static float GetEndProbability(this object value)
+        {
+            var attribute = GetProbabilitiesAttribute(value);
+            return attribute != null ? attribute.EndProbability : 0f;
+        }
+
+        private static ProbabilitiesAttribute GetProbabilitiesAttribute(object value)
+        {
+            if (value == null)
+                return null;
+
+            var mi = value as MemberInfo;
+            var isClassMember = mi != null;
+
+            var attribute = isClassMember
+                ? mi.GetAttribute<ProbabilitiesAttribute>()
+                : value.GetAttribute<ProbabilitiesAttribute>();
+
+            return attribute;
         }
     }
 }
