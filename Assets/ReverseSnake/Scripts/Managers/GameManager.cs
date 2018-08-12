@@ -25,22 +25,44 @@ namespace Assets.ReverseSnake.Scripts.Managers
             );
         }
 
-        public void TargetReached(Step lastStep, DirectionEnum direction)
+        public void TargetReached(Step lastStep, DirectionEnum direction, TargetValueEnum targetValue)
         {
+            var round = lastStep.Round + 1;
+
             TriggerClearBoardEvent(lastStep.Round);
 
-            var round = lastStep.Round + 1;
+            TriggerUpdateTargetEvent(round);
+
+            var stepChange = 0;
+            switch (targetValue)
+            {
+                case TargetValueEnum.AddWall:
+                    TriggerAddWallEvent();
+                    break;
+
+                case TargetValueEnum.RemoveWall:
+                    TriggerRemoveWallEvent(1);
+                    break;
+
+                case TargetValueEnum.AddTailRemoveTwoWall:
+                    TriggerRemoveWallEvent(2);
+                    stepChange = 1;
+                    break;
+
+                case TargetValueEnum.RemoveTailAddWall:
+                    TriggerAddWallEvent();
+                    stepChange = -1;
+                    break;
+            }
+
             TriggerAddNewStepEvent(
                 lastStep.Row,
                 lastStep.Column,
-                lastStep.StartNumber,
-                lastStep.StartNumber,
+                lastStep.StartNumber + stepChange,
+                lastStep.StartNumber + stepChange,
                 round,
                 direction
             );
-            TriggerUpdateTargetEvent(round);
-
-            TriggerAddWallEvent();
 
             TriggerIncreaseScoreEvent();
         }
@@ -100,6 +122,12 @@ namespace Assets.ReverseSnake.Scripts.Managers
         private void TriggerAddWallEvent()
         {
             _world.CreateEntityWith<AddWallEvent>();
+        }
+
+        private void TriggerRemoveWallEvent(int wallsToRemove)
+        {
+            var data = _world.CreateEntityWith<RemoveWallEvent>();
+            data.Walls = wallsToRemove;
         }
 
         private void TriggerIncreaseScoreEvent()

@@ -15,7 +15,8 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
 
     EcsFilter<Step> _stepFilter = null;
     EcsFilter<Wall> _wallFilter = null;
-    EcsFilter<BoardElement> _boardElementsFilter = null;
+    EcsFilter<Target> _targetFilter = null;
+    EcsFilterSingle<BoardElements> _boardElements = null;
 
     EcsFilter<GameStartEvent> _gameStartFilter = null;
 
@@ -59,7 +60,11 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
                 var isTargetReached = IsTargetReached(lastStep.Row, lastStep.Column, lastStep.Number, direction);
                 if (isTargetReached)
                 {
-                    _manager.TargetReached(lastStep, direction);
+                    var newPosition = PositionHelper.GetNextPosition(lastStep.Row, lastStep.Column, direction);
+                    var target = _targetFilter
+                        .ToEntitiesList()
+                        .Find(t => t.Row == newPosition.Row && t.Column == newPosition.Column);
+                    _manager.TargetReached(lastStep, direction, target.Value);
                 }
                 else
                 {
@@ -133,16 +138,9 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
     private BoardElement GetNextBoardElement(int row, int column, DirectionEnum direction)
     {
         var newPosition = PositionHelper.GetNextPosition(row, column, direction);
-
-        for (var i = 0; i < _boardElementsFilter.EntitiesCount; i++)
+        return _boardElements.Data.Elements.Find((element) =>
         {
-            var element = _boardElementsFilter.Components1[i];
-            if (element.Row == newPosition.Row && element.Column == newPosition.Column)
-            {
-                return element;
-            }
-        }
-
-        return null;
+            return element.Row == newPosition.Row && element.Column == newPosition.Column;
+        });
     }
 }

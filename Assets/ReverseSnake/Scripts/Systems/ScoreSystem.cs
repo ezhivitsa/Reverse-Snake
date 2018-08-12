@@ -63,6 +63,6 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
 
     private string FormatText(int v)
     {
-        return string.Format("Score: {0}", v);
+        return string.Format("{0}", v);
     }
 }

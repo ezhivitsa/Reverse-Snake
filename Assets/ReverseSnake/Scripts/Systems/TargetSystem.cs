@@ -5,7 +5,7 @@ using System.Linq;
 using Assets.ReverseSnake.Scripts.Extensions;
 using LeopotamGroup.Ecs.UnityIntegration;
 using Assets.ReverseSnake.Scripts.Enums;
-using System.Collections.Generic;
+using Assets.ReverseSnake.Scripts.Helpers;
 
 [EcsInject]
 public class TargetSystem : IEcsInitSystem, IEcsRunSystem
@@ -14,8 +14,9 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     
     EcsWorld _world = null;
 
-    EcsFilter<BoardElement> _boardElements = null;
+    EcsFilterSingle<BoardElements> _boardElements = null;
     EcsFilter<Target> _targetFilter = null;
+    EcsFilter<Wall> _wallFilter = null;
 
     EcsFilter<UpdateTargetEvent> _updateTargetEventsFilter = null;
     EcsFilter<ShowTargetEvent> _showTargetEventsFilter = null;
@@ -24,18 +25,13 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     {
         var boardElement = GetRandomBoardElement(1);
 
-        var entity = _world.CreateEntity();
-        var element = _world.AddComponent<Target>(entity);
+        Target element = null;
+        var entity = _world.CreateEntityWith(out element);
         SetTargetData(element, boardElement, AppConstants.FirstRound);
 
         var prefab = _world.AddComponent<UnityPrefabComponent>(entity);
         prefab.Attach(BoardElementPath);
-        prefab.Prefab.transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
-
-        var textElement = prefab.Prefab.transform.GetChild(0).GetComponent<TextMesh>();
-        textElement.text = element.Value.GetDescription();
-
-        prefab.Prefab.SetActive(true);
+        UpdatePrefab(entity, element, boardElement);
     }
 
     void IEcsRunSystem.OnUpdate()
@@ -64,7 +60,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
                     boardElement = GetRandomBoardElement(eventEntity.Round);
                 }
                 SetTargetData(_targetFilter.Components1[j], boardElement, eventEntity.Round);
-                UpdateTargetPosition(_targetFilter.Entities[j], boardElement);
+                UpdatePrefab(_targetFilter.Entities[j], _targetFilter.Components1[j], boardElement);
             }
         });
     }
@@ -83,15 +79,12 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     private BoardElement GetBoardElement(int? column, int? row)
     {
-        return _boardElements
-            .ToEntitiesList()
-            .Find((el) => el.Column == column && el.Row == row);
+        return _boardElements.Data.Elements.Find((el) => el.Column == column && el.Row == row);
     }
 
     private BoardElement GetRandomBoardElement(int round)
     {
-        return _boardElements
-            .ToEntitiesList()
+        return _boardElements.Data.Elements
             .Where((el) => {
                 return !el.ContainsSnakeStep || el.Round != round;
             })
@@ -102,17 +95,33 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     {
         element.Row = boardElement.Row;
         element.Column = boardElement.Column;
-        element.Value = TargetValueEnum.AddWall;
+        element.Value = GetTargetValue();
         element.Round = round;
 
         boardElement.ContainsTarget = true;
         boardElement.Round = round;
     }
 
-    private void UpdateTargetPosition(int entity, BoardElement boardElement)
+    private TargetValueEnum GetTargetValue()
+    {
+        var activeWalls = _wallFilter
+            .ToEntitiesList()
+            .Where(e => e.IsActive)
+            .ToList()
+            .Count;
+
+        return TargetHelper.GetTargetValue(activeWalls / 2);
+    }
+
+    private void UpdatePrefab(int entity, Target element, BoardElement boardElement)
     {
         var prefab = _world.GetComponent<UnityPrefabComponent>(entity);
         prefab.Prefab.transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
+
+        var textElement = prefab.Prefab.transform.GetChild(0).GetComponent<TextMesh>();
+        textElement.text = element.Value.GetDescription();
+
+        prefab.Prefab.SetActive(true);
     }
 
     private Vector3 GetPositionVector(int rowPos, int columnPos)

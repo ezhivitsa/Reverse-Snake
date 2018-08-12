@@ -52,9 +52,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
             var targetEventData = _world.CreateEntityWith<ShowTargetEvent>();
             targetEventData.IsActive = isActive;
 
-            var boardEventData = _world.CreateEntityWith<ShowBoardEvent>();
-            boardEventData.IsActive = isActive;
-
             var wallEventData = _world.CreateEntityWith<ShowWallEvent>();
             wallEventData.IsActive = isActive;
         }
