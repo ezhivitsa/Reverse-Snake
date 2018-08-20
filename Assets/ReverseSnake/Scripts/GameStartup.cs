@@ -13,6 +13,7 @@ public class GameStartup : MonoBehaviour {
 #endif
 
         EcsFilterSingle<BoardElements>.Create(_world);
+        EcsFilterSingle<StateSystem>.Create(_world);
 
         _systems = new EcsSystems(_world)
             .Add(new BoardElementsSystem())
