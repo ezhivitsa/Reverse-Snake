@@ -47,11 +47,11 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
             var amount = scoreEvent.Amount;
             _scoreUiFilter.ToEntitiesList().ForEach((score) =>
             {
-                score.Amount = amount;
+                score.Amount += amount;
                 score.Ui.text = FormatText(score.Amount);
-            });
 
-            _stateManager.SetScore(amount);
+                _stateManager.SetScore(score.Amount);
+            });
         });
     }
 
@@ -62,11 +62,11 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
             var amount = scoreEvent.Amount;
             _scoreUiFilter.ToEntitiesList().ForEach((score) =>
             {
-                score.Amount += amount;
+                score.Amount = amount;
                 score.Ui.text = FormatText(score.Amount);
-
-                _stateManager.SetScore(score.Amount += amount);
             });
+
+            _stateManager.SetScore(amount);
         });
     }
 

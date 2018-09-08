@@ -1,6 +1,7 @@
 using Assets.ReverseSnake.Scripts.Extensions;
 using LeopotamGroup.Ecs;
 using System.Collections.Generic;
+using System.Linq;
 
 [EcsInject]
 public class StateSystem : IEcsInitSystem, IEcsRunSystem
@@ -12,6 +13,10 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<StateSetScoreEvent> _setScoreEvents = null;
     EcsFilter<StateAddStepsEvent> _addStepsEvents = null;
     EcsFilter<StateRemoveStepsEvent> _removeStepsEvent = null;
+    EcsFilter<StateAddTargetsEvent> _addTargetsEvents = null;
+    EcsFilter<StateRemoveTargetsEvent> _removeTargetsEvents = null;
+    EcsFilter<StateAddWallsEvent> _addWallsEvents = null;
+    EcsFilter<StateRemoveWallsEvent> _removeWallsEvents = null;
 
     void IEcsInitSystem.OnInitialize()
     {
@@ -24,7 +29,14 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
     void IEcsRunSystem.OnUpdate()
     {
         HandleSetScoreEvent();
+
         HandleAddStepsEvent();
+        HandleAddTargetsEvent();
+        HandleAddWallsEvent();
+
+        HandleRemoveStepsEvent();
+        HandleRemoveTargetsEvent();
+        HandleRemoveWallsEvent();
     }
 
     void IEcsInitSystem.OnDestroy() { }
@@ -45,6 +57,66 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
 
     private void HandleRemoveStepsEvent()
     {
+        _removeStepsEvent.HandleEvents(_world, (eventData) => {
+            _state.Data.Steps = _state.Data.Steps
+                .Where((step) => {
+                    var stepToRemove = eventData.Steps.Find(s =>
+                    {
+                        return s.Column == step.Column &&
+                            s.Row == step.Row &&
+                            s.Round == step.Round &&
+                            s.Number == step.Number;
+                    });
+                    return stepToRemove == null;
+                })
+                .ToList();
+        });
+    }
 
+    private void HandleAddTargetsEvent()
+    {
+        _addTargetsEvents.HandleEvents(_world, (eventData) => {
+            _state.Data.Targets.AddRange(eventData.Targets);
+        });
+    }
+
+    private void HandleRemoveTargetsEvent()
+    {
+        _removeTargetsEvents.HandleEvents(_world, (eventData) => {
+            _state.Data.Targets = _state.Data.Targets
+                .Where((target) => {
+                    return !eventData.Targets.Any((t) =>
+                    {
+                        return t.Column == target.Column &&
+                            t.Row == target.Row &&
+                            t.Round == target.Round &&
+                            t.Value == target.Value;
+                    });
+                })
+                .ToList();
+        });
+    }
+
+    private void HandleAddWallsEvent()
+    {
+        _addWallsEvents.HandleEvents(_world, (eventData) => {
+            _state.Data.ActiveWalls.AddRange(eventData.Walls);
+        });
+    }
+
+    private void HandleRemoveWallsEvent()
+    {
+        _removeWallsEvents.HandleEvents(_world, (eventData) => {
+            _state.Data.ActiveWalls = _state.Data.ActiveWalls
+                .Where((wall) => {
+                    return !eventData.Walls.Any((w) =>
+                    {
+                        return w.Column == wall.Column &&
+                            w.Row == wall.Row &&
+                            w.Direction == wall.Direction;
+                    });
+                })
+                .ToList();
+        });
     }
 }

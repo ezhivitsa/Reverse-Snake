@@ -1,3 +1,4 @@
+using Assets.ReverseSnake.Scripts.Enums;
 using LeopotamGroup.Ecs;
 using System.Collections.Generic;
 
@@ -48,6 +49,46 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             var eventData = _world.CreateEntityWith<StateRemoveStepsEvent>();
             eventData.Steps = steps;
+        }
+
+        public void AddTarget(int row, int column, TargetValueEnum value, int round)
+        {
+            var eventData = _world.CreateEntityWith<StateAddTargetsEvent>();
+
+            var target = new Target
+            {
+                Column = column,
+                Row = row,
+                Round = round,
+                Value = value,
+            };
+            eventData.Targets = new List<Target> { target };
+        }
+
+        public void RemoveTarget(int row, int column, TargetValueEnum value, int round)
+        {
+            var eventData = _world.CreateEntityWith<StateRemoveTargetsEvent>();
+
+            var target = new Target
+            {
+                Column = column,
+                Row = row,
+                Round = round,
+                Value = value,
+            };
+            eventData.Targets = new List<Target> { target };
+        }
+
+        public void AddWalls(List<Wall> walls)
+        {
+            var eventData = _world.CreateEntityWith<StateAddWallsEvent>();
+            eventData.Walls = walls;
+        }
+
+        public void RemoveWalls(List<Wall> walls)
+        {
+            var eventData = _world.CreateEntityWith<StateRemoveWallsEvent>();
+            eventData.Walls = walls;
         }
     }
 }

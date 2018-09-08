@@ -6,10 +6,13 @@ using Assets.ReverseSnake.Scripts.Extensions;
 using LeopotamGroup.Ecs.UnityIntegration;
 using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Helpers;
+using Assets.ReverseSnake.Scripts.Managers;
 
 [EcsInject]
 public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 {
+    private StateManager _stateManager;
+
     const string BoardElementPath = "Objects/Target";
     
     EcsWorld _world = null;
@@ -23,6 +26,8 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsInitSystem.OnInitialize()
     {
+        _stateManager = StateManager.GetInstance(_world);
+
         var boardElement = GetRandomBoardElement(1);
 
         Target element = null;
@@ -93,6 +98,11 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     private void SetTargetData(Target element, BoardElement boardElement, int round)
     {
+        if (element.Round != 0)
+        {
+            _stateManager.RemoveTarget(element.Row, element.Column, element.Value, element.Round);
+        }
+
         element.Row = boardElement.Row;
         element.Column = boardElement.Column;
         element.Value = GetTargetValue();
@@ -100,6 +110,8 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
         boardElement.ContainsTarget = true;
         boardElement.Round = round;
+
+        _stateManager.AddTarget(element.Row, element.Column, element.Value, element.Round);
     }
 
     private TargetValueEnum GetTargetValue()
