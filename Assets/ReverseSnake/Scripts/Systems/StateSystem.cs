@@ -1,7 +1,9 @@
+using Assets.ReverseSnake.Scripts;
 using Assets.ReverseSnake.Scripts.Extensions;
 using LeopotamGroup.Ecs;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 [EcsInject]
 public class StateSystem : IEcsInitSystem, IEcsRunSystem
@@ -24,10 +26,20 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
         _state.Data.Steps = new List<Step>();
         _state.Data.ActiveWalls = new List<Wall>();
         _state.Data.Score = 0;
+
+        SaveData.OnLoaded += LoadData;
     }
 
     void IEcsRunSystem.OnUpdate()
     {
+        var HasEvents = _setScoreEvents.EntitiesCount > 0 ||
+            _addStepsEvents.EntitiesCount > 0 ||
+            _removeStepsEvent.EntitiesCount > 0 ||
+            _addTargetsEvents.EntitiesCount > 0 ||
+            _removeTargetsEvents.EntitiesCount > 0 ||
+            _addWallsEvents.EntitiesCount > 0 ||
+            _removeWallsEvents.EntitiesCount > 0;
+
         HandleSetScoreEvent();
 
         HandleAddStepsEvent();
@@ -37,9 +49,17 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
         HandleRemoveStepsEvent();
         HandleRemoveTargetsEvent();
         HandleRemoveWallsEvent();
+
+        if (HasEvents)
+        {
+            SaveData.Save(_state.Data);
+        }
     }
 
-    void IEcsInitSystem.OnDestroy() { }
+    void IEcsInitSystem.OnDestroy()
+    {
+        SaveData.OnLoaded -= LoadData;
+    }
 
     private void HandleSetScoreEvent()
     {
@@ -118,5 +138,10 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
                 })
                 .ToList();
         });
+    }
+
+    private void LoadData()
+    {
+
     }
 }
