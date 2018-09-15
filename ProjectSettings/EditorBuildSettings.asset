@@ -4,4 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/ReverseSnake/Scenes/MainMenu.unity
+    guid: 68e8a15a51202874c8d2cc2a0f43f10b
+  - enabled: 1
+    path: Assets/ReverseSnake/Scenes/Game.unity
+    guid: 6a8489d6a0b0beb418c4d75b6aca226f
+  m_configObjects: {}

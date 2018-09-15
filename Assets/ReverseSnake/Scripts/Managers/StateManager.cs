@@ -90,5 +90,34 @@ namespace Assets.ReverseSnake.Scripts.Managers
             var eventData = _world.CreateEntityWith<StateRemoveWallsEvent>();
             eventData.Walls = walls;
         }
+
+        public void Clear()
+        {
+            _world.CreateEntityWith<StateClearEvent>();
+        }
+
+        public void LoadFromState(State state)
+        {
+            var stateEventData = _world.CreateEntityWith<StateLoadEvent>();
+            stateEventData.State = state;
+
+            var scoreEventData = _world.CreateEntityWith<ScoreSetEvent>();
+            scoreEventData.Amount = state.Score;
+            scoreEventData.Silent = true;
+
+            var target = state.Targets[0];
+            var targetEventData = _world.CreateEntityWith<UpdateTargetEvent>();
+            targetEventData.Column = target.Column;
+            targetEventData.Row = target.Row;
+            targetEventData.Round = target.Round;
+            targetEventData.Value = target.Value;
+            targetEventData.Silent = true;
+
+            var stepsEventData = _world.CreateEntityWith<CreateStepsEvent>();
+            stepsEventData.Steps = state.Steps;
+
+            var wallsEventData = _world.CreateEntityWith<CreateWallsEvent>();
+            wallsEventData.Walls = state.ActiveWalls;
+        }
     }
 }

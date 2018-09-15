@@ -28,6 +28,10 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
             score.Ui = ui.GetComponent<Text>();
             score.Ui.text = FormatText(score.Amount);
         }
+
+        if (!GameStartup.LoadState) {
+            _stateManager.SetScore(0);
+        }
     }
 
     void IEcsInitSystem.OnDestroy()
@@ -66,7 +70,10 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
                 score.Ui.text = FormatText(score.Amount);
             });
 
-            _stateManager.SetScore(amount);
+            if (!scoreEvent.Silent)
+            {
+                _stateManager.SetScore(amount);
+            }
         });
     }
 

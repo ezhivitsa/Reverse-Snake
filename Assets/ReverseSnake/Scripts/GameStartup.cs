@@ -1,16 +1,23 @@
+using Assets.ReverseSnake.Scripts;
+using Assets.ReverseSnake.Scripts.Managers;
 using LeopotamGroup.Ecs;
 using UnityEngine;
 
-public class GameStartup : MonoBehaviour {
-    EcsWorld _world;
+public class GameStartup : MonoBehaviour
+{
+    public static bool LoadState { get; set; }
 
+    private StateManager _stateManager;
+
+    EcsWorld _world;
     EcsSystems _systems;
 
-    void OnEnable () {
+    void OnEnable ()
+    {
         _world = new EcsWorld();
     #if UNITY_EDITOR
         LeopotamGroup.Ecs.UnityIntegration.EcsWorldObserver.Create(_world);
-#endif
+    #endif
 
         EcsFilterSingle<BoardElements>.Create(_world);
         EcsFilterSingle<State>.Create(_world);
@@ -30,6 +37,12 @@ public class GameStartup : MonoBehaviour {
     #if UNITY_EDITOR
         LeopotamGroup.Ecs.UnityIntegration.EcsSystemsObserver.Create(_systems);
     #endif
+
+        SaveData.OnLoaded += OnLoadState;
+        if (LoadState)
+        {
+            SaveData.Load();
+        }
     }
 
     void Update ()
@@ -37,9 +50,20 @@ public class GameStartup : MonoBehaviour {
         _systems.OnUpdate();
     }
 
-    void OnDisable () {
+    void OnDisable ()
+    {
         _world.Dispose();
         _systems = null;
         _world = null;
+
+        SaveData.OnLoaded -= OnLoadState;
+    }
+
+    private void OnLoadState()
+    {
+        _stateManager = StateManager.GetInstance(_world);
+        var state = SaveData.state;
+
+        _stateManager.LoadFromState(state);
     }
 }

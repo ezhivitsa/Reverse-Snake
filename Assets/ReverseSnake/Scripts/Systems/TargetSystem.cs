@@ -28,15 +28,24 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     {
         _stateManager = StateManager.GetInstance(_world);
 
+
         var boardElement = GetRandomBoardElement(1);
 
         Target element = null;
         var entity = _world.CreateEntityWith(out element);
-        SetTargetData(element, boardElement, AppConstants.FirstRound);
 
         var prefab = _world.AddComponent<UnityPrefabComponent>(entity);
         prefab.Attach(BoardElementPath);
-        UpdatePrefab(entity, element, boardElement);
+
+        if (!GameStartup.LoadState)
+        {
+            SetTargetData(element, boardElement, AppConstants.FirstRound);
+            UpdatePrefab(entity, element, boardElement);
+        }
+        else
+        {
+            prefab.Prefab.SetActive(false);
+        }
     }
 
     void IEcsRunSystem.OnUpdate()
@@ -64,8 +73,10 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
                 {
                     boardElement = GetRandomBoardElement(eventEntity.Round);
                 }
-                SetTargetData(_targetFilter.Components1[j], boardElement, eventEntity.Round);
-                UpdatePrefab(_targetFilter.Entities[j], _targetFilter.Components1[j], boardElement);
+
+                var element = _targetFilter.Components1[j];
+                SetTargetData(element, boardElement, eventEntity.Round, eventEntity.Value, eventEntity.Silent);
+                UpdatePrefab(_targetFilter.Entities[j], element, boardElement);
             }
         });
     }
@@ -81,7 +92,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
             });
         });
     }
-
+    
     private BoardElement GetBoardElement(int? column, int? row)
     {
         return _boardElements.Data.Elements.Find((el) => el.Column == column && el.Row == row);
@@ -96,22 +107,31 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
             .RandomElement();
     }
 
-    private void SetTargetData(Target element, BoardElement boardElement, int round)
+    private void SetTargetData(
+        Target element,
+        BoardElement boardElement,
+        int round,
+        TargetValueEnum? value = null,
+        bool silent = false
+    )
     {
-        if (element.Round != 0)
+        if (element.Round != 0 && !silent)
         {
             _stateManager.RemoveTarget(element.Row, element.Column, element.Value, element.Round);
         }
 
         element.Row = boardElement.Row;
         element.Column = boardElement.Column;
-        element.Value = GetTargetValue();
+        element.Value = value != null ? value.Value : GetTargetValue();
         element.Round = round;
 
         boardElement.ContainsTarget = true;
         boardElement.Round = round;
 
-        _stateManager.AddTarget(element.Row, element.Column, element.Value, element.Round);
+        if (silent)
+        {
+            _stateManager.AddTarget(element.Row, element.Column, element.Value, element.Round);
+        }
     }
 
     private TargetValueEnum GetTargetValue()

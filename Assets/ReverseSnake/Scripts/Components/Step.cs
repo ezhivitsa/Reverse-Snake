@@ -1,4 +1,7 @@
-﻿sealed class Step
+﻿using System;
+
+[Serializable]
+sealed class Step
 {
     public int Row;
 

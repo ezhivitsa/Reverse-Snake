@@ -27,6 +27,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<ClearWallEvent> _clearEventFilter = null;
     EcsFilter<ShowWallEvent> _showEventFilter = null;
     EcsFilter<RemoveWallEvent> _removeWallEventFilter = null;
+    EcsFilter<CreateWallsEvent> _createWallsEvents = null;
 
     void IEcsInitSystem.OnInitialize()
     {
@@ -50,6 +51,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         HandleClearWallEvent();
         HandleShowWallEvent();
         HandleRemoveWallEvent();
+        HandleCreateWallsEvent();
     }
 
     void IEcsInitSystem.OnDestroy() { }
@@ -118,6 +120,20 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
             }
 
             _stateManager.RemoveWalls(wallsToRemove);
+        });
+    }
+
+    private void HandleCreateWallsEvent()
+    {
+        _createWallsEvents.HandleEvents(_world, (eventData) => {
+            foreach (var wallData in eventData.Walls)
+            {
+                var wall = GetWall(wallData.Column, wallData.Row, wallData.Direction);
+                var entityNum = GetEntity(wall);
+                wall.IsActive = true;
+
+                UpdatePrefab(wall, entityNum);
+            }
         });
     }
 
@@ -271,6 +287,20 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         }
 
         return 0;
+    }
+
+    private Wall GetWall(int column, int row, DirectionEnum direction)
+    {
+        for (var i = 0; i < _wallFilter.EntitiesCount; i++)
+        {
+            var wall = _wallFilter.Components1[i];
+            if (wall.Column == column && wall.Row == row && wall.Direction == direction)
+            {
+                return wall;
+            }
+        }
+
+        return null;
     }
 
     private Material GetMaterial(bool isActive)

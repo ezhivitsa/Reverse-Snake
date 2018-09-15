@@ -19,6 +19,8 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<StateRemoveTargetsEvent> _removeTargetsEvents = null;
     EcsFilter<StateAddWallsEvent> _addWallsEvents = null;
     EcsFilter<StateRemoveWallsEvent> _removeWallsEvents = null;
+    EcsFilter<StateClearEvent> _clearEvents = null;
+    EcsFilter<StateLoadEvent> _loadEvents = null;
 
     void IEcsInitSystem.OnInitialize()
     {
@@ -26,8 +28,6 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
         _state.Data.Steps = new List<Step>();
         _state.Data.ActiveWalls = new List<Wall>();
         _state.Data.Score = 0;
-
-        SaveData.OnLoaded += LoadData;
     }
 
     void IEcsRunSystem.OnUpdate()
@@ -38,7 +38,8 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
             _addTargetsEvents.EntitiesCount > 0 ||
             _removeTargetsEvents.EntitiesCount > 0 ||
             _addWallsEvents.EntitiesCount > 0 ||
-            _removeWallsEvents.EntitiesCount > 0;
+            _removeWallsEvents.EntitiesCount > 0 ||
+            _clearEvents.EntitiesCount > 0;
 
         HandleSetScoreEvent();
 
@@ -50,6 +51,9 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
         HandleRemoveTargetsEvent();
         HandleRemoveWallsEvent();
 
+        HandleClearEvent();
+        HandleLoadEvent();
+
         if (HasEvents)
         {
             SaveData.Save(_state.Data);
@@ -58,7 +62,6 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsInitSystem.OnDestroy()
     {
-        SaveData.OnLoaded -= LoadData;
     }
 
     private void HandleSetScoreEvent()
@@ -140,8 +143,23 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
         });
     }
 
-    private void LoadData()
+    private void HandleClearEvent()
     {
+        _clearEvents.HandleEvents(_world, (eventData) => {
+            _state.Data.Targets.Clear();
+            _state.Data.Steps.Clear();
+            _state.Data.ActiveWalls.Clear();
+            _state.Data.Score = 0;
+        });
+    }
 
+    private void HandleLoadEvent()
+    {
+        _loadEvents.HandleEvents(_world, (eventData) => {
+            _state.Data.Targets = eventData.State.Targets;
+            _state.Data.Steps = eventData.State.Steps;
+            _state.Data.ActiveWalls = eventData.State.ActiveWalls;
+            _state.Data.Score = eventData.State.Score;
+        });
     }
 }
