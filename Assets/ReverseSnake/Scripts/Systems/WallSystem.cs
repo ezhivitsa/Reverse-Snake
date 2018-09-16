@@ -7,6 +7,7 @@ using UnityEngine;
 using System.Linq;
 using Assets.ReverseSnake.Scripts.Helpers;
 using Assets.ReverseSnake.Scripts.Extensions;
+using Assets.ReverseSnake.Scripts.Managers;
 
 [EcsInject]
 public class WallSystem : IEcsInitSystem, IEcsRunSystem
@@ -20,13 +21,18 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
     EcsFilter<Wall> _wallFilter = null;
 
+    private StateManager _stateManager;
+
     EcsFilter<AddWallEvent> _addWallEventFilter = null;
     EcsFilter<ClearWallEvent> _clearEventFilter = null;
     EcsFilter<ShowWallEvent> _showEventFilter = null;
     EcsFilter<RemoveWallEvent> _removeWallEventFilter = null;
+    EcsFilter<CreateWallsEvent> _createWallsEvents = null;
 
     void IEcsInitSystem.OnInitialize()
     {
+        _stateManager = StateManager.GetInstance(_world);
+
         for (var i = 0; i < AppConstants.Rows; i++)
         {
             for (var j = 0; j < AppConstants.Columns; j++)
@@ -45,6 +51,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         HandleClearWallEvent();
         HandleShowWallEvent();
         HandleRemoveWallEvent();
+        HandleCreateWallsEvent();
     }
 
     void IEcsInitSystem.OnDestroy() { }
@@ -90,6 +97,9 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
                 .ToEntitiesList()
                 .Where(e => e.IsActive)
                 .ToList();
+
+            var wallsToRemove = new List<Wall>();
+
             for (var i = 0; i < eventData.Walls; i += 1)
             {
                 var wall = entities.RandomElement();
@@ -104,6 +114,25 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
                 UpdatePrefab(reverseWall, GetEntity(reverseWall));
 
                 entities = entities.Where(e => e != wall && e != reverseWall).ToList();
+
+                wallsToRemove.Add(wall);
+                wallsToRemove.Add(reverseWall);
+            }
+
+            _stateManager.RemoveWalls(wallsToRemove);
+        });
+    }
+
+    private void HandleCreateWallsEvent()
+    {
+        _createWallsEvents.HandleEvents(_world, (eventData) => {
+            foreach (var wallData in eventData.Walls)
+            {
+                var wall = GetWall(wallData.Column, wallData.Row, wallData.Direction);
+                var entityNum = GetEntity(wall);
+                wall.IsActive = true;
+
+                UpdatePrefab(wall, entityNum);
             }
         });
     }
@@ -226,6 +255,8 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         reverseWall.IsActive = true;
 
         UpdatePrefab(reverseWall, reverseEntityNum);
+
+        _stateManager.AddWalls(new List<Wall> { wall, reverseWall });
     }
 
     private void UpdatePrefab(Wall wall, int entity)
@@ -256,6 +287,20 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         }
 
         return 0;
+    }
+
+    private Wall GetWall(int column, int row, DirectionEnum direction)
+    {
+        for (var i = 0; i < _wallFilter.EntitiesCount; i++)
+        {
+            var wall = _wallFilter.Components1[i];
+            if (wall.Column == column && wall.Row == row && wall.Direction == direction)
+            {
+                return wall;
+            }
+        }
+
+        return null;
     }
 
     private Material GetMaterial(bool isActive)

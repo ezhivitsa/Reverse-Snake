@@ -14,6 +14,7 @@ using UnityEngine.UI;
 public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 {
     private GameStartManager _manager;
+    private StateManager _stateManager;
 
     EcsWorld _world = null;
 
@@ -28,6 +29,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     void IEcsInitSystem.OnInitialize()
     {
         _manager = new GameStartManager(_world);
+        _stateManager = StateManager.GetInstance(_world);
 
         foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.GameOverTag))
         {
@@ -63,6 +65,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
                 ShowGameOverScreen(true);
 
                 _manager.EndGame(eventData.Round);
+                _stateManager.Clear();
             }
         });
     }

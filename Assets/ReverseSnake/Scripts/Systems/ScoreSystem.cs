@@ -1,4 +1,5 @@
 using Assets.ReverseSnake.Scripts.Extensions;
+using Assets.ReverseSnake.Scripts.Managers;
 using Assets.src;
 using LeopotamGroup.Ecs;
 using UnityEngine;
@@ -13,8 +14,12 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
     EcsFilter<ScoreChangeEvent> _scoreChangeFilter = null;
     EcsFilter<ScoreSetEvent> _scoreSetFilter = null;
 
+    private StateManager _stateManager = null;
+
     void IEcsInitSystem.OnInitialize()
     {
+        _stateManager = StateManager.GetInstance(_world);
+
         foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.ScoreTag))
         {
             var score = _world.CreateEntityWith<Score>();
@@ -22,6 +27,10 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
             score.GameObject = ui;
             score.Ui = ui.GetComponent<Text>();
             score.Ui.text = FormatText(score.Amount);
+        }
+
+        if (!GameStartup.LoadState) {
+            _stateManager.SetScore(0);
         }
     }
 
@@ -42,8 +51,10 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
             var amount = scoreEvent.Amount;
             _scoreUiFilter.ToEntitiesList().ForEach((score) =>
             {
-                score.Amount = amount;
+                score.Amount += amount;
                 score.Ui.text = FormatText(score.Amount);
+
+                _stateManager.SetScore(score.Amount);
             });
         });
     }
@@ -55,9 +66,14 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
             var amount = scoreEvent.Amount;
             _scoreUiFilter.ToEntitiesList().ForEach((score) =>
             {
-                score.Amount += amount;
+                score.Amount = amount;
                 score.Ui.text = FormatText(score.Amount);
             });
+
+            if (!scoreEvent.Silent)
+            {
+                _stateManager.SetScore(amount);
+            }
         });
     }
 

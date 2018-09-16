@@ -1,5 +1,7 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
+using System;
 
+[Serializable]
 sealed class Target
 {
     public int Row;

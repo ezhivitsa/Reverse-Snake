@@ -18,23 +18,38 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
     EcsFilter<MovementEvent> _movementsFilter = null;
     EcsFilter<ClearStepEvent> _clearEventFilter = null;
+    EcsFilter<CreateStepsEvent> _createEvents = null;
 
     private StepManager _manager;
+    private StateManager _stateManager;
 
     private List<int> _disabledSteps = new List<int>();
 
     void IEcsInitSystem.OnInitialize()
     {
         _manager = new StepManager(_world);
+        _stateManager = StateManager.GetInstance(_world);
 
-        var boardElement = _boardElements.Data.Elements.RandomElement();
-        CreateStep(boardElement, AppConstants.StartStepsCount, AppConstants.StartStepsCount, AppConstants.FirstRound);
+        if (!GameStartup.LoadState)
+        {
+            var boardElement = _boardElements.Data.Elements.RandomElement();
+            CreateStep(boardElement, AppConstants.StartStepsCount, AppConstants.StartStepsCount, AppConstants.FirstRound);
+
+            _stateManager.AddStep(
+                boardElement.Row,
+                boardElement.Column,
+                AppConstants.StartStepsCount,
+                AppConstants.StartStepsCount,
+                AppConstants.FirstRound
+            );
+        }
     }
 
     void IEcsRunSystem.OnUpdate()
     {
         HandleMovementEvent();
         HandleClearEvent();
+        HandleCreateStepsEvent();
     }
 
     void IEcsInitSystem.OnDestroy() { }
@@ -96,6 +111,8 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
                 .Find(e => e.Row == step.Row && e.Column == step.Column);
 
             CreateStep(boardElement, step.Number, step.StartNumber, step.Round);
+
+            _stateManager.AddStep(step.Row, step.Column, step.Number, step.StartNumber, step.Round);
             _manager.StepCreated(step.Row, step.Column, step.Number, step.Round);
         });
     }
@@ -103,6 +120,8 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
     private void HandleClearEvent()
     {
         _clearEventFilter.HandleEvents(_world, (eventData) => {
+            var stepsToRemove = new List<Step>();
+
             for (var j = 0; j < _stepFilter.EntitiesCount; j++)
             {
                 var step = _stepFilter.Components1[j];
@@ -116,7 +135,24 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
                     prefab.Prefab.SetActive(false);
                     _disabledSteps.Add(entity);
+
+                    stepsToRemove.Add(element);
                 }
+            }
+
+            _stateManager.RemoveSteps(stepsToRemove);
+        });
+    }
+
+    private void HandleCreateStepsEvent()
+    {
+        _createEvents.HandleEvents(_world, (eventData) => {
+            foreach(var step in eventData.Steps)
+            {
+                var boardElement = _boardElements.Data.Elements
+                    .Find(e => e.Row == step.Row && e.Column == step.Column);
+
+                CreateStep(boardElement, step.Number, step.StartNumber, step.Round);
             }
         });
     }
