@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/ReverseSnake/Scenes/Game.unity
+- path: Assets/ReverseSnake/Scenes/MainMenu.unity
   isLoaded: 1
   isActive: 1

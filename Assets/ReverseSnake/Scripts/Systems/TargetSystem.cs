@@ -128,7 +128,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
         boardElement.ContainsTarget = true;
         boardElement.Round = round;
 
-        if (silent)
+        if (!silent)
         {
             _stateManager.AddTarget(element.Row, element.Column, element.Value, element.Round);
         }
