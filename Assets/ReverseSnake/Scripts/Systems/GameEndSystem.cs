@@ -1,6 +1,7 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Helpers;
+using Assets.ReverseSnake.Scripts.IO;
 using Assets.ReverseSnake.Scripts.Managers;
 using Assets.ReverseSnake.Scripts.Models;
 using Assets.src;
@@ -44,7 +45,8 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     void IEcsRunSystem.OnUpdate()
     {
-        _gameEndEventFilter.HandleEvents(_world, (eventData) => {
+        _gameEndEventFilter.HandleEvents(_world, (eventData) =>
+        {
             var directions = new List<DirectionEnum>
             {
                 DirectionEnum.Top,
@@ -65,6 +67,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
                 ShowGameOverScreen(true);
 
                 _manager.EndGame(eventData.Round);
+                SaveLeaderboard.AddResultAndSave(eventData.Round);
                 _stateManager.Clear();
             }
         });

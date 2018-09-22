@@ -56,7 +56,7 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
 
         if (HasEvents)
         {
-            SaveData.Save(_state.Data);
+            SaveState.Save(_state.Data);
         }
     }
 

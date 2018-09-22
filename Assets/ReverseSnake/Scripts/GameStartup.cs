@@ -38,10 +38,10 @@ public class GameStartup : MonoBehaviour
         LeopotamGroup.Ecs.UnityIntegration.EcsSystemsObserver.Create(_systems);
     #endif
 
-        SaveData.OnLoaded += OnLoadState;
+        SaveState.OnLoaded += OnLoadState;
         if (LoadState)
         {
-            SaveData.Load();
+            SaveState.Load();
         }
     }
 
@@ -56,13 +56,13 @@ public class GameStartup : MonoBehaviour
         _systems = null;
         _world = null;
 
-        SaveData.OnLoaded -= OnLoadState;
+        SaveState.OnLoaded -= OnLoadState;
     }
 
     private void OnLoadState()
     {
         _stateManager = StateManager.GetInstance(_world);
-        var state = SaveData.state;
+        var state = SaveState.State;
 
         _stateManager.LoadFromState(state);
     }
