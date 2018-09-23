@@ -1,6 +1,6 @@
 ﻿using Assets.ReverseSnake.Scripts.Models;
 using Assets.src;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 
 namespace Assets.ReverseSnake.Scripts.Managers
 {
@@ -60,6 +60,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             var eventData = _world.CreateEntityWith<ScoreSetEvent>();
             eventData.Amount = 0;
+            eventData.Silent = false;
         }
 
         private void TriggerUpdateTargetEvent(PositionModel position)

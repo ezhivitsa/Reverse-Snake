@@ -1,10 +1,10 @@
 ﻿using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.src;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using System.Collections.Generic;
 
 [EcsInject]
-public class BoardElementsSystem : IEcsInitSystem, IEcsRunSystem
+public class BoardElementsSystem : IEcsPreInitSystem, IEcsRunSystem
 {
     EcsWorld _world = null;
 
@@ -12,7 +12,7 @@ public class BoardElementsSystem : IEcsInitSystem, IEcsRunSystem
 
     EcsFilter<ClearBoardEvent> _clearEventFilter = null;
 
-    void IEcsInitSystem.OnInitialize()
+    public void PreInitialize()
     {
         _boardElements.Data.Elements = new List<BoardElement>();
 
@@ -31,12 +31,14 @@ public class BoardElementsSystem : IEcsInitSystem, IEcsRunSystem
         }
     }
 
-    void IEcsRunSystem.OnUpdate()
+    public void Run()
     {
         HandleClearEvent();
     }
 
-    void IEcsInitSystem.OnDestroy() { }
+    public void PreDestroy()
+    {
+    }
 
     private void HandleClearEvent()
     {

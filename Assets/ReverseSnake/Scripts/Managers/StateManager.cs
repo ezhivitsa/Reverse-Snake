@@ -1,5 +1,5 @@
 using Assets.ReverseSnake.Scripts.Enums;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using System.Collections.Generic;
 
 namespace Assets.ReverseSnake.Scripts.Managers

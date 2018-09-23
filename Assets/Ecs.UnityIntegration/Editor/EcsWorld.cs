@@ -8,7 +8,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
+namespace Leopotam.Ecs.UnityIntegration.Editor {
     [CustomEditor (typeof (EcsWorldObserver))]
     sealed class EcsWorldObserverInspector : UnityEditor.Editor {
         public override void OnInspectorGUI () {

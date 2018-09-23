@@ -1,6 +1,6 @@
 using Assets.ReverseSnake.Scripts;
 using Assets.ReverseSnake.Scripts.Managers;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using UnityEngine;
 
 public class GameStartup : MonoBehaviour
@@ -16,7 +16,7 @@ public class GameStartup : MonoBehaviour
     {
         _world = new EcsWorld();
     #if UNITY_EDITOR
-        LeopotamGroup.Ecs.UnityIntegration.EcsWorldObserver.Create(_world);
+        Leopotam.Ecs.UnityIntegration.EcsWorldObserver.Create(_world);
     #endif
 
         EcsFilterSingle<BoardElements>.Create(_world);
@@ -32,10 +32,10 @@ public class GameStartup : MonoBehaviour
             .Add(new UserInputSystem())
             .Add(new GameEndSystem());
 
-        _systems.OnInitialize();
+        _systems.Initialize();
 
     #if UNITY_EDITOR
-        LeopotamGroup.Ecs.UnityIntegration.EcsSystemsObserver.Create(_systems);
+        Leopotam.Ecs.UnityIntegration.EcsSystemsObserver.Create(_systems);
     #endif
 
         SaveState.OnLoaded += OnLoadState;
@@ -47,13 +47,16 @@ public class GameStartup : MonoBehaviour
 
     void Update ()
     {
-        _systems.OnUpdate();
+        _systems.Run();
     }
 
     void OnDisable ()
     {
-        _world.Dispose();
+        // destroy systems logical group.
+        _systems.Dispose();
         _systems = null;
+        // destroy world.
+        _world.Dispose();
         _world = null;
 
         SaveState.OnLoaded -= OnLoadState;

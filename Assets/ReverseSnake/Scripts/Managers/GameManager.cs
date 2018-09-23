@@ -1,6 +1,6 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Helpers;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 
 namespace Assets.ReverseSnake.Scripts.Managers
 {
@@ -108,6 +108,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             eventData.Round = round;
             eventData.Column = null;
             eventData.Row = null;
+            eventData.Silent = false;
         }
 
         private void TriggerClearBoardEvent(int round)

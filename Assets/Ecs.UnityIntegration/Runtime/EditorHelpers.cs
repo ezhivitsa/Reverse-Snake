@@ -10,7 +10,20 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LeopotamGroup.Ecs.UnityIntegration {
+namespace Leopotam.Ecs.UnityIntegration {
+    public static class EditorHelpers {
+        public static string GetCleanGenericTypeName (Type type) {
+            if (!type.IsGenericType) {
+                return type.Name;
+            }
+            var constraints = "";
+            foreach (var constr in type.GetGenericArguments ()) {
+                constraints += constraints.Length > 0 ? string.Format (", {0}", GetCleanGenericTypeName (constr)) : constr.Name;
+            }
+            return string.Format ("{0}<{1}>", type.Name.Substring (0, type.Name.LastIndexOf ("`")), constraints);
+        }
+    }
+
     public sealed class EcsEntityObserver : MonoBehaviour {
         public EcsWorld World;
 
@@ -108,11 +121,18 @@ namespace LeopotamGroup.Ecs.UnityIntegration {
             UpdateEntityName (entity);
         }
 
+        void IEcsWorldDebugListener.OnWorldDestroyed (EcsWorld world) {
+            // for immediate unregistering this MonoBehaviour from ECS.
+            OnDestroy ();
+            // for delayed destroying GameObject.
+            Destroy (gameObject);
+        }
+
         void UpdateEntityName (int entity) {
             var entityName = entity.ToString ("D8");
             var count = _world.GetComponents (entity, ref _componentsCache);
             for (var i = 0; i < count; i++) {
-                entityName = string.Format ("{0}:{1}", entityName, _componentsCache[i].GetType ().Name);
+                entityName = string.Format ("{0}:{1}", entityName, EditorHelpers.GetCleanGenericTypeName (_componentsCache[i].GetType ()));
                 _componentsCache[i] = null;
             }
             _entities[entity].name = entityName;

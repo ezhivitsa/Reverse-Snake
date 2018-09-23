@@ -11,7 +11,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
+namespace Leopotam.Ecs.UnityIntegration.Editor {
     [CustomEditor (typeof (EcsEntityObserver))]
     sealed class EcsEntityObserverInspector : UnityEditor.Editor {
         static object[] _componentsCache = new object[32];
@@ -43,12 +43,13 @@ namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
                 _componentsCache[i] = null;
                 var type = component.GetType ();
                 GUILayout.BeginVertical (GUI.skin.box);
-                if (!EcsComponentInspectors.Render (type.Name, type, component)) {
-                    EditorGUILayout.LabelField (type.Name, EditorStyles.boldLabel);
+                var typeName = EditorHelpers.GetCleanGenericTypeName (type);
+                if (!EcsComponentInspectors.Render (typeName, type, component, _entity)) {
+                    EditorGUILayout.LabelField (typeName, EditorStyles.boldLabel);
                     var indent = EditorGUI.indentLevel;
                     EditorGUI.indentLevel++;
                     foreach (var field in type.GetFields (BindingFlags.Instance | BindingFlags.Public)) {
-                        DrawTypeField (component, field);
+                        DrawTypeField (component, field, _entity);
                     }
                     EditorGUI.indentLevel = indent;
                 }
@@ -57,10 +58,10 @@ namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
             }
         }
 
-        void DrawTypeField (object instance, FieldInfo field) {
+        void DrawTypeField (object instance, FieldInfo field, EcsEntityObserver entity) {
             var fieldValue = field.GetValue (instance);
             var fieldType = field.FieldType;
-            if (!EcsComponentInspectors.Render (field.Name, fieldType, fieldValue)) {
+            if (!EcsComponentInspectors.Render (field.Name, fieldType, fieldValue, entity)) {
                 if (fieldType == typeof (UnityEngine.Object) || fieldType.IsSubclassOf (typeof (UnityEngine.Object))) {
                     GUILayout.BeginHorizontal ();
                     EditorGUILayout.LabelField (field.Name, GUILayout.MaxWidth (EditorGUIUtility.labelWidth - 16));
@@ -72,7 +73,10 @@ namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
                     return;
                 }
                 var strVal = fieldValue != null ? string.Format (System.Globalization.CultureInfo.InvariantCulture, "{0}", fieldValue) : "null";
-                EditorGUILayout.TextField (field.Name, strVal);
+                GUILayout.BeginHorizontal ();
+                EditorGUILayout.LabelField (field.Name, GUILayout.MaxWidth (EditorGUIUtility.labelWidth - 16));
+                EditorGUILayout.SelectableLabel (strVal, GUILayout.MaxHeight (EditorGUIUtility.singleLineHeight));
+                GUILayout.EndHorizontal ();
             }
         }
     }
@@ -95,10 +99,10 @@ namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
             }
         }
 
-        public static bool Render (string label, Type type, object value) {
+        public static bool Render (string label, Type type, object value, EcsEntityObserver entity) {
             IEcsComponentInspector inspector;
             if (_inspectors.TryGetValue (type, out inspector)) {
-                inspector.OnGUI (label, value);
+                inspector.OnGUI (label, value, entity.World, entity.Id);
                 return true;
             }
             return false;
@@ -119,6 +123,8 @@ namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
         /// </summary>
         /// <param name="label">Label of field.</param>
         /// <param name="value">Value of field.</param>
-        void OnGUI (string label, object value);
+        /// <param name="world">World instance.</param>
+        /// <param name="entityId">Entity id.</param>
+        void OnGUI (string label, object value, EcsWorld world, int entityId);
     }
 }

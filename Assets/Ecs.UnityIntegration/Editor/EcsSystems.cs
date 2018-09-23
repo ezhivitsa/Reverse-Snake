@@ -8,11 +8,11 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
+namespace Leopotam.Ecs.UnityIntegration.Editor {
     [CustomEditor (typeof (EcsSystemsObserver))]
     sealed class EcsSystemsObserverInspector : UnityEditor.Editor {
+        static IEcsPreInitSystem[] _preInitList = new IEcsPreInitSystem[32];
         static IEcsInitSystem[] _initList = new IEcsInitSystem[32];
-
         static IEcsRunSystem[] _runList = new IEcsRunSystem[32];
 
         public override void OnInspectorGUI () {
@@ -21,6 +21,20 @@ namespace LeopotamGroup.Ecs.UnityIntegration.Editor {
             var observer = target as EcsSystemsObserver;
             var systems = observer.GetSystems ();
             int count;
+
+            count = systems.GetPreInitSystems (ref _preInitList);
+            if (count > 0) {
+                GUILayout.BeginVertical (GUI.skin.box);
+                EditorGUILayout.LabelField ("PreInitialize systems", EditorStyles.boldLabel);
+                EditorGUI.indentLevel++;
+                for (var i = 0; i < count; i++) {
+                    EditorGUILayout.LabelField (_preInitList[i].GetType ().Name);
+                    _preInitList[i] = null;
+                }
+                EditorGUI.indentLevel--;
+                GUILayout.EndVertical ();
+            }
+
             count = systems.GetInitSystems (ref _initList);
             if (count > 0) {
                 GUILayout.BeginVertical (GUI.skin.box);

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Leopotam.Ecs;
+using System;
+using UnityEngine;
 
 [Serializable]
 sealed class Step
@@ -14,4 +16,8 @@ sealed class Step
     public int Round;
 
     public bool Active = true;
+
+    [NonSerialized]
+    [EcsIgnoreNullCheck]
+    public Transform Transform;
 }

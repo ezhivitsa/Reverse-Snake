@@ -11,7 +11,7 @@
 
 ## EcsWorld observer
 Integration can be processed with one call of `LeopotamGroup.Ecs.UnityIntegration.EcsWorldObserver.Create()` metod - this call should be wrapped to `#if UNITY_EDITOR` preprocessor define:
-```
+```csharp
 public class Startup : MonoBehaviour {
     EcsSystems _systems;
 
@@ -33,7 +33,7 @@ Observer **must** be created before any entity will be created in ecs-world.
 
 ## EcsSystems observer
 Integration can be processed with one call of `LeopotamGroup.Ecs.UnityIntegration.EcsSystemsObserver.Create()` metod - this call should be wrapped to `#if UNITY_EDITOR` preprocessor define:
-```
+```csharp
 public class Startup : MonoBehaviour {
     EcsSystems _systems;
 
@@ -54,28 +54,6 @@ public class Startup : MonoBehaviour {
 }
 ```
 
-# Runtime integration
-## UnityPrefabComponent
-Supports spawning instances of prefab from `Resources` folder. Instead of removing instance will be placed in pool for reuse it in next time:
-```
-// Path to prefab inside Resources folder.
-const string PrefabPath = "Test/Cube";
-...
-// Creating...
-var prefab = _world.AddComponent<UnityPrefabComponent>(entity);
-prefab.Attach(PrefabPath);
-// prefab.Prefab field will be filled with instance of spawned unity prefab.
-// This instance will be in deactivated state - should be activated after attaching!
-prefab.Prefab.transform.Position = new Vector3(100f, 200f, 300f);
-prefab.Prefab.SetActive(true);
-...
-// Destroying...
-// No need to deactivate instance manually - component will do it automatically during pooling.
-// Dont forget to call Detach method before removing component!
-prefab.Detach();
-_world.RemoveEntity<UnityPrefabComponent>(entity);
-```
-
 # FAQ
 
 ### I can't edit component fields at any ecs-entity observer.
@@ -83,7 +61,7 @@ By design, observer works as readonly copy of ecs world data - you can copy valu
 
 ### I want to create custom inspector view for my component.
 Custom component `MyComponent1`:
-```
+```csharp
 public enum MyEnum { True, False }
 
 public class MyComponent1 {
@@ -92,13 +70,13 @@ public class MyComponent1 {
 }
 ```
 Inspector for `MyComponent1` (should be placed in `Editor` folder):
-```
+```csharp
 class MyComponent1Inspector : IEcsComponentInspector {
     Type IEcsComponentInspector.GetFieldType () {
         return typeof (MyComponent1);
     }
 
-    void IEcsComponentInspector.OnGUI (string label, object value) {
+    void IEcsComponentInspector.OnGUI (string label, object value, EcsWorld world, int entityId) {
         var component = value as MyComponent1;
         EditorGUILayout.LabelField (label, EditorStyles.boldLabel);
         EditorGUI.indentLevel++;

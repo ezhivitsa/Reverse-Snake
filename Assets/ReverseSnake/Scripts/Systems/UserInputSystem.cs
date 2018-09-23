@@ -1,5 +1,5 @@
 using Assets.ReverseSnake.Scripts.Enums;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using System.Linq;
 using Assets.ReverseSnake.Scripts.Helpers;
 using System.Collections.Generic;
@@ -22,17 +22,17 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
 
     private GameManager _manager;
 
-    void IEcsInitSystem.OnInitialize()
+    public void Initialize()
     {
         _manager = new GameManager(_world);
         _isGameActive = true;
     }
 
-    void IEcsInitSystem.OnDestroy()
+    public void Destroy()
     {
     }
 
-    void IEcsRunSystem.OnUpdate()
+    public void Run()
     {
         HandleGameStartEvent();
 

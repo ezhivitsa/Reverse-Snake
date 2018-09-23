@@ -11,7 +11,7 @@ Performance and zero memory allocation / small size, no dependencies on any game
 
 ## Component
 Container for user data without / with small logic inside. Can be used any user class without any additional inheritance:
-```
+```csharp
 class WeaponComponent {
     public int Ammo;
     public string GunName;
@@ -21,10 +21,12 @@ class WeaponComponent {
 > **Important!** Dont forget to manually init all fields of new added component. Default value initializers will not work due all components can be reused automatically multiple times through builtin pooling mechanism (no destroying / creating new instance for each request for performance reason).
 
 > **Important!** Dont forget to cleanup reference links to instances of another components / engine classes before removing components from entity, otherwise it can lead to memory leaks.
+>
+> By default all `marshal-by-reference` typed fields of component (classes in common case) will be checked for null on removing attempt in `DEBUG`-mode. If you know that you have object instance that should be not null (preinited collections for example) - `[EcsIgnoreNullCheck]` attribute can be used for disabling these checks.
 
 ## Entity
 Сontainer for components. Implemented with int id-s for more simplified api:
-```
+```csharp
 WeaponComponent myWeapon;
 int entityId = _world.CreateEntityWith<WeaponComponent> (out myWeapon);
 _world.RemoveEntity (entityId);
@@ -33,9 +35,13 @@ _world.RemoveEntity (entityId);
 > **Important!** Entities without components on them will be automatically removed from `EcsWorld` right after finish execution of current system.
 
 ## System
-Сontainer for logic for processing filtered entities. User class should implements `IEcsInitSystem` or / and `IEcsRunSystem` interfaces:
-```
-class WeaponSystem : IEcsInitSystem {
+Сontainer for logic for processing filtered entities. User class should implements `IEcsPreInitSystem`, `IEcsInitSystem` or / and `IEcsRunSystem` interfaces:
+```csharp
+class WeaponSystem : IEcsPreInitSystem, IEcsInitSystem {
+    void IEcsPreInitSystem.PreInitialize () {
+        // Will be called once during world initialization and before IEcsInitSystem.Initialize.
+    }
+
     void IEcsInitSystem.Initialize () {
         // Will be called once during world initialization.
     }
@@ -43,10 +49,14 @@ class WeaponSystem : IEcsInitSystem {
     void IEcsInitSystem.Destroy () {
         // Will be called once during world destruction.
     }
+
+    void IEcsPreInitSystem.PreDestroy () {
+        // Will be called once during world destruction and after IEcsInitSystem.Destroy.
+    }
 }
 ```
 
-```
+```csharp
 class HealthSystem : IEcsRunSystem {
     void IEcsRunSystem.Run () {
         // Will be called on each EcsSystems.Run() call.
@@ -58,7 +68,7 @@ class HealthSystem : IEcsRunSystem {
 > **Important!** Will not work when LEOECS_DISABLE_INJECT preprocessor constant defined.
 
 With `[EcsInject]` attribute over `IEcsSystem` class all compatible `EcsWorld` and `EcsFilter<>` fields of instance of this class will be auto-initialized (auto-injected):
-```
+```csharp
 [EcsInject]
 class HealthSystem : IEcsSystem {
     EcsWorld _world = null;
@@ -71,7 +81,7 @@ class HealthSystem : IEcsSystem {
 
 ## EcsFilter<>
 Container for keep filtered entities with specified component list:
-```
+```csharp
 [EcsInject]
 class WeaponSystem : IEcsInitSystem, IEcsRunSystem {
     EcsWorld _world = null;
@@ -88,7 +98,7 @@ class WeaponSystem : IEcsInitSystem, IEcsRunSystem {
     void IEcsRunSystem.Run () {
         // Important: foreach-loop cant be used for filtered entities!
         for (var i = 0; i < _filter.EntitiesCount; i++) {
-            // Components1 array fill be automatically filled with instances of type "WeaponComponent".
+            // Components1 array will be automatically filled with instances of type "WeaponComponent".
             var weapon = _filter.Components1[i];
             weapon.Ammo = System.Math.Max (0, weapon.Ammo - 1);
         }
@@ -103,7 +113,7 @@ All compatible entities will be stored at `filter.Entities` array, amount of the
 All components from filter `Include` constraint will be stored at `filter.Components1`, `filter.Components2`, etc - in same order as they were used in filter type declaration.
 
 If autofilling not required (for example, for flag-based components without data), `EcsIgnoreInFilter` attribute can be used for decrease memory usage and increase performance:
-```
+```csharp
 class Component1 { }
 
 [EcsIgnoreInFilter]
@@ -131,10 +141,11 @@ class TestSystem : IEcsSystem {
 
 ## EcsWorld
 Root level container for all entities / components, works like isolated environment.
+> Important: Do not forget to call `EcsWorld.Dispose` method when instance will not be used anymore.
 
 ## EcsSystems
 Group of systems to process `EcsWorld` instance:
-```
+```csharp
 class Startup : MonoBehaviour {
     EcsSystems _systems;
 
@@ -153,14 +164,39 @@ class Startup : MonoBehaviour {
 
     void OnDisable() {
         // destroy systems logical group.
-        _systems.Destroy ();
+        _systems.Dispose ();
+        _systems = null;
+        // destroy world.
+        _world.Dispose ();
+        _world = null;
     }
 }
+```
+> Important: Do not forget to call `EcsSystems.Dispose` method when instance will not be used anymore.
+
+`EcsSystems` instance can be used as nested system (any types of `IEcsPreInitSystem`, `IEcsInitSystem` or `IEcsRunSystem` behaviours are supported):
+```csharp
+// initialization
+var nestedSystems = new EcsSystems (_world)
+    .Add (new NestedSystem ());
+// dont call nestedSystems.Initialize() here, rootSystems will do it automatically.
+
+var rootSystems = new EcsSystems (_world)
+    .Add (nestedSystems);
+rootSystems.Initialize();
+
+// update loop
+// dont call nestedSystems.Run() here, rootSystems will do it automatically.
+rootSystems.Run();
+
+// destroying
+// dont call nestedSystems.Dispose() here, rootSystems will do it automatically.
+rootSystems.Dispose();
 ```
 
 # Sharing data between systems
 If some component should be shared between systems `EcsFilterSingle<>` filter class can be used in this case:
-```
+```csharp
 class MySharedData {
     public string PlayerName;
     public int AchivementsCount;
@@ -213,8 +249,9 @@ class Startup : Monobehaviour {
         // Do not forget to cleanup all reference links inside shared components to another data here.
         // ...
 
-        _world.Dispose();
+        _systems.Dispose();
         _systems = null;
+        _world.Dispose();
         _world = null;
     }
 }
@@ -230,11 +267,14 @@ Another way - creating custom world class with inheritance from `EcsWorld` and f
 [Pacman game](https://github.com/SH42913/pacmanecs)
 
 # Extensions
-[Engine independent types](https://github.com/Leopotam/ecs-types)
+
+[Reactive filters / systems](https://github.com/Leopotam/ecs-reactive)
 
 [Unity integration](https://github.com/Leopotam/ecs-unityintegration)
 
 [Unity uGui event bindings](https://github.com/Leopotam/ecs-ui)
+
+[Engine independent types](https://github.com/Leopotam/ecs-types)
 
 # License
 The software released under the terms of the MIT license. Enjoy.
@@ -249,7 +289,7 @@ There are no components limit, but for performance / memory usage reason better 
 
 In this case custom component creator can be used (for speed up 2x or more):
 
-```
+```csharp
 class MyComponent { }
 
 class Startup : Monobehaviour {
@@ -270,7 +310,7 @@ class Startup : Monobehaviour {
 ### I want to process one system at MonoBehaviour.Update() and another - at MonoBehaviour.FixedUpdate(). How I can do it?
 
 For splitting systems by `MonoBehaviour`-method multiple `EcsSystems` logical groups should be used:
-```
+```csharp
 EcsSystems _update;
 EcsSystems _fixedUpdate;
 
@@ -294,25 +334,19 @@ void FixedUpdate() {
 Builtin Reflection-based DI can be removed with **LEOECS_DISABLE_INJECT** preprocessor define:
 * No `EcsInject` attribute.
 * No automatic injection for `EcsWorld` and `EcsFilter<>` fields.
-* Less code size.`
+* Less code size.
 
 `EcsWorld` should be injected somehow (for example, through constructor of system), `EcsFilter<>` data can be requested through `EcsWorld.GetFilter<>` method.
 
 ### I used reactive systems and filter events before, but now I can't find them. How I can get it back?
 
-Reactive events support was removed for performance reason and for more clear execution flow of components processing by systems:
-* Less internal magic.
-* Less code size.
-* Small performance gain.
-* Less memory usage.
-
-If you really need them - better to stay on ["v20180422 release"](https://github.com/Leopotam/ecs/releases/tag/v20180422).
+Reactive filters / systems can be found at [separate repo](https://github.com/Leopotam/ecs-reactive).
 
 ### I need more than 4 components in filter, how i can do it?
 
 First of all - looks like there are problems in architecture and better to rethink it. Anyway, custom filter can be implemented it this way:
 
-```
+```csharp
 // Custom class should be inherited from EcsFilter.
 public class CustomEcsFilter<Inc1> : EcsFilter where Inc1 : class, new () {
     public Inc1[] Components1;
@@ -331,7 +365,7 @@ public class CustomEcsFilter<Inc1> : EcsFilter where Inc1 : class, new () {
         ValidateMasks (1, 0);
     }
 
-    // This method will be called for all new compatible entities.
+    // This method will be called for new compatible entities.
     public override void RaiseOnAddEvent (int entity) {
         if (Entities.Length == EntitiesCount) {
             Array.Resize (ref Entities, EntitiesCount << 1);
@@ -345,7 +379,7 @@ public class CustomEcsFilter<Inc1> : EcsFilter where Inc1 : class, new () {
         Entities[EntitiesCount++] = entity;
     }
 
-    // This method will be removed for added before, but already non-compatible entities.
+    // This method will be called for added before, but already non-compatible entities.
     public override void RaiseOnRemoveEvent (int entity) {
         for (var i = 0; i < EntitiesCount; i++) {
             if (Entities[i] == entity) {
@@ -371,8 +405,6 @@ public class CustomEcsFilter<Inc1> : EcsFilter where Inc1 : class, new () {
     }
 }
 ```
-
-> You can even add your own events inside `RaiseOnAddEvent` / `RaiseOnRemoveEvent` calls, but i do not recommend it and you will do it at your own peril.
 
 ### How it fast relative to Entitas?
 
