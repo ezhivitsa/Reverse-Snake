@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace Assets.ReverseSnake.Scripts
 {
-    sealed class SaveData
+    sealed class SaveState
     {
-        public static State state = new State();
+        public static State State = new State();
 
         public delegate void SerializeAction();
         public static event SerializeAction OnLoaded;
@@ -15,24 +16,30 @@ namespace Assets.ReverseSnake.Scripts
         {
             OnBeforeSave?.Invoke();
 
-            SaveState(state);
+            SaveStateData(state);
         }
 
         public static void Load()
         {
-            state = LoadState();
+            State = LoadStateData();
 
             OnLoaded?.Invoke();
         }
 
-        private static State LoadState()
+        private static State LoadStateData()
         {
-            string json = File.ReadAllText(SavePath());
-
-            return JsonUtility.FromJson<State>(json);
+            try
+            {
+                string json = File.ReadAllText(SavePath());
+                return JsonUtility.FromJson<State>(json);
+            }
+            catch (Exception)
+            {
+                return new State();
+            }
         }
 
-        private static void SaveState(State state)
+        private static void SaveStateData(State state)
         {
             string json = JsonUtility.ToJson(state);
 

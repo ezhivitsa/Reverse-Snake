@@ -1,12 +1,13 @@
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Managers;
 using Assets.src;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using UnityEngine;
 using UnityEngine.UI;
 
 [EcsInject]
-public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
+public class ScoreSystem : IEcsRunSystem, IEcsInitSystem
+{
     EcsWorld _world = null;
 
     EcsFilter<Score> _scoreUiFilter = null;
@@ -16,7 +17,7 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
 
     private StateManager _stateManager = null;
 
-    void IEcsInitSystem.OnInitialize()
+    public void Initialize()
     {
         _stateManager = StateManager.GetInstance(_world);
 
@@ -34,11 +35,14 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem {
         }
     }
 
-    void IEcsInitSystem.OnDestroy()
+    public void Destroy()
     {
+        _scoreUiFilter.ToEntitieNumbersList().ForEach(entity => {
+            _world.RemoveEntity(entity);
+        });
     }
 
-    void IEcsRunSystem.OnUpdate()
+    public void Run()
     {
         HandleChangeEvent();
         HandleSetEvent();

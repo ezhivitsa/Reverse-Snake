@@ -5,9 +5,8 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using LeopotamGroup.Ecs.Internals;
 
-namespace LeopotamGroup.Ecs {
+namespace Leopotam.Ecs {
     /// <summary>
     /// Marks component class to be not autofilled as ComponentX in filter.
     /// </summary>
@@ -40,21 +39,15 @@ namespace LeopotamGroup.Ecs {
         }
 
         public override void RaiseOnAddEvent (int entity) {
-#if DEBUG
-            if (EntitiesCount > 0) {
-                throw new Exception (string.Format ("Cant add entity \"{1}\" to single filter \"{0}\": another one already added.", GetType (), entity));
-            }
-#endif
+            Internals.EcsHelpers.Assert (EntitiesCount <= 0,
+                string.Format ("Cant add entity \"{1}\" to single filter \"{0}\": another one already added.", GetType (), entity));
             Data = World.GetComponent<Inc1> (entity);
             Entities[EntitiesCount++] = entity;
         }
 
         public override void RaiseOnRemoveEvent (int entity) {
-#if DEBUG
-            if (EntitiesCount != 1 || Entities[0] != entity) {
-                throw new Exception (string.Format ("Cant remove entity \"{1}\" from single filter \"{0}\".", GetType (), entity));
-            }
-#endif
+            Internals.EcsHelpers.Assert (EntitiesCount == 1 && Entities[0] == entity,
+                string.Format ("Cant remove entity \"{1}\" from single filter \"{0}\".", GetType (), entity));
             EntitiesCount--;
             Data = null;
         }
@@ -445,6 +438,13 @@ namespace LeopotamGroup.Ecs {
         public readonly EcsComponentMask ExcludeMask = new EcsComponentMask ();
 
         /// <summary>
+        /// Returns connected EcsWorld instance.
+        /// </summary>
+        public EcsWorld GetWorld () {
+            return World;
+        }
+
+        /// <summary>
         /// Instance of connected EcsWorld.
         /// Do not change it manually!
         /// </summary>
@@ -482,18 +482,26 @@ namespace LeopotamGroup.Ecs {
         public int EntitiesCount;
 
         /// <summary>
+        /// Removes all filtered entities from world.
+        /// </summary>
+        [Obsolete ("Use custom extension method instead")]
+        public void RemoveAllEntities () {
+            for (var i = 0; i < EntitiesCount; i++) {
+                World.RemoveEntity (Entities[i]);
+            }
+        }
+
+        /// <summary>
         /// Vaidates amount of constraint components.
         /// </summary>
         /// <param name="inc">Valid amount for included components.</param>
         /// <param name="exc">Valid amount for excluded components.</param>
         [System.Diagnostics.Conditional ("DEBUG")]
         protected void ValidateMasks (int inc, int exc) {
-            if (IncludeMask.BitsCount != inc || ExcludeMask.BitsCount != exc) {
-                throw new Exception (string.Format ("Invalid filter type \"{0}\": duplicated component types.", GetType ()));
-            }
-            if (IncludeMask.IsIntersects (ExcludeMask)) {
-                throw new Exception (string.Format ("Invalid filter type \"{0}\": Include types intersects with exclude types.", GetType ()));
-            }
+            Internals.EcsHelpers.Assert (IncludeMask.BitsCount == inc && ExcludeMask.BitsCount == exc,
+                string.Format ("Invalid filter type \"{0}\": possible duplicated component types.", GetType ()));
+            Internals.EcsHelpers.Assert (!IncludeMask.IsIntersects (ExcludeMask),
+                string.Format ("Invalid filter type \"{0}\": Include types intersects with exclude types.", GetType ()));
         }
 #if DEBUG
         public override string ToString () {

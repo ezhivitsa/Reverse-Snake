@@ -9,13 +9,13 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace LeopotamGroup.Ecs.UnityIntegration.Editor.Inspectors {
+namespace Leopotam.Ecs.UnityIntegration.Editor.Inspectors {
     sealed class StringInspector : IEcsComponentInspector {
         Type IEcsComponentInspector.GetFieldType () {
             return typeof (Vector3);
         }
 
-        void IEcsComponentInspector.OnGUI (string label, object value) {
+        void IEcsComponentInspector.OnGUI (string label, object value, EcsWorld world, int entityId) {
             EditorGUILayout.Vector3Field (label, (Vector3) value);
         }
     }

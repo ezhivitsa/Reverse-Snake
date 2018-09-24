@@ -1,15 +1,14 @@
 ﻿using Assets.src;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using UnityEngine;
 using Assets.ReverseSnake.Scripts.Extensions;
-using LeopotamGroup.Ecs.UnityIntegration;
 using System.Collections.Generic;
 using Assets.ReverseSnake.Scripts.Managers;
 
 [EcsInject]
 public class StepSystem : IEcsInitSystem, IEcsRunSystem
 {
-    const string BoardElementPath = "Objects/SnakeStep";
+    const string StepElementPath = "Objects/SnakeStep";
 
     EcsWorld _world = null;
 
@@ -25,7 +24,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
     private List<int> _disabledSteps = new List<int>();
 
-    void IEcsInitSystem.OnInitialize()
+    public void Initialize()
     {
         _manager = new StepManager(_world);
         _stateManager = StateManager.GetInstance(_world);
@@ -45,14 +44,16 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
         }
     }
 
-    void IEcsRunSystem.OnUpdate()
+    public void Run()
     {
         HandleMovementEvent();
         HandleClearEvent();
         HandleCreateStepsEvent();
     }
 
-    void IEcsInitSystem.OnDestroy() { }
+    public void Destroy()
+    {
+    }
 
     private void CreateStep(BoardElement boardElement, int number, int startNumber, int round)
     {
@@ -61,21 +62,22 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
         int entity = 0;
         Step element = null;
-        UnityPrefabComponent prefab = null;
+        Transform transform = null;
 
         if (_disabledSteps.Count > 0)
         {
             entity = _disabledSteps[0];
             element = _world.GetComponent<Step>(entity);
-            prefab = _world.GetComponent<UnityPrefabComponent>(entity);
+            transform = element.Transform;
 
             _disabledSteps.RemoveAt(0);
         }
         else
         {
             entity = _world.CreateEntityWith(out element);
-            prefab = _world.AddComponent<UnityPrefabComponent>(entity);
-            prefab.Attach(BoardElementPath);
+
+            var stepObject = (GameObject)Resources.Load(StepElementPath, typeof(GameObject));
+            transform = GameObject.Instantiate(stepObject).transform;
         }
         
         element.Row = boardElement.Row;
@@ -84,13 +86,14 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
         element.StartNumber = startNumber;
         element.Round = round;
         element.Active = true;
+        element.Transform = transform;
 
-        prefab.Prefab.transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
+        element.Transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
 
-        var textElement = prefab.Prefab.transform.GetChild(0).GetComponent<TextMesh>();
+        var textElement = element.Transform.GetChild(0).GetComponent<TextMesh>();
         textElement.text = GetStepText(element.Number);
 
-        prefab.Prefab.SetActive(true);
+        element.Transform.gameObject.SetActive(true);
     }
 
     private Vector3 GetPositionVector(int rowPos, int columnPos)
@@ -128,12 +131,10 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
                 if (step.Round == eventData.Round)
                 {
                     var entity = _stepFilter.Entities[j];
-                    var prefab = _world.GetComponent<UnityPrefabComponent>(entity);
                     var element = _world.GetComponent<Step>(entity);
 
                     element.Active = false;
-
-                    prefab.Prefab.SetActive(false);
+                    element.Transform.gameObject.SetActive(false);
                     _disabledSteps.Add(entity);
 
                     stepsToRemove.Add(element);

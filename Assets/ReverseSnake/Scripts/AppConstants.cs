@@ -25,5 +25,9 @@
         public const string UITag = "UI";
 
         public const string GameOverTag = "GameOver";
+
+        public const string LeaderboardLineTag = "LeaderboardLine";
+
+        public const int LeaderboardCount = 10;
     }
 }

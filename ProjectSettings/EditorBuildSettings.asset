@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ReverseSnake/Scenes/Game.unity
     guid: 6a8489d6a0b0beb418c4d75b6aca226f
+  - enabled: 1
+    path: Assets/ReverseSnake/Scenes/Leaderboard.unity
+    guid: 0dd81e8fbfae8eb4aabea0c86b647f1f
   m_configObjects: {}

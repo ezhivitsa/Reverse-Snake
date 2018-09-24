@@ -1,5 +1,7 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
+using Leopotam.Ecs;
 using System;
+using UnityEngine;
 
 [Serializable]
 sealed class Target
@@ -11,4 +13,8 @@ sealed class Target
     public TargetValueEnum Value;
 
     public int Round;
+
+    [NonSerialized]
+    [EcsIgnoreNullCheck]
+    public Transform Transform;
 }

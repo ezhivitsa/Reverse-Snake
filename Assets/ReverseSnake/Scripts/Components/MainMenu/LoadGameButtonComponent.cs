@@ -8,18 +8,18 @@ public class LoadGameButtonComponent : MonoBehaviour
 
     void OnEnable()
     {
-        SaveData.OnLoaded += OnStateLoaded;
-        SaveData.Load();
+        SaveState.OnLoaded += OnStateLoaded;
+        SaveState.Load();
 	}
 
     void OnDestroy()
     {
-        SaveData.OnLoaded -= OnStateLoaded;
+        SaveState.OnLoaded -= OnStateLoaded;
     }
 
     private void OnStateLoaded()
     {
-        var state = SaveData.state;
+        var state = SaveState.State;
         if (state.Steps != null && state.Steps.Count > 0)
         {
             var button = gameObject.GetComponent<Selectable>();

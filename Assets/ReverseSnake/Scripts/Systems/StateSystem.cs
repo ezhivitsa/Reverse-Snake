@@ -1,12 +1,12 @@
 using Assets.ReverseSnake.Scripts;
 using Assets.ReverseSnake.Scripts.Extensions;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 [EcsInject]
-public class StateSystem : IEcsInitSystem, IEcsRunSystem
+public class StateSystem : IEcsPreInitSystem, IEcsRunSystem
 {
     EcsWorld _world = null;
 
@@ -22,7 +22,7 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<StateClearEvent> _clearEvents = null;
     EcsFilter<StateLoadEvent> _loadEvents = null;
 
-    void IEcsInitSystem.OnInitialize()
+    public void PreInitialize()
     {
         _state.Data.Targets = new List<Target>();
         _state.Data.Steps = new List<Step>();
@@ -30,17 +30,8 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
         _state.Data.Score = 0;
     }
 
-    void IEcsRunSystem.OnUpdate()
+    public void Run()
     {
-        var HasEvents = _setScoreEvents.EntitiesCount > 0 ||
-            _addStepsEvents.EntitiesCount > 0 ||
-            _removeStepsEvent.EntitiesCount > 0 ||
-            _addTargetsEvents.EntitiesCount > 0 ||
-            _removeTargetsEvents.EntitiesCount > 0 ||
-            _addWallsEvents.EntitiesCount > 0 ||
-            _removeWallsEvents.EntitiesCount > 0 ||
-            _clearEvents.EntitiesCount > 0;
-
         HandleSetScoreEvent();
 
         HandleAddStepsEvent();
@@ -53,15 +44,11 @@ public class StateSystem : IEcsInitSystem, IEcsRunSystem
 
         HandleClearEvent();
         HandleLoadEvent();
-
-        if (HasEvents)
-        {
-            SaveData.Save(_state.Data);
-        }
     }
 
-    void IEcsInitSystem.OnDestroy()
+    public void PreDestroy()
     {
+        SaveState.Save(_state.Data);
     }
 
     private void HandleSetScoreEvent()

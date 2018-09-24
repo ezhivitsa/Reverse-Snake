@@ -1,4 +1,4 @@
-﻿using LeopotamGroup.Ecs;
+﻿using Leopotam.Ecs;
 using System;
 using System.Collections.Generic;
 

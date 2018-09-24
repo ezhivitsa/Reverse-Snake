@@ -1,10 +1,11 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Helpers;
+using Assets.ReverseSnake.Scripts.IO;
 using Assets.ReverseSnake.Scripts.Managers;
 using Assets.ReverseSnake.Scripts.Models;
 using Assets.src;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -26,7 +27,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     EcsFilter<CheckGameEndEvent> _gameEndEventFilter = null;
 
-    void IEcsInitSystem.OnInitialize()
+    public void Initialize()
     {
         _manager = new GameStartManager(_world);
         _stateManager = StateManager.GetInstance(_world);
@@ -42,9 +43,10 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         }
     }
 
-    void IEcsRunSystem.OnUpdate()
+    public void Run()
     {
-        _gameEndEventFilter.HandleEvents(_world, (eventData) => {
+        _gameEndEventFilter.HandleEvents(_world, (eventData) =>
+        {
             var directions = new List<DirectionEnum>
             {
                 DirectionEnum.Top,
@@ -65,13 +67,17 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
                 ShowGameOverScreen(true);
 
                 _manager.EndGame(eventData.Round);
+                SaveLeaderboard.AddResultAndSave(eventData.Round);
                 _stateManager.Clear();
             }
         });
     }
 
-    public void OnDestroy()
+    public void Destroy()
     {
+        _gameOverFilter.ToEntitieNumbersList().ForEach(entity => {
+            _world.RemoveEntity(entity);
+        });
     }
 
     private bool HasAvailablePosition(int column, int row, int round, int number, List<DirectionEnum> directions)

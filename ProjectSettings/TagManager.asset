@@ -8,6 +8,7 @@ TagManager:
   - Score
   - GameOver
   - UI
+  - LeaderboardLine
   layers:
   - Default
   - TransparentFX

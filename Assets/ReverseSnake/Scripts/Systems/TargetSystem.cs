@@ -1,9 +1,8 @@
 ﻿using Assets.src;
-using LeopotamGroup.Ecs;
+using Leopotam.Ecs;
 using UnityEngine;
 using System.Linq;
 using Assets.ReverseSnake.Scripts.Extensions;
-using LeopotamGroup.Ecs.UnityIntegration;
 using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Helpers;
 using Assets.ReverseSnake.Scripts.Managers;
@@ -13,7 +12,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 {
     private StateManager _stateManager;
 
-    const string BoardElementPath = "Objects/Target";
+    const string TargetPath = "Objects/Target";
     
     EcsWorld _world = null;
 
@@ -24,37 +23,36 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<UpdateTargetEvent> _updateTargetEventsFilter = null;
     EcsFilter<ShowTargetEvent> _showTargetEventsFilter = null;
 
-    void IEcsInitSystem.OnInitialize()
+    public void Initialize()
     {
         _stateManager = StateManager.GetInstance(_world);
 
 
         var boardElement = GetRandomBoardElement(1);
 
-        Target element = null;
-        var entity = _world.CreateEntityWith(out element);
+        Target element = _world.CreateEntityWith<Target>();
 
-        var prefab = _world.AddComponent<UnityPrefabComponent>(entity);
-        prefab.Attach(BoardElementPath);
+        var targetObject = (GameObject)Resources.Load(TargetPath, typeof(GameObject));
+        element.Transform = GameObject.Instantiate(targetObject).transform;
 
         if (!GameStartup.LoadState)
         {
             SetTargetData(element, boardElement, AppConstants.FirstRound);
-            UpdatePrefab(entity, element, boardElement);
+            UpdatePrefab(element, boardElement);
         }
         else
         {
-            prefab.Prefab.SetActive(false);
+            element.Transform.gameObject.SetActive(false);
         }
     }
 
-    void IEcsRunSystem.OnUpdate()
+    public void Run()
     {
         HandleUpdateTarget();
         HandleShowTarget();
     }
 
-    void IEcsInitSystem.OnDestroy()
+    void IEcsInitSystem.Destroy()
     {
     }
 
@@ -76,7 +74,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
                 var element = _targetFilter.Components1[j];
                 SetTargetData(element, boardElement, eventEntity.Round, eventEntity.Value, eventEntity.Silent);
-                UpdatePrefab(_targetFilter.Entities[j], element, boardElement);
+                UpdatePrefab(element, boardElement);
             }
         });
     }
@@ -85,10 +83,9 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     {
         _showTargetEventsFilter.HandleEvents(_world, (eventData) =>
         {
-            _targetFilter.ToEntitieNumbersList().ForEach((entity) =>
+            _targetFilter.ToEntitiesList().ForEach((entity) =>
             {
-                var prefab = _world.GetComponent<UnityPrefabComponent>(entity);
-                prefab.Prefab.SetActive(eventData.IsActive);
+                entity.Transform.gameObject.SetActive(eventData.IsActive);
             });
         });
     }
@@ -145,15 +142,14 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
         return TargetHelper.GetTargetValue(activeWalls / 2);
     }
 
-    private void UpdatePrefab(int entity, Target element, BoardElement boardElement)
+    private void UpdatePrefab(Target element, BoardElement boardElement)
     {
-        var prefab = _world.GetComponent<UnityPrefabComponent>(entity);
-        prefab.Prefab.transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
+        element.Transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
 
-        var textElement = prefab.Prefab.transform.GetChild(0).GetComponent<TextMesh>();
+        var textElement = element.Transform.GetChild(0).GetComponent<TextMesh>();
         textElement.text = element.Value.GetDescription();
 
-        prefab.Prefab.SetActive(true);
+        element.Transform.gameObject.SetActive(true);
     }
 
     private Vector3 GetPositionVector(int rowPos, int columnPos)

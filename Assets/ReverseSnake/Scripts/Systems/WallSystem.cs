@@ -1,7 +1,7 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
 using Assets.src;
-using LeopotamGroup.Ecs;
-using LeopotamGroup.Ecs.UnityIntegration;
+using Leopotam.Ecs;
+using Leopotam.Ecs.UnityIntegration;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -29,7 +29,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<RemoveWallEvent> _removeWallEventFilter = null;
     EcsFilter<CreateWallsEvent> _createWallsEvents = null;
 
-    void IEcsInitSystem.OnInitialize()
+    public void Initialize()
     {
         _stateManager = StateManager.GetInstance(_world);
 
@@ -45,7 +45,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         }
     }
 
-    void IEcsRunSystem.OnUpdate()
+    public void Run()
     {
         HandleAddWallEvent();
         HandleClearWallEvent();
@@ -54,7 +54,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         HandleCreateWallsEvent();
     }
 
-    void IEcsInitSystem.OnDestroy() { }
+    public void Destroy() { }
 
     private void HandleAddWallEvent()
     {
@@ -72,7 +72,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
                 if (wall.IsActive)
                 {
                     wall.IsActive = false;
-                    UpdatePrefab(wall, _wallFilter.Entities[i]);
+                    UpdatePrefab(wall);
                 }
             }
         });
@@ -83,8 +83,8 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         _showEventFilter.HandleEvents(_world, (eventData) => {
             for (var i = 0; i < _wallFilter.EntitiesCount; i += 1)
             {
-                var prefab = _world.GetComponent<UnityPrefabComponent>(_wallFilter.Entities[i]);
-                prefab.Prefab.gameObject.SetActive(eventData.IsActive);
+                var entity = _wallFilter.Components1[i];
+                entity.Transform.gameObject.SetActive(eventData.IsActive);
             }
         });
     }
@@ -104,14 +104,14 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
             {
                 var wall = entities.RandomElement();
                 wall.IsActive = false;
-                UpdatePrefab(wall, GetEntity(wall));
+                UpdatePrefab(wall);
 
                 var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
 
                 var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
                 var reverseWall = GetWall(entities, nextPosition.Row, nextPosition.Column, reverseDirection);
                 reverseWall.IsActive = false;
-                UpdatePrefab(reverseWall, GetEntity(reverseWall));
+                UpdatePrefab(reverseWall);
 
                 entities = entities.Where(e => e != wall && e != reverseWall).ToList();
 
@@ -129,28 +129,26 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
             foreach (var wallData in eventData.Walls)
             {
                 var wall = GetWall(wallData.Column, wallData.Row, wallData.Direction);
-                var entityNum = GetEntity(wall);
                 wall.IsActive = true;
 
-                UpdatePrefab(wall, entityNum);
+                UpdatePrefab(wall);
             }
         });
     }
 
     private void GenerateWall(int row, int column, DirectionEnum direction)
     {
-        Wall element = null;
-        var entity = _world.CreateEntityWith(out element);
+        Wall element = _world.CreateEntityWith<Wall>();
         element.Row = row;
         element.Column = column;
         element.Direction = direction;
         element.IsActive = false;
 
-        var prefab = _world.AddComponent<UnityPrefabComponent>(entity);
-        prefab.Attach(WallPath);
-        prefab.Prefab.transform.position = GetPositionVector(false, row, column, direction);
-        prefab.Prefab.transform.rotation = GetRotationQuaternion(direction);
-        prefab.Prefab.SetActive(true);
+        var wallObject = (GameObject)Resources.Load(WallPath, typeof(GameObject));
+        element.Transform = GameObject.Instantiate(wallObject).transform;
+        element.Transform.position = GetPositionVector(false, row, column, direction);
+        element.Transform.rotation = GetRotationQuaternion(direction);
+        element.Transform.gameObject.SetActive(true);
     }
 
     private Vector3 GetPositionVector(bool isActive, int row, int column, DirectionEnum direction)
@@ -241,34 +239,29 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
     private void CloseWall(Wall wall, List<Wall> availableWalls)
     {
-        var entityNum = GetEntity(wall);
         wall.IsActive = true;
-
-        UpdatePrefab(wall, entityNum);
+        UpdatePrefab(wall);
 
         var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
 
         var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
         var reverseWall = GetWall(availableWalls, nextPosition.Row, nextPosition.Column, reverseDirection);
 
-        var reverseEntityNum = GetEntity(reverseWall);
         reverseWall.IsActive = true;
-
-        UpdatePrefab(reverseWall, reverseEntityNum);
+        UpdatePrefab(reverseWall);
 
         _stateManager.AddWalls(new List<Wall> { wall, reverseWall });
     }
 
-    private void UpdatePrefab(Wall wall, int entity)
+    private void UpdatePrefab(Wall wall)
     {
-        var prefab = _world.GetComponent<UnityPrefabComponent>(entity);
-        prefab.Prefab.transform.position = GetPositionVector(
+        wall.Transform.position = GetPositionVector(
             wall.IsActive,
             wall.Row,
             wall.Column,
             wall.Direction
         );
-        prefab.Prefab.gameObject.GetComponent<MeshRenderer>().material = GetMaterial(wall.IsActive);
+        wall.Transform.gameObject.GetComponent<MeshRenderer>().material = GetMaterial(wall.IsActive);
     }
 
     private Wall GetWall(List<Wall> walls, int row, int column, DirectionEnum direction)
