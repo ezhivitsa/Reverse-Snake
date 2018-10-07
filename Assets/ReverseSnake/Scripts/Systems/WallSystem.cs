@@ -8,12 +8,11 @@ using System.Linq;
 using Assets.ReverseSnake.Scripts.Helpers;
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Managers;
+using System;
 
 [EcsInject]
 public class WallSystem : IEcsInitSystem, IEcsRunSystem
 {
-    const string WallPath = "Objects/Wall";
-
     const string DisabledWallMaterial = "Materials/wall-base-material";
     const string ActiveWallMaterial = "Materials/wall-close-material";
 
@@ -33,14 +32,13 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
     {
         _stateManager = StateManager.GetInstance(_world);
 
-        for (var i = 0; i < AppConstants.Rows; i++)
+        var lines = GameObject.FindGameObjectsWithTag(AppConstants.BoardLineTag);
+        foreach (var line in lines)
         {
-            for (var j = 0; j < AppConstants.Columns; j++)
+            foreach (Transform plane in line.transform)
             {
-                GenerateWall(i, j, DirectionEnum.Top);
-                GenerateWall(i, j, DirectionEnum.Bottom);
-                GenerateWall(i, j, DirectionEnum.Left);
-                GenerateWall(i, j, DirectionEnum.Right);
+                var wall = plane.GetComponent<WallElement>();
+                GenerateWall(wall.Row, wall.Column, wall.Direction, plane);
             }
         }
     }
@@ -106,17 +104,16 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
                 wall.IsActive = false;
                 UpdatePrefab(wall);
 
-                var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
+                //var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
 
-                var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
-                var reverseWall = GetWall(entities, nextPosition.Row, nextPosition.Column, reverseDirection);
-                reverseWall.IsActive = false;
-                UpdatePrefab(reverseWall);
+                //var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
+                //var reverseWall = GetWall(entities, nextPosition.Row, nextPosition.Column, reverseDirection);
+                //reverseWall.IsActive = false;
+                //UpdatePrefab(reverseWall);
 
-                entities = entities.Where(e => e != wall && e != reverseWall).ToList();
+                entities = entities.Where(e => e != wall).ToList();
 
                 wallsToRemove.Add(wall);
-                wallsToRemove.Add(reverseWall);
             }
 
             _stateManager.RemoveWalls(wallsToRemove);
@@ -136,79 +133,15 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         });
     }
 
-    private void GenerateWall(int row, int column, DirectionEnum direction)
+    private void GenerateWall(int row, int column, DirectionEnum direction, Transform transform)
     {
         Wall element = _world.CreateEntityWith<Wall>();
         element.Row = row;
         element.Column = column;
         element.Direction = direction;
         element.IsActive = false;
-
-        var wallObject = (GameObject)Resources.Load(WallPath, typeof(GameObject));
-        element.Transform = GameObject.Instantiate(wallObject).transform;
-        element.Transform.position = GetPositionVector(false, row, column, direction);
-        element.Transform.rotation = GetRotationQuaternion(direction);
+        element.Transform = transform;
         element.Transform.gameObject.SetActive(true);
-    }
-
-    private Vector3 GetPositionVector(bool isActive, int row, int column, DirectionEnum direction)
-    {
-        var yPos = isActive ? 0.01F : -0.95F;
-        Vector3 result;
-
-        switch (direction)
-        {
-            case DirectionEnum.Top:
-                result = CalculatePosition(column, row, -1 / 2F, -1, yPos, 0, 1 / 2F);
-                break;
-
-            case DirectionEnum.Bottom:
-                result = CalculatePosition(column, row, -1 / 2F, -1, yPos, 1, 3 / 2F);
-                break;
-
-            case DirectionEnum.Left:
-                result = CalculatePosition(column, row, 0, -1 / 2F, yPos, 1 / 2F, 1);
-                break;
-
-            case DirectionEnum.Right:
-                result = CalculatePosition(column, row, -1, -3 / 2F, yPos, 1 / 2F, 1);
-                break;
-
-            default:
-                return new Vector3(0, 0, 0);
-        }
-
-        return result - new Vector3(AppConstants.OffsetX, 0, AppConstants.OffsetZ);
-    }
-
-    private Vector3 CalculatePosition(
-        float columnPos,
-        float rowPos,
-        float elementXCoeff,
-        float borderXCoeff,
-        float yPos,
-        float elementZCoeff,
-        float borderZCoeff
-    )
-    {
-        return new Vector3(
-            AppConstants.BoardElementWidth * (columnPos + elementXCoeff + 1) + AppConstants.BorderWidth * (columnPos + borderXCoeff + 2),
-            yPos,
-            AppConstants.BoardElementWidth * (rowPos + elementZCoeff) + AppConstants.BorderWidth * (rowPos + borderZCoeff)
-        );
-    }
-
-    private Quaternion GetRotationQuaternion(DirectionEnum direction)
-    {
-        switch (direction)
-        {
-            case DirectionEnum.Left:
-            case DirectionEnum.Right:
-                return Quaternion.Euler(0, 90, 0);
-
-            default:
-                return Quaternion.Euler(0, 0, 0);
-        }
     }
 
     private void AddWall()
@@ -232,9 +165,33 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
     private List<Wall> GetWallsOnPosition(List<Wall> walls, int row, int column)
     {
-        return walls
-            .Where(wall => wall.Column == column && wall.Row == row)
-            .ToList();
+        var wallsOnPosition = new List<Wall>();
+        foreach (var direction in Enum.GetValues(typeof(DirectionEnum)).Cast<DirectionEnum>())
+        {
+            var wall = walls.Find(w => w.Column == column && w.Row == row && w.Direction == direction);
+            if (wall != null)
+            {
+                wallsOnPosition.Add(wall);
+            }
+            else
+            {
+                var nextPosition = PositionHelper.GetNextPosition(row, column, direction);
+                var reverseDirection = DirectionHelper.GetReverseDirection(direction);
+
+                wall = walls.Find(w =>
+                    w.Column == nextPosition.Column &&
+                    w.Row == nextPosition.Row &&
+                    w.Direction == reverseDirection
+                );
+
+                if (wall != null)
+                {
+                    wallsOnPosition.Add(wall);
+                }
+            }
+        }
+
+        return wallsOnPosition;
     }
 
     private void CloseWall(Wall wall, List<Wall> availableWalls)
@@ -242,25 +199,11 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         wall.IsActive = true;
         UpdatePrefab(wall);
 
-        var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
-
-        var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
-        var reverseWall = GetWall(availableWalls, nextPosition.Row, nextPosition.Column, reverseDirection);
-
-        reverseWall.IsActive = true;
-        UpdatePrefab(reverseWall);
-
-        _stateManager.AddWalls(new List<Wall> { wall, reverseWall });
+        _stateManager.AddWalls(new List<Wall> { wall });
     }
 
     private void UpdatePrefab(Wall wall)
     {
-        wall.Transform.position = GetPositionVector(
-            wall.IsActive,
-            wall.Row,
-            wall.Column,
-            wall.Direction
-        );
         wall.Transform.gameObject.GetComponent<MeshRenderer>().material = GetMaterial(wall.IsActive);
     }
 

@@ -28,6 +28,8 @@
 
         public const string LeaderboardLineTag = "LeaderboardLine";
 
+        public const string BoardLineTag = "BoardLine";
+
         public const int LeaderboardCount = 10;
     }
 }
