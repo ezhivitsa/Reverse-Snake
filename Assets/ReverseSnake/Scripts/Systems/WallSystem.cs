@@ -1,7 +1,6 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
 using Assets.src;
 using Leopotam.Ecs;
-using Leopotam.Ecs.UnityIntegration;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -103,13 +102,6 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
                 var wall = entities.RandomElement();
                 wall.IsActive = false;
                 UpdatePrefab(wall);
-
-                //var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
-
-                //var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
-                //var reverseWall = GetWall(entities, nextPosition.Row, nextPosition.Column, reverseDirection);
-                //reverseWall.IsActive = false;
-                //UpdatePrefab(reverseWall);
 
                 entities = entities.Where(e => e != wall).ToList();
 
