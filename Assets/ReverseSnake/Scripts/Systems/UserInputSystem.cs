@@ -117,8 +117,12 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
             wallsList.Add(_wallFilter.Components1[i]);
         }
 
+        var nextPosition = PositionHelper.GetNextPosition(row, column, direction);
+        var reverseDirection = DirectionHelper.GetReverseDirection(direction);
+
         return wallsList.Find(w => {
-            return w.Row == row && w.Column == column && w.Direction == direction;
+            return (w.Row == row && w.Column == column && w.Direction == direction) ||
+             (w.Row == nextPosition.Row && w.Column == nextPosition.Column && w.Direction == reverseDirection);
         });
     }
 

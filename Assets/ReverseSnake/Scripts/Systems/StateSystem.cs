@@ -3,7 +3,6 @@ using Assets.ReverseSnake.Scripts.Extensions;
 using Leopotam.Ecs;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 [EcsInject]
 public class StateSystem : IEcsPreInitSystem, IEcsRunSystem

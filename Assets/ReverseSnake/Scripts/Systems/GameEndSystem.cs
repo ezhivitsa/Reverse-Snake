@@ -111,9 +111,23 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     private Wall GetWall(PositionModel position, DirectionEnum direction)
     {
+        var nextPosition = PositionHelper.GetNextPosition(position.Row, position.Column, direction);
+        var reverseDirection = DirectionHelper.GetReverseDirection(direction);
+
         return _wallsFilter
             .ToEntitiesList()
-            .Find(e => e.Row == position.Row && e.Column == position.Column && e.Direction == direction);
+            .Find(e =>
+                (
+                    e.Row == position.Row &&
+                    e.Column == position.Column &&
+                    e.Direction == direction
+                ) ||
+                (
+                    e.Row == nextPosition.Row &&
+                    e.Column == nextPosition.Column &&
+                    e.Direction == reverseDirection
+                )
+            );
     }
 
     private void ShowGameOverScreen(bool isActive)

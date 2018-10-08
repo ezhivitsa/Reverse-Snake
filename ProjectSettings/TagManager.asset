@@ -9,6 +9,7 @@ TagManager:
   - GameOver
   - UI
   - LeaderboardLine
+  - BoardLine
   layers:
   - Default
   - TransparentFX
