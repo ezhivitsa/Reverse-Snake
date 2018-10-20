@@ -21,27 +21,42 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
     EcsFilter<GameStartEvent> _gameStartFilter = null;
 
     private GameManager _manager;
+    private InputHelper _inputHelper = new InputHelper();
 
     public void Initialize()
     {
         _manager = new GameManager(_world);
         _isGameActive = true;
+
+        _inputHelper.Swipe += SwipeDone;
     }
 
     public void Destroy()
     {
+        _inputHelper.Swipe -= SwipeDone;
     }
 
     public void Run()
     {
+        var isGameActive = _isGameActive;
         HandleGameStartEvent();
 
+        if (!isGameActive)
+        {
+            return;
+        }
+
+        _inputHelper.Update();
+    }
+
+    private void SwipeDone(object sender, SwipeEventArgs e)
+    {
         if (!_isGameActive)
         {
             return;
         }
 
-        var direction = InputHelper.GetInputArg();
+        var direction = e.direction;
         if (direction != DirectionEnum.None)
         {
             var lastStep = GetLastStep();
@@ -84,6 +99,7 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
     {
         _gameStartFilter.HandleEvents(_world, (gameStart) =>
         {
+            _inputHelper.Clear();
             _isGameActive = gameStart.IsActive;
         });
     }

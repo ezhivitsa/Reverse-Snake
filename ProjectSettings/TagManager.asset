@@ -10,6 +10,9 @@ TagManager:
   - UI
   - LeaderboardLine
   - BoardLine
+  - Wall
+  - Grid
+  - GameElements
   layers:
   - Default
   - TransparentFX

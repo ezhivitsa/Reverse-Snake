@@ -21,11 +21,11 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         public void StartGame(PositionModel targetModel, PositionModel stepModel)
         {
-            TriggerStartGameEvent(true);
             TriggerShowEvents(true);
             TriggerResetScoreEvent();
             TriggerUpdateTargetEvent(targetModel);
             TriggerMovementEvent(stepModel);
+            TriggerStartGameEvent(true);
         }
 
         private void TriggerStartGameEvent(bool isActive)

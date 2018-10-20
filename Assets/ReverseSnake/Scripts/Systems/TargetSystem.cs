@@ -23,10 +23,12 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<UpdateTargetEvent> _updateTargetEventsFilter = null;
     EcsFilter<ShowTargetEvent> _showTargetEventsFilter = null;
 
+    private GameObject _gameElements;
+
     public void Initialize()
     {
         _stateManager = StateManager.GetInstance(_world);
-
+        _gameElements = GameObject.FindGameObjectWithTag(AppConstants.GameElementsTag);
 
         var boardElement = GetRandomBoardElement(1);
 
@@ -34,6 +36,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
         var targetObject = (GameObject)Resources.Load(TargetPath, typeof(GameObject));
         element.Transform = GameObject.Instantiate(targetObject).transform;
+        element.Transform.parent = _gameElements.transform;
 
         if (!GameStartup.LoadState)
         {
@@ -156,7 +159,7 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     {
         var result = new Vector3(
             AppConstants.BoardElementWidth * columnPos + AppConstants.BorderWidth * (columnPos + 1),
-            2F,
+            1F,
             AppConstants.BoardElementWidth * rowPos + AppConstants.BorderWidth * (rowPos + 1)
         );
 

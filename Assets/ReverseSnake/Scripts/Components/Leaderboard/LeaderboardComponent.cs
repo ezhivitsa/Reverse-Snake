@@ -3,14 +3,22 @@ using Assets.src;
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LeaderboardComponent : MonoBehaviour
 {
+    public string mainMenu;
+
     void OnEnable()
     {
         SaveLeaderboard.OnLoaded += OnLeaderboardLoaded;
         SaveLeaderboard.Load();
+    }
+
+    public void MainMenu()
+    {
+        SceneManager.LoadScene(mainMenu);
     }
 
     void OnDestroy()
