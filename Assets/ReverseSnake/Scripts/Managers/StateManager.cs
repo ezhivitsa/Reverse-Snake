@@ -7,6 +7,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
     sealed class StateManager
     {
         private static StateManager instance;
+        private static EcsWorld instanceWorld;
 
         private EcsWorld _world;
 
@@ -17,9 +18,10 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         public static StateManager GetInstance(EcsWorld world)
         {
-            if (instance == null)
+            if (instance == null || world != instanceWorld)
             {
                 instance = new StateManager(world);
+                instanceWorld = world;
             }
             return instance;
         }

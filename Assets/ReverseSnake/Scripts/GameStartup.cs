@@ -62,6 +62,10 @@ public class GameStartup : MonoBehaviour
         SaveState.OnLoaded -= OnLoadState;
     }
 
+    void OnApplicationQuit()
+    {
+    }
+
     private void OnLoadState()
     {
         _stateManager = StateManager.GetInstance(_world);

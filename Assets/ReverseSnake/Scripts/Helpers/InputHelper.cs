@@ -1,87 +1,168 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
+using System;
 using UnityEngine;
 
 namespace Assets.ReverseSnake.Scripts.Helpers
 {
-    public static class InputHelper
+    public class SwipeEventArgs : EventArgs
     {
-        internal static DirectionEnum GetInputArg()
+        public DirectionEnum direction { get; set; }
+    }
+
+    public class InputHelper
+    {
+        public event EventHandler<SwipeEventArgs> Swipe;
+
+        public bool detectSwipeOnlyAfterRelease = true;
+        public float SWIPE_THRESHOLD = 100f;
+
+        private static Vector2 fingerDown;
+        private static Vector2 fingerUp;
+
+        public void Update()
         {
         #if UNITY_EDITOR
-            return PCInput();
+            PCInput();
         #elif UNITY_IOS || UNITY_ANDROID
-			return MobileInput();
+			MobileInput();
         #endif
         }
 
-        private static DirectionEnum PCInput()
+        public void Clear()
+        {
+            fingerUp = new Vector2();
+            fingerDown = new Vector2();
+        }
+
+        private void PCInput()
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                return DirectionEnum.Left;
+                OnSwipeLeft();
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                return DirectionEnum.Right;
+                OnSwipeRight();
             }
             else if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                return DirectionEnum.Top;
+                OnSwipeUp();
             }
             else if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                return DirectionEnum.Bottom;
-            }
-            else
-            {
-                return DirectionEnum.None;
+                OnSwipeDown();
             }
         }
 
-        private static Vector2 fingerDown;
-        private static DirectionEnum MobileInput()
+        private void MobileInput()
         {
             foreach (Touch touch in Input.touches)
             {
                 if (touch.phase == TouchPhase.Began)
                 {
+                    fingerUp = touch.position;
                     fingerDown = touch.position;
                 }
-                if (touch.phase == TouchPhase.Ended)
+
+                //Detects Swipe while finger is still moving
+                if (touch.phase == TouchPhase.Moved)
                 {
-                    Vector2 fingerUp = touch.position;
-
-                    Vector2 delta = fingerUp - fingerDown;
-
-                    float xAbs = Mathf.Abs(delta.x);
-                    float yAbs = Mathf.Abs(delta.y);
-
-                    if (xAbs > yAbs)
+                    if (!detectSwipeOnlyAfterRelease)
                     {
-                        if (delta.x > 0)
-                        {
-                            return DirectionEnum.Right;
-                        }
-                        else
-                        {
-                            return DirectionEnum.Left;
-                        }
-                    }
-                    else
-                    {
-                        if (delta.y > 0)
-                        {
-                            return DirectionEnum.Top;
-                        }
-                        else
-                        {
-                            return DirectionEnum.Bottom;
-                        }
+                        fingerDown = touch.position;
+                        CheckSwipe();
                     }
                 }
+
+                //Detects swipe after finger is released
+                if (touch.phase == TouchPhase.Ended)
+                {
+                    fingerDown = touch.position;
+                    CheckSwipe();
+                }
+            }
+        }
+
+        private void CheckSwipe()
+        {
+            //Check if Vertical swipe
+            if (VerticalMove() > SWIPE_THRESHOLD && VerticalMove() > HorizontalValMove())
+            {
+                if (fingerDown.y - fingerUp.y > 0)//up swipe
+                {
+                    OnSwipeUp();
+                }
+                else if (fingerDown.y - fingerUp.y < 0)//Down swipe
+                {
+                    OnSwipeDown();
+                }
+                fingerUp = fingerDown;
             }
 
-            return DirectionEnum.None;
+            //Check if Horizontal swipe
+            else if (HorizontalValMove() > SWIPE_THRESHOLD && HorizontalValMove() > VerticalMove())
+            {
+                if (fingerDown.x - fingerUp.x > 0)//Right swipe
+                {
+                    OnSwipeRight();
+                }
+                else if (fingerDown.x - fingerUp.x < 0)//Left swipe
+                {
+                    OnSwipeLeft();
+                }
+                fingerUp = fingerDown;
+            }
+        }
+
+        private float VerticalMove()
+        {
+            return Mathf.Abs(fingerDown.y - fingerUp.y);
+        }
+
+        private float HorizontalValMove()
+        {
+            return Mathf.Abs(fingerDown.x - fingerUp.x);
+        }
+
+        private void OnSwipeUp()
+        {
+            SwipeEventArgs args = new SwipeEventArgs
+            {
+                direction = DirectionEnum.Top
+            };
+            OnSwipe(args);
+        }
+
+        private void OnSwipeDown()
+        {
+            SwipeEventArgs args = new SwipeEventArgs
+            {
+                direction = DirectionEnum.Bottom
+            };
+            OnSwipe(args);
+        }
+
+        private void OnSwipeLeft()
+        {
+            SwipeEventArgs args = new SwipeEventArgs
+            {
+                direction = DirectionEnum.Left
+            };
+            OnSwipe(args);
+        }
+
+        private void OnSwipeRight()
+        {
+            SwipeEventArgs args = new SwipeEventArgs
+            {
+                direction = DirectionEnum.Right
+            };
+            OnSwipe(args);
+        }
+
+        protected virtual void OnSwipe(SwipeEventArgs e)
+        {
+            Swipe?.Invoke(this, e);
         }
     }
 }

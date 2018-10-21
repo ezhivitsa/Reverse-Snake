@@ -15,8 +15,13 @@ namespace Assets.ReverseSnake.Scripts
         public static void Save(State state)
         {
             OnBeforeSave?.Invoke();
-
             SaveStateData(state);
+        }
+
+        public static void Save()
+        {
+            OnBeforeSave?.Invoke();
+            SaveStateData(State);
         }
 
         public static void Load()

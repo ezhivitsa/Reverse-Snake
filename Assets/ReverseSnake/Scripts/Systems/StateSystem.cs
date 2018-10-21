@@ -31,6 +31,14 @@ public class StateSystem : IEcsPreInitSystem, IEcsRunSystem
 
     public void Run()
     {
+        var hasEvents = _setScoreEvents.EntitiesCount > 0 ||
+            _addStepsEvents.EntitiesCount > 0 ||
+            _removeStepsEvent.EntitiesCount > 0 ||
+            _addTargetsEvents.EntitiesCount > 0 ||
+            _removeTargetsEvents.EntitiesCount > 0 ||
+            _addWallsEvents.EntitiesCount > 0 ||
+            _removeWallsEvents.EntitiesCount > 0;
+
         HandleSetScoreEvent();
 
         HandleAddStepsEvent();
@@ -43,6 +51,14 @@ public class StateSystem : IEcsPreInitSystem, IEcsRunSystem
 
         HandleClearEvent();
         HandleLoadEvent();
+
+        if (hasEvents)
+        {
+            SaveState.State = _state.Data;
+
+            // ToDo: find a way to save only on exit
+            SaveState.Save(_state.Data);
+        }
     }
 
     public void PreDestroy()

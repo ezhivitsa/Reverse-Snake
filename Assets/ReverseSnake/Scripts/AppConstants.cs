@@ -2,13 +2,15 @@
 {
     public static class AppConstants
     {
-        public const float OffsetX = 10F;
+        public const float Scale = 0.8F;
 
-        public const float OffsetZ = 12F;
+        public const float OffsetX = 8.8F * Scale;
 
-        public const float BorderWidth = 0.5F;
+        public const float OffsetZ = 12F * Scale;
 
-        public const float BoardElementWidth = 4F;
+        public const float BorderWidth = 0.5F * Scale;
+
+        public const float BoardElementWidth = 4F * Scale;
 
         public const int StartStepsCount = 3;
 
@@ -29,6 +31,12 @@
         public const string LeaderboardLineTag = "LeaderboardLine";
 
         public const string BoardLineTag = "BoardLine";
+
+        public const string WallTag = "Wall";
+
+        public const string GridTag = "Grid";
+
+        public const string GameElementsTag = "GameElements";
 
         public const int LeaderboardCount = 10;
     }

@@ -12,14 +12,12 @@ using System;
 [EcsInject]
 public class WallSystem : IEcsInitSystem, IEcsRunSystem
 {
-    const string DisabledWallMaterial = "Materials/wall-base-material";
-    const string ActiveWallMaterial = "Materials/wall-close-material";
-
     EcsWorld _world = null;
 
     EcsFilter<Wall> _wallFilter = null;
 
     private StateManager _stateManager;
+    private GameObject grid;
 
     EcsFilter<AddWallEvent> _addWallEventFilter = null;
     EcsFilter<ClearWallEvent> _clearEventFilter = null;
@@ -31,14 +29,12 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
     {
         _stateManager = StateManager.GetInstance(_world);
 
-        var lines = GameObject.FindGameObjectsWithTag(AppConstants.BoardLineTag);
-        foreach (var line in lines)
+        var walls = GameObject.FindGameObjectsWithTag(AppConstants.WallTag);
+        grid = GameObject.FindGameObjectWithTag(AppConstants.GridTag);
+        foreach (var wallObj in walls)
         {
-            foreach (Transform plane in line.transform)
-            {
-                var wall = plane.GetComponent<WallElement>();
-                GenerateWall(wall.Row, wall.Column, wall.Direction, plane);
-            }
+            var wall = wallObj.transform.GetComponent<WallElement>();
+            GenerateWall(wall.Row, wall.Column, wall.Direction, wallObj.transform);
         }
     }
 
@@ -78,11 +74,16 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
     private void HandleShowWallEvent()
     {
         _showEventFilter.HandleEvents(_world, (eventData) => {
-            for (var i = 0; i < _wallFilter.EntitiesCount; i += 1)
+            if (eventData.IsActive)
             {
-                var entity = _wallFilter.Components1[i];
-                entity.Transform.gameObject.SetActive(eventData.IsActive);
+                for (var i = 0; i < _wallFilter.EntitiesCount; i += 1)
+                {
+                    var entity = _wallFilter.Components1[i];
+                    entity.Transform.gameObject.SetActive(false);
+                }
             }
+
+            grid.SetActive(eventData.IsActive);
         });
     }
 
@@ -133,7 +134,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         element.Direction = direction;
         element.IsActive = false;
         element.Transform = transform;
-        element.Transform.gameObject.SetActive(true);
+        element.Transform.gameObject.SetActive(false);
     }
 
     private void AddWall()
@@ -153,6 +154,15 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
         var randomWall = availableWalls.RandomElement();
         CloseWall(randomWall, availableWalls);
+
+        var nextPosition = PositionHelper.GetNextPosition(randomWall.Row, randomWall.Column, randomWall.Direction);
+        var reverseDirection = DirectionHelper.GetReverseDirection(randomWall.Direction);
+        var reverseWall = GetWall(availableWalls, nextPosition.Row, nextPosition.Column, reverseDirection);
+
+        if (reverseWall != null)
+        {
+            CloseWall(reverseWall, availableWalls);
+        }
     }
 
     private List<Wall> GetWallsOnPosition(List<Wall> walls, int row, int column)
@@ -196,7 +206,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
     private void UpdatePrefab(Wall wall)
     {
-        wall.Transform.gameObject.GetComponent<MeshRenderer>().material = GetMaterial(wall.IsActive);
+        wall.Transform.gameObject.SetActive(wall.IsActive);
     }
 
     private Wall GetWall(List<Wall> walls, int row, int column, DirectionEnum direction)
@@ -229,11 +239,5 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
         }
 
         return null;
-    }
-
-    private Material GetMaterial(bool isActive)
-    {
-        var name = isActive ? ActiveWallMaterial : DisabledWallMaterial;
-        return (Material)Resources.Load(name, typeof(Material));
     }
 }

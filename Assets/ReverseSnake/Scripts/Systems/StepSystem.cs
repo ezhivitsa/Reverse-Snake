@@ -23,11 +23,14 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
     private StateManager _stateManager;
 
     private List<int> _disabledSteps = new List<int>();
+    private GameObject _gameElements;
 
     public void Initialize()
     {
         _manager = new StepManager(_world);
         _stateManager = StateManager.GetInstance(_world);
+
+        _gameElements = GameObject.FindGameObjectWithTag(AppConstants.GameElementsTag);
 
         if (!GameStartup.LoadState)
         {
@@ -78,6 +81,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
             var stepObject = (GameObject)Resources.Load(StepElementPath, typeof(GameObject));
             transform = GameObject.Instantiate(stepObject).transform;
+            transform.parent = _gameElements.transform;
         }
         
         element.Row = boardElement.Row;
@@ -100,7 +104,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
     {
         var result = new Vector3(
             AppConstants.BoardElementWidth * columnPos + AppConstants.BorderWidth * (columnPos + 1),
-            2F,
+            1F,
             AppConstants.BoardElementWidth * rowPos + AppConstants.BorderWidth * (rowPos + 1)
         );
 
