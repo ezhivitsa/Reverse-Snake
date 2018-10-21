@@ -8,6 +8,7 @@ using Assets.ReverseSnake.Scripts.Helpers;
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Managers;
 using System;
+using Assets.ReverseSnake.Scripts.WallAlgorithm;
 
 [EcsInject]
 public class WallSystem : IEcsInitSystem, IEcsRunSystem
@@ -18,6 +19,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
 
     private StateManager _stateManager;
     private GameObject grid;
+    private Graph _graph;
 
     EcsFilter<AddWallEvent> _addWallEventFilter = null;
     EcsFilter<ClearWallEvent> _clearEventFilter = null;
@@ -28,6 +30,7 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
     public void Initialize()
     {
         _stateManager = StateManager.GetInstance(_world);
+        _graph = GraphGenertor.Generate();
 
         var walls = GameObject.FindGameObjectsWithTag(AppConstants.WallTag);
         grid = GameObject.FindGameObjectWithTag(AppConstants.GridTag);
@@ -122,6 +125,9 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
                 wall.IsActive = true;
 
                 UpdatePrefab(wall);
+
+                var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
+                _graph.RemoveEdge(wall.Row, wall.Column, nextPosition.Row, nextPosition.Column);
             }
         });
     }
@@ -141,7 +147,8 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
     {
         var notActiveWalls = _wallFilter
             .ToEntitiesList()
-            .Where(e => !e.IsActive).ToList();
+            .Where(e => !e.IsActive)
+            .ToList();
 
         var availableWalls = notActiveWalls.Where((wall) => {
             var wallsOnPosition = GetWallsOnPosition(notActiveWalls, wall.Row, wall.Column);
@@ -149,15 +156,23 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
             var nextPos = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
             var wallsOnNextPosition = GetWallsOnPosition(notActiveWalls, nextPos.Row, nextPos.Column);
 
-            return wallsOnPosition.Count > 2 && wallsOnNextPosition.Count > 2;
+            return wallsOnPosition.Count > 2 &&wallsOnNextPosition.Count > 2 &&
+                DFS.IsConnectedWithoutEdge(_graph, wall.Row, wall.Column, nextPos.Row, nextPos.Column);
         }).ToList();
 
         var randomWall = availableWalls.RandomElement();
+        if (randomWall == null)
+        {
+            return;
+        }
+
         CloseWall(randomWall, availableWalls);
 
         var nextPosition = PositionHelper.GetNextPosition(randomWall.Row, randomWall.Column, randomWall.Direction);
         var reverseDirection = DirectionHelper.GetReverseDirection(randomWall.Direction);
         var reverseWall = GetWall(availableWalls, nextPosition.Row, nextPosition.Column, reverseDirection);
+
+        _graph.RemoveEdge(randomWall.Row, randomWall.Column, nextPosition.Row, nextPosition.Column);
 
         if (reverseWall != null)
         {
