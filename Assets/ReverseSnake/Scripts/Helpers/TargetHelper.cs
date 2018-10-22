@@ -25,10 +25,10 @@ namespace Assets.ReverseSnake.Scripts.Helpers
                 return TargetValueEnum.AddWall;
             }
 
-            activeWalls = Mathf.Max(activeWalls, _thirdValue);
+            activeWalls = Mathf.Min(activeWalls, _thirdValue);
 
-            var randomValue = Random.Range(0, 100);
-
+            var randomValue = Random.Range(0f, 100f);
+            
             var addWallProbability = AddWallProbability(activeWalls);
             var removeWallProbability = RemoveWallProbability(activeWalls);
             var addTailRemoveTwoWallProbability = AddTailRemoveTwoWallProbability(activeWalls);
@@ -115,15 +115,15 @@ namespace Assets.ReverseSnake.Scripts.Helpers
             return values.Aggregate(0f, (acc, x) => acc + x.GetEndProbability());
         }
 
-        static private float ProbabilityFunction(float start, float intermediate, float end, float value)
+        static private float ProbabilityFunction(float start, float intermediate, float end, float x)
         {
-            var calcStart = value < _secondValue ? start : intermediate;
-            var calcEnd = value < _secondValue ? intermediate : end;
+            var y1 = x < _secondValue ? start : intermediate;
+            var y2 = x < _secondValue ? intermediate : end;
 
-            var valStart = value < _secondValue ? _firstValue : _secondValue;
-            var valEnd = value < _secondValue ? _secondValue : _thirdValue;
+            var x1 = x < _secondValue ? _firstValue : _secondValue;
+            var x2 = x < _secondValue ? _secondValue : _thirdValue;
 
-            return ((valEnd - value) * calcStart + (value + valStart) * calcEnd) / (valEnd - valStart);
+            return ((x2 * y1 - x1 * y2) + (y2 - y1) * x) / (x2 - x1);
         }
     }
 }

@@ -110,6 +110,9 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
                 entities = entities.Where(e => e != wall).ToList();
 
                 wallsToRemove.Add(wall);
+
+                var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
+                _graph.AddEdge(wall.Row, wall.Column, nextPosition.Row, nextPosition.Column);
             }
 
             _stateManager.RemoveWalls(wallsToRemove);
