@@ -62,6 +62,12 @@ namespace Assets.ReverseSnake.Scripts.Extensions
             return attribute != null ? attribute.EndProbability : 0f;
         }
 
+        public static float GetIntermediateProbability(this object value)
+        {
+            var attribute = GetProbabilitiesAttribute(value);
+            return attribute != null ? attribute.IntermediateProbability : 0f;
+        }
+
         private static ProbabilitiesAttribute GetProbabilitiesAttribute(object value)
         {
             if (value == null)

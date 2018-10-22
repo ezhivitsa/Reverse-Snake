@@ -9,8 +9,9 @@ namespace Assets.ReverseSnake.Scripts.Helpers
 {
     public static class TargetHelper
     {
-        private static float _firstValue = 2;
-        private static float _secondValue = (AppConstants.Columns - 1) * (AppConstants.Rows - 1) * 2;
+        private static int _firstValue = 2;
+        private static int _secondValue = (AppConstants.Columns - 1) * (AppConstants.Rows - 1);
+        private static int _thirdValue = (AppConstants.Columns - 1) * (AppConstants.Rows - 1) * 2;
 
         static public bool CanGetTargetElement(int currentNumber)
         {
@@ -23,6 +24,8 @@ namespace Assets.ReverseSnake.Scripts.Helpers
             {
                 return TargetValueEnum.AddWall;
             }
+
+            activeWalls = Mathf.Max(activeWalls, _thirdValue);
 
             var randomValue = Random.Range(0, 100);
 
@@ -52,18 +55,20 @@ namespace Assets.ReverseSnake.Scripts.Helpers
         {
             var values = new List<TargetValueEnum> { TargetValueEnum.AddWall };
             var startProbability = GetStartProbability(values);
+            var intermediateProbability = GetIntermediateProbability(values);
             var endProbability = GetEndProbability(values);
 
-            return ProbabilityFunction(startProbability, endProbability, value);
+            return ProbabilityFunction(startProbability, intermediateProbability, endProbability, value);
         }
 
         static private float RemoveWallProbability(float value)
         {
             var values = new List<TargetValueEnum> { TargetValueEnum.AddWall, TargetValueEnum.RemoveWall };
             var startProbability = GetStartProbability(values);
+            var intermediateProbability = GetIntermediateProbability(values);
             var endProbability = GetEndProbability(values);
 
-            return ProbabilityFunction(startProbability, endProbability, value);
+            return ProbabilityFunction(startProbability, intermediateProbability, endProbability, value);
         }
 
         static private float AddTailRemoveTwoWallProbability(float value)
@@ -74,9 +79,10 @@ namespace Assets.ReverseSnake.Scripts.Helpers
                 TargetValueEnum.AddTailRemoveTwoWall,
             };
             var startProbability = GetStartProbability(values);
+            var intermediateProbability = GetIntermediateProbability(values);
             var endProbability = GetEndProbability(values);
 
-            return ProbabilityFunction(startProbability, endProbability, value);
+            return ProbabilityFunction(startProbability, intermediateProbability, endProbability, value);
         }
 
         static private float RemoveTailAddWallProbability(float value)
@@ -88,9 +94,10 @@ namespace Assets.ReverseSnake.Scripts.Helpers
                 TargetValueEnum.RemoveTailAddWall,
             };
             var startProbability = GetStartProbability(values);
+            var intermediateProbability = GetIntermediateProbability(values);
             var endProbability = GetEndProbability(values);
 
-            return ProbabilityFunction(startProbability, endProbability, value);
+            return ProbabilityFunction(startProbability, intermediateProbability, endProbability, value);
         }
 
         static private float GetStartProbability(List<TargetValueEnum> values)
@@ -98,14 +105,25 @@ namespace Assets.ReverseSnake.Scripts.Helpers
             return values.Aggregate(0f, (acc, x) => acc + x.GetStartProbability());
         }
 
+        static private float GetIntermediateProbability(List<TargetValueEnum> values)
+        {
+            return values.Aggregate(0f, (acc, x) => acc + x.GetIntermediateProbability());
+        }
+
         static private float GetEndProbability(List<TargetValueEnum> values)
         {
             return values.Aggregate(0f, (acc, x) => acc + x.GetEndProbability());
         }
 
-        static private float ProbabilityFunction(float start, float end, float value)
+        static private float ProbabilityFunction(float start, float intermediate, float end, float value)
         {
-            return ((_secondValue - value) * start + (value + _firstValue) * end) / (_secondValue - _firstValue);
+            var calcStart = value < _secondValue ? start : intermediate;
+            var calcEnd = value < _secondValue ? intermediate : end;
+
+            var valStart = value < _secondValue ? _firstValue : _secondValue;
+            var valEnd = value < _secondValue ? _secondValue : _thirdValue;
+
+            return ((valEnd - value) * calcStart + (value + valStart) * calcEnd) / (valEnd - valStart);
         }
     }
 }
