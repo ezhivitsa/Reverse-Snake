@@ -5,18 +5,18 @@ using Assets.ReverseSnake.Scripts.Helpers;
 using System.Collections.Generic;
 using Assets.ReverseSnake.Scripts.Managers;
 using Assets.ReverseSnake.Scripts.Extensions;
+using Assets.ReverseSnake.Scripts;
 
 [EcsInject]
 sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
 {
     private bool _isGameActive = false;
 
-    EcsWorld _world = null;
+    ReverseSnakeWorld _world = null;
 
     EcsFilter<Step> _stepFilter = null;
     EcsFilter<Wall> _wallFilter = null;
     EcsFilter<Target> _targetFilter = null;
-    EcsFilterSingle<BoardElements> _boardElements = null;
 
     EcsFilter<GameStartEvent> _gameStartFilter = null;
 
@@ -158,7 +158,7 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
     private BoardElement GetNextBoardElement(int row, int column, DirectionEnum direction)
     {
         var newPosition = PositionHelper.GetNextPosition(row, column, direction);
-        return _boardElements.Data.Elements.Find((element) =>
+        return _world.BoardElements.Find((element) =>
         {
             return element.Row == newPosition.Row && element.Column == newPosition.Column;
         });

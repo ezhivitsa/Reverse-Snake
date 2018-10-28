@@ -1,0 +1,6 @@
+*.meta
+!Runtime/Actions/*.meta
+Runtime/Actions/EcsUiActionBase.cs.meta
+!Runtime/Systems/*.meta
+Runtime/Systems/EcsUiCleaner.cs.meta
+!Runtime/Widgets/*.meta

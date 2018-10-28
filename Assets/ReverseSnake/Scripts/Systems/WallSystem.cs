@@ -107,12 +107,22 @@ public class WallSystem : IEcsInitSystem, IEcsRunSystem
                 wall.IsActive = false;
                 UpdatePrefab(wall);
 
-                entities = entities.Where(e => e != wall).ToList();
-
                 wallsToRemove.Add(wall);
 
                 var nextPosition = PositionHelper.GetNextPosition(wall.Row, wall.Column, wall.Direction);
+                var reverseDirection = DirectionHelper.GetReverseDirection(wall.Direction);
+                var reverseWall = GetWall(entities, nextPosition.Row, nextPosition.Column, reverseDirection);
+
+                if (reverseWall != null)
+                {
+                    reverseWall.IsActive = false;
+                    UpdatePrefab(reverseWall);
+                    wallsToRemove.Add(reverseWall);
+                }
+
                 _graph.AddEdge(wall.Row, wall.Column, nextPosition.Row, nextPosition.Column);
+
+                entities = entities.Where(e => e != wall && e != reverseWall).ToList();
             }
 
             _stateManager.RemoveWalls(wallsToRemove);

@@ -6,6 +6,7 @@ using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Helpers;
 using Assets.ReverseSnake.Scripts.Managers;
+using Assets.ReverseSnake.Scripts;
 
 [EcsInject]
 public class TargetSystem : IEcsInitSystem, IEcsRunSystem
@@ -13,10 +14,9 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     private StateManager _stateManager;
 
     const string TargetPath = "Objects/Target";
-    
-    EcsWorld _world = null;
 
-    EcsFilterSingle<BoardElements> _boardElements = null;
+    ReverseSnakeWorld _world = null;
+    
     EcsFilter<Target> _targetFilter = null;
     EcsFilter<Wall> _wallFilter = null;
 
@@ -95,12 +95,12 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
     
     private BoardElement GetBoardElement(int? column, int? row)
     {
-        return _boardElements.Data.Elements.Find((el) => el.Column == column && el.Row == row);
+        return _world.BoardElements.Find((el) => el.Column == column && el.Row == row);
     }
 
     private BoardElement GetRandomBoardElement(int round)
     {
-        return _boardElements.Data.Elements
+        return _world.BoardElements
             .Where((el) => {
                 return !el.ContainsSnakeStep || el.Round != round;
             })

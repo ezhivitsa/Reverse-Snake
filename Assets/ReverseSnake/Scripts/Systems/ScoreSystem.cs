@@ -21,14 +21,15 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem
     {
         _stateManager = StateManager.GetInstance(_world);
 
-        foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.ScoreTag))
-        {
-            var score = _world.CreateEntityWith<Score>();
-            score.Amount = 0;
-            score.GameObject = ui;
-            score.Ui = ui.GetComponent<Text>();
-            score.Ui.text = FormatText(score.Amount);
-        }
+        var scoreElement = GameObject.FindGameObjectWithTag(AppConstants.ScoreTag);
+        var ui = GameObject.FindGameObjectWithTag(AppConstants.UITag);
+
+        var score = _world.CreateEntityWith<Score>();
+        score.Amount = 0;
+        score.GameObject = scoreElement;
+        score.UI = ui;
+        score.Result = scoreElement.GetComponent<Text>();
+        score.Result.text = FormatText(score.Amount);
 
         if (!GameStartup.LoadState) {
             _stateManager.SetScore(0);
@@ -56,7 +57,7 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem
             _scoreUiFilter.ToEntitiesList().ForEach((score) =>
             {
                 score.Amount += amount;
-                score.Ui.text = FormatText(score.Amount);
+                score.Result.text = FormatText(score.Amount);
 
                 _stateManager.SetScore(score.Amount);
             });
@@ -71,7 +72,7 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem
             _scoreUiFilter.ToEntitiesList().ForEach((score) =>
             {
                 score.Amount = amount;
-                score.Ui.text = FormatText(score.Amount);
+                score.Result.text = FormatText(score.Amount);
             });
 
             if (!scoreEvent.Silent)

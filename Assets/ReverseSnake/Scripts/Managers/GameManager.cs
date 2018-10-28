@@ -108,6 +108,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             eventData.Round = round;
             eventData.Column = null;
             eventData.Row = null;
+            eventData.Value = null;
             eventData.Silent = false;
         }
 

@@ -4,15 +4,15 @@ using UnityEngine;
 using Assets.ReverseSnake.Scripts.Extensions;
 using System.Collections.Generic;
 using Assets.ReverseSnake.Scripts.Managers;
+using Assets.ReverseSnake.Scripts;
 
 [EcsInject]
 public class StepSystem : IEcsInitSystem, IEcsRunSystem
 {
     const string StepElementPath = "Objects/SnakeStep";
 
-    EcsWorld _world = null;
-
-    EcsFilterSingle<BoardElements> _boardElements = null;
+    ReverseSnakeWorld _world = null;
+    
     EcsFilter<Step> _stepFilter = null;
 
     EcsFilter<MovementEvent> _movementsFilter = null;
@@ -34,7 +34,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
 
         if (!GameStartup.LoadState)
         {
-            var boardElement = _boardElements.Data.Elements.RandomElement();
+            var boardElement = _world.BoardElements.RandomElement();
             CreateStep(boardElement, AppConstants.StartStepsCount, AppConstants.StartStepsCount, AppConstants.FirstRound);
 
             _stateManager.AddStep(
@@ -114,7 +114,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
     private void HandleMovementEvent()
     {
         _movementsFilter.HandleEvents(_world, (step) => {
-            var boardElement = _boardElements.Data.Elements
+            var boardElement = _world.BoardElements
                 .Find(e => e.Row == step.Row && e.Column == step.Column);
 
             CreateStep(boardElement, step.Number, step.StartNumber, step.Round);
@@ -154,7 +154,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
         _createEvents.HandleEvents(_world, (eventData) => {
             foreach(var step in eventData.Steps)
             {
-                var boardElement = _boardElements.Data.Elements
+                var boardElement = _world.BoardElements
                     .Find(e => e.Row == step.Row && e.Column == step.Column);
 
                 CreateStep(boardElement, step.Number, step.StartNumber, step.Round);
