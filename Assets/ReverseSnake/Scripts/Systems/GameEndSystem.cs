@@ -1,4 +1,5 @@
-﻿using Assets.ReverseSnake.Scripts.Enums;
+﻿using Assets.ReverseSnake.Scripts;
+using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Helpers;
 using Assets.ReverseSnake.Scripts.IO;
@@ -6,10 +7,11 @@ using Assets.ReverseSnake.Scripts.Managers;
 using Assets.ReverseSnake.Scripts.Models;
 using Assets.src;
 using Leopotam.Ecs;
+using Leopotam.Ecs.Ui.Components;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 [EcsInject]
 public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
@@ -17,33 +19,44 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     private GameStartManager _manager;
     private StateManager _stateManager;
 
-    EcsWorld _world = null;
+    private const string _tryAgainWidget = "tryAgain";
+    private const string _goToMainMenuWidget = "goToMainMenu";
 
-    EcsFilterSingle<BoardElements> _boardElements = null;
+    ReverseSnakeWorld _world = null;
+
     EcsFilter<Wall> _wallsFilter = null;
-
     EcsFilter<Score> _scoreFilter = null;
     EcsFilter<GameOver> _gameOverFilter = null;
 
     EcsFilter<CheckGameEndEvent> _gameEndEventFilter = null;
+
+    EcsFilter<EcsUiClickEvent> _clickEvents = null;
 
     public void Initialize()
     {
         _manager = new GameStartManager(_world);
         _stateManager = StateManager.GetInstance(_world);
 
-        foreach (var ui in GameObject.FindGameObjectsWithTag(AppConstants.GameOverTag))
-        {
-            var gameOver = _world.CreateEntityWith<GameOver>();
-            gameOver.GameObject = ui;
-            ui.SetActive(false);
-
-            Button btn = ui.GetComponentInChildren<Button>();
-            btn.onClick.AddListener(OnNewGameClick);
-        }
+        var ui = GameObject.FindGameObjectWithTag(AppConstants.GameOverTag);
+        var gameOver = _world.CreateEntityWith<GameOver>();
+        gameOver.GameObject = ui;
+        ui.SetActive(false);
     }
 
     public void Run()
+    {
+        HandleGameEnd();
+        HandleUiClicks();
+    }
+
+    public void Destroy()
+    {
+        _gameOverFilter.ToEntitieNumbersList().ForEach(entity => {
+            _world.RemoveEntity(entity);
+        });
+    }
+
+    private void HandleGameEnd()
     {
         _gameEndEventFilter.HandleEvents(_world, (eventData) =>
         {
@@ -73,11 +86,22 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         });
     }
 
-    public void Destroy()
+    private void HandleUiClicks()
     {
-        _gameOverFilter.ToEntitieNumbersList().ForEach(entity => {
-            _world.RemoveEntity(entity);
-        });
+        for (var i = 0; i < _clickEvents.EntitiesCount; i++)
+        {
+            EcsUiClickEvent data = _clickEvents.Components1[i];
+            switch (data.WidgetName)
+            {
+                case _tryAgainWidget:
+                    OnNewGameClick();
+                    break;
+
+                case _goToMainMenuWidget:
+                    OnGoToMainMenuClick();
+                    break;
+            }
+        }
     }
 
     private bool HasAvailablePosition(int column, int row, int round, int number, List<DirectionEnum> directions)
@@ -105,8 +129,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     private BoardElement GetBoardElement(PositionModel position)
     {
-        return _boardElements.Data.Elements
-            .Find(e => e.Row == position.Row && e.Column == position.Column);
+        return _world.BoardElements.Find(e => e.Row == position.Row && e.Column == position.Column);
     }
 
     private Wall GetWall(PositionModel position, DirectionEnum direction)
@@ -142,7 +165,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     {
         _scoreFilter.ToEntitiesList().ForEach((entity) =>
         {
-            entity.GameObject.SetActive(isActive);
+            entity.UI.SetActive(isActive);
         });
     }
 
@@ -151,7 +174,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         ShowScoreUI(true);
         ShowGameOverScreen(false);
 
-        var boardElements = _boardElements.Data.Elements;
+        var boardElements = _world.BoardElements;
 
         var targetElement = boardElements.RandomElement();
         var stepElement = boardElements.Where(e => e != targetElement).RandomElement();
@@ -168,5 +191,10 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         };
 
         _manager.StartGame(targetPosition, stepPosition);
+    }
+
+    private void OnGoToMainMenuClick()
+    {
+        SceneManager.LoadScene(AppConstants.MainMenuScene);
     }
 }

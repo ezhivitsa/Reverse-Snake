@@ -17,7 +17,7 @@ namespace Assets.ReverseSnake.Scripts.Helpers
         public float SWIPE_THRESHOLD = 100f;
 
         private static Vector2 fingerDown;
-        private static Vector2 fingerUp;
+        private static Vector2? fingerUp;
 
         public void Update()
         {
@@ -58,6 +58,12 @@ namespace Assets.ReverseSnake.Scripts.Helpers
         {
             foreach (Touch touch in Input.touches)
             {
+                if (touch.position.y < 200 || touch.position.y > Screen.height - 200)
+                {
+                    fingerUp = null;
+                    return;
+                }
+
                 if (touch.phase == TouchPhase.Began)
                 {
                     fingerUp = touch.position;
@@ -70,7 +76,11 @@ namespace Assets.ReverseSnake.Scripts.Helpers
                     if (!detectSwipeOnlyAfterRelease)
                     {
                         fingerDown = touch.position;
-                        CheckSwipe();
+
+                        if (fingerUp.HasValue)
+                        {
+                            CheckSwipe();
+                        }
                     }
                 }
 
@@ -78,7 +88,10 @@ namespace Assets.ReverseSnake.Scripts.Helpers
                 if (touch.phase == TouchPhase.Ended)
                 {
                     fingerDown = touch.position;
-                    CheckSwipe();
+                    if (fingerUp.HasValue)
+                    {
+                        CheckSwipe();
+                    }
                 }
             }
         }
@@ -88,11 +101,11 @@ namespace Assets.ReverseSnake.Scripts.Helpers
             //Check if Vertical swipe
             if (VerticalMove() > SWIPE_THRESHOLD && VerticalMove() > HorizontalValMove())
             {
-                if (fingerDown.y - fingerUp.y > 0)//up swipe
+                if (fingerDown.y - fingerUp.Value.y > 0)//up swipe
                 {
                     OnSwipeUp();
                 }
-                else if (fingerDown.y - fingerUp.y < 0)//Down swipe
+                else if (fingerDown.y - fingerUp.Value.y < 0)//Down swipe
                 {
                     OnSwipeDown();
                 }
@@ -102,11 +115,11 @@ namespace Assets.ReverseSnake.Scripts.Helpers
             //Check if Horizontal swipe
             else if (HorizontalValMove() > SWIPE_THRESHOLD && HorizontalValMove() > VerticalMove())
             {
-                if (fingerDown.x - fingerUp.x > 0)//Right swipe
+                if (fingerDown.x - fingerUp.Value.x > 0)//Right swipe
                 {
                     OnSwipeRight();
                 }
-                else if (fingerDown.x - fingerUp.x < 0)//Left swipe
+                else if (fingerDown.x - fingerUp.Value.x < 0)//Left swipe
                 {
                     OnSwipeLeft();
                 }
@@ -116,12 +129,12 @@ namespace Assets.ReverseSnake.Scripts.Helpers
 
         private float VerticalMove()
         {
-            return Mathf.Abs(fingerDown.y - fingerUp.y);
+            return Mathf.Abs(fingerDown.y - fingerUp.Value.y);
         }
 
         private float HorizontalValMove()
         {
-            return Mathf.Abs(fingerDown.x - fingerUp.x);
+            return Mathf.Abs(fingerDown.x - fingerUp.Value.x);
         }
 
         private void OnSwipeUp()

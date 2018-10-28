@@ -10,5 +10,8 @@ sealed class Score
     public GameObject GameObject;
 
     [EcsIgnoreNullCheck]
-    public Text Ui;
+    public GameObject UI;
+
+    [EcsIgnoreNullCheck]
+    public Text Result;
 }

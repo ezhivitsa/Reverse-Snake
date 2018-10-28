@@ -41,7 +41,7 @@ namespace Assets.ReverseSnake.Scripts.Helpers
             {
                 return TargetValueEnum.RemoveWall;
             }
-            else if (randomValue < addTailRemoveTwoWallProbability)
+            else if (randomValue<addTailRemoveTwoWallProbability)
             {
                 return TargetValueEnum.AddTailRemoveTwoWall;
             }

@@ -39,5 +39,7 @@
         public const string GameElementsTag = "GameElements";
 
         public const int LeaderboardCount = 10;
+
+        public const string MainMenuScene = "MainMenu";
     }
 }

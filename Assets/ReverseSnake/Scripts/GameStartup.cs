@@ -1,6 +1,7 @@
 using Assets.ReverseSnake.Scripts;
 using Assets.ReverseSnake.Scripts.Managers;
 using Leopotam.Ecs;
+using Leopotam.Ecs.Ui.Systems;
 using UnityEngine;
 
 public class GameStartup : MonoBehaviour
@@ -9,20 +10,21 @@ public class GameStartup : MonoBehaviour
 
     private StateManager _stateManager;
 
-    EcsWorld _world;
+    ReverseSnakeWorld _world;
     EcsSystems _systems;
+
+    [SerializeField]
+    EcsUiEmitter _uiEmitter;
 
     void OnEnable ()
     {
-        _world = new EcsWorld();
+        _world = new ReverseSnakeWorld();
     #if UNITY_EDITOR
         Leopotam.Ecs.UnityIntegration.EcsWorldObserver.Create(_world);
     #endif
 
-        EcsFilterSingle<BoardElements>.Create(_world);
-        EcsFilterSingle<State>.Create(_world);
-
         _systems = new EcsSystems(_world)
+            .Add(_uiEmitter)
             .Add(new BoardElementsSystem())
             .Add(new StateSystem())
             .Add(new WallSystem())
@@ -30,7 +32,8 @@ public class GameStartup : MonoBehaviour
             .Add(new TargetSystem())
             .Add(new ScoreSystem())
             .Add(new UserInputSystem())
-            .Add(new GameEndSystem());
+            .Add(new GameEndSystem())
+            .Add(new EcsUiCleaner());
 
         _systems.Initialize();
 

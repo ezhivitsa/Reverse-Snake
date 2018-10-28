@@ -1,50 +1,24 @@
-﻿using Assets.ReverseSnake.Scripts.Extensions;
-using Assets.src;
+﻿using Assets.ReverseSnake.Scripts;
+using Assets.ReverseSnake.Scripts.Extensions;
 using Leopotam.Ecs;
-using System.Collections.Generic;
 
 [EcsInject]
-public class BoardElementsSystem : IEcsPreInitSystem, IEcsRunSystem
+public class BoardElementsSystem : IEcsRunSystem
 {
-    EcsWorld _world = null;
-
-    EcsFilterSingle<BoardElements> _boardElements = null;
+    ReverseSnakeWorld _world = null;
 
     EcsFilter<ClearBoardEvent> _clearEventFilter = null;
-
-    public void PreInitialize()
-    {
-        _boardElements.Data.Elements = new List<BoardElement>();
-
-        for (var i = 0; i < AppConstants.Rows; i++)
-        {
-            for (var j = 0; j < AppConstants.Columns; j++)
-            {
-                _boardElements.Data.Elements.Add(new BoardElement
-                {
-                    Row = i,
-                    Column = j,
-                    ContainsSnakeStep = false,
-                    ContainsTarget = false,
-                });
-            }
-        }
-    }
 
     public void Run()
     {
         HandleClearEvent();
     }
 
-    public void PreDestroy()
-    {
-    }
-
     private void HandleClearEvent()
     {
         _clearEventFilter.HandleEvents(_world, (clearEvent) =>
         {
-            _boardElements.Data.Elements.ForEach((element) =>
+            foreach (var element in _world.BoardElements)
             {
                 if (element.Round == clearEvent.Round)
                 {
@@ -52,7 +26,7 @@ public class BoardElementsSystem : IEcsPreInitSystem, IEcsRunSystem
                     element.ContainsTarget = false;
                     element.Round = -1;
                 }
-            });
+            }
         });
     }
 }

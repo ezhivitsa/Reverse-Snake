@@ -1,0 +1,8 @@
+{
+    "name": "Leopotam.Ecs.Ui",
+    "references": [
+        "Leopotam.Ecs"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}
