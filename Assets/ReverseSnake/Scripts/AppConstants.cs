@@ -6,7 +6,7 @@
 
         public const float OffsetX = 8.8F * Scale;
 
-        public const float OffsetZ = 12F * Scale;
+        public const float OffsetZ = 11.8F * Scale;
 
         public const float BorderWidth = 0.5F * Scale;
 
