@@ -13,7 +13,11 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 {
     private StateManager _stateManager;
 
-    const string TargetPath = "Objects/Target";
+    const string DefaultTargetPath = "Objects/DefaultTarget";
+    const string AddTailRemoveTwoWallTarget = "Objects/AddTailRemoveTwoWallTarget";
+    const string RemoveTailAddWallTarget = "Objects/RemoveTailAddWallTarget";
+
+    const string MaterialsPath = "Materials/Textures";
 
     ReverseSnakeWorld _world = null;
     
@@ -25,18 +29,20 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     private GameObject _gameElements;
 
+    private Transform _defaultTarget;
+    private Transform _addTailRemoveTwoWallTarget;
+    private Transform _removeTailAddWallTarget;
+
     public void Initialize()
     {
         _stateManager = StateManager.GetInstance(_world);
         _gameElements = GameObject.FindGameObjectWithTag(AppConstants.GameElementsTag);
 
+        InitializeTargets();
+
         var boardElement = GetRandomBoardElement(1);
 
         Target element = _world.CreateEntityWith<Target>();
-
-        var targetObject = (GameObject)Resources.Load(TargetPath, typeof(GameObject));
-        element.Transform = GameObject.Instantiate(targetObject).transform;
-        element.Transform.parent = _gameElements.transform;
 
         if (!GameStartup.LoadState)
         {
@@ -147,22 +153,86 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
 
     private void UpdatePrefab(Target element, BoardElement boardElement)
     {
-        element.Transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
+        if (element.Transform != null)
+        {
+            element.Transform.gameObject.SetActive(false);
+        }
 
-        var textElement = element.Transform.GetChild(0).GetComponent<TextMesh>();
-        textElement.text = element.Value.GetDescription();
+        var target = GetTargetElement(element.Value);
+        target.gameObject.SetActive(true);
+        element.Transform = target.transform;
 
-        element.Transform.gameObject.SetActive(true);
+        target.transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
+
+        if (element.Value == TargetValueEnum.AddWall || element.Value == TargetValueEnum.RemoveWall)
+        {
+            var textElement = element.Transform.GetChild(0).GetComponent<TextMesh>();
+            textElement.text = element.Value.GetDescription();
+            textElement.color = GetTargetColor(element.Value);
+
+            var renderer = element.Transform.GetChild(1).GetComponent<Renderer>();
+            var name = element.Value.GetTextureName();
+            var material = (Material)Resources.Load($"{MaterialsPath}/{name}", typeof(Material));
+            renderer.material = material;
+        }        
     }
 
     private Vector3 GetPositionVector(int rowPos, int columnPos)
     {
         var result = new Vector3(
             AppConstants.BoardElementWidth * columnPos + AppConstants.BorderWidth * (columnPos + 1),
-            1F,
+            0.1F,
             AppConstants.BoardElementWidth * rowPos + AppConstants.BorderWidth * (rowPos + 1)
         );
 
         return result - new Vector3(AppConstants.OffsetX, 0, AppConstants.OffsetZ);
+    }
+
+    private Color GetTargetColor(TargetValueEnum value)
+    {
+        switch (value)
+        {
+            case TargetValueEnum.AddWall:
+                return new Color32(51, 135, 77, 255);
+
+            case TargetValueEnum.RemoveWall:
+                return new Color32(220, 85, 98, 225);
+
+            default:
+                return Color.white;
+        }
+    }
+
+    private Transform GetTargetElement(TargetValueEnum value)
+    {
+        switch (value)
+        {
+            case TargetValueEnum.AddTailRemoveTwoWall:
+                return _addTailRemoveTwoWallTarget;
+
+            case TargetValueEnum.RemoveTailAddWall:
+                return _removeTailAddWallTarget;
+
+            default:
+                return _defaultTarget;
+        }
+    }
+
+    private void InitializeTargets()
+    {
+        var defaultTarget = (GameObject)Resources.Load(DefaultTargetPath, typeof(GameObject));
+        _defaultTarget = GameObject.Instantiate(defaultTarget).transform;
+        _defaultTarget.parent = _gameElements.transform;
+        _defaultTarget.gameObject.SetActive(false);
+
+        var addTailRemoveTwoWallTarget = (GameObject)Resources.Load(AddTailRemoveTwoWallTarget, typeof(GameObject));
+        _addTailRemoveTwoWallTarget = GameObject.Instantiate(addTailRemoveTwoWallTarget).transform;
+        _addTailRemoveTwoWallTarget.parent = _gameElements.transform;
+        _addTailRemoveTwoWallTarget.gameObject.SetActive(false);
+
+        var removeTailAddWallTarget = (GameObject)Resources.Load(RemoveTailAddWallTarget, typeof(GameObject));
+        _removeTailAddWallTarget = GameObject.Instantiate(removeTailAddWallTarget).transform;
+        _removeTailAddWallTarget.parent = _gameElements.transform;
+        _removeTailAddWallTarget.gameObject.SetActive(false);
     }
 }

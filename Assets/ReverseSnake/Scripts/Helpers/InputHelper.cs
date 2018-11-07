@@ -15,6 +15,7 @@ namespace Assets.ReverseSnake.Scripts.Helpers
 
         public bool detectSwipeOnlyAfterRelease = true;
         public float SWIPE_THRESHOLD = 100f;
+        public float TOP_BOTTOM_GAP = 100f;
 
         private static Vector2 fingerDown;
         private static Vector2? fingerUp;
@@ -58,7 +59,7 @@ namespace Assets.ReverseSnake.Scripts.Helpers
         {
             foreach (Touch touch in Input.touches)
             {
-                if (touch.position.y < 200 || touch.position.y > Screen.height - 200)
+                if (touch.position.y < TOP_BOTTOM_GAP || touch.position.y > Screen.height - TOP_BOTTOM_GAP)
                 {
                     fingerUp = null;
                     return;
