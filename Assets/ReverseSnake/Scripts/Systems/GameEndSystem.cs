@@ -80,7 +80,10 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
                 ShowGameOverScreen(true);
 
                 _manager.EndGame(eventData.Round);
-                SaveLeaderboard.AddResultAndSave(eventData.Round);
+
+                var scoreEntity = _scoreFilter.ToEntitiesList().First();
+                SaveLeaderboard.AddResultAndSave(scoreEntity.Amount);
+
                 _stateManager.Clear();
             }
         });
