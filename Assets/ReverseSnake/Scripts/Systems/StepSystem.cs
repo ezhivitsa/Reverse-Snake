@@ -104,7 +104,7 @@ public class StepSystem : IEcsInitSystem, IEcsRunSystem
     {
         var result = new Vector3(
             AppConstants.BoardElementWidth * columnPos + AppConstants.BorderWidth * (columnPos + 1),
-            1F,
+            0.1F,
             AppConstants.BoardElementWidth * rowPos + AppConstants.BorderWidth * (rowPos + 1)
         );
 

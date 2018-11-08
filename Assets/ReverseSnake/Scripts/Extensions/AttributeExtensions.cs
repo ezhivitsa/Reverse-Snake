@@ -68,6 +68,12 @@ namespace Assets.ReverseSnake.Scripts.Extensions
             return attribute != null ? attribute.IntermediateProbability : 0f;
         }
 
+        public static string GetTextureName(this object value)
+        {
+            var attribute = GetAttribute<TextureAttribute>(value);
+            return attribute.Texture;
+        }
+
         private static ProbabilitiesAttribute GetProbabilitiesAttribute(object value)
         {
             if (value == null)

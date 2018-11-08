@@ -5,11 +5,13 @@ namespace Assets.ReverseSnake.Scripts.Enums
 {
     public enum TargetValueEnum
     {
-        [Description("1(g)")]
+        [Description("1")]
+        [Texture("addWallTarget")]
         [Probabilities(90, 80, 75)]
         AddWall = 0,
 
-        [Description("-1(r)")]
+        [Description("-1")]
+        [Texture("removeWallTarget")]
         [Probabilities(5, 10, 13)]
         RemoveWall = 1,
 
