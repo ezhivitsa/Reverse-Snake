@@ -49,10 +49,6 @@ public class TargetSystem : IEcsInitSystem, IEcsRunSystem
             SetTargetData(element, boardElement, AppConstants.FirstRound);
             UpdatePrefab(element, boardElement);
         }
-        else
-        {
-            element.Transform.gameObject.SetActive(false);
-        }
     }
 
     public void Run()
