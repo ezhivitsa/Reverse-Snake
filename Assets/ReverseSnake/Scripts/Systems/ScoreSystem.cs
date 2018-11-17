@@ -1,3 +1,4 @@
+using Assets.ReverseSnake.Scripts;
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Managers;
 using Assets.src;
@@ -8,7 +9,7 @@ using UnityEngine.UI;
 [EcsInject]
 public class ScoreSystem : IEcsRunSystem, IEcsInitSystem
 {
-    EcsWorld _world = null;
+    ReverseSnakeWorld _world = null;
 
     EcsFilter<Score> _scoreUiFilter = null;
 
@@ -16,6 +17,9 @@ public class ScoreSystem : IEcsRunSystem, IEcsInitSystem
     EcsFilter<ScoreSetEvent> _scoreSetFilter = null;
 
     private StateManager _stateManager = null;
+
+    private const string _reloadWidget = "tryAgain";
+    private const string _goToMainMenuWidget = "goToMainMenu";
 
     public void Initialize()
     {
