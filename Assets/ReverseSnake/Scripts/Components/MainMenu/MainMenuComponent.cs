@@ -27,4 +27,12 @@ public class MainMenuComponent : MonoBehaviour
     {
         Application.Quit();
     }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+    }
 }

@@ -69,6 +69,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             eventData.Round = AppConstants.FirstRound;
             eventData.Column = position.Column;
             eventData.Row = position.Row;
+            eventData.Silent = false;
         }
 
         private void TriggerMovementEvent(PositionModel position)

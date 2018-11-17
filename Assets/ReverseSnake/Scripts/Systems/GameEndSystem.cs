@@ -21,12 +21,17 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     private const string _tryAgainWidget = "tryAgain";
     private const string _goToMainMenuWidget = "goToMainMenu";
+    private const string _reloadWidget = "reload";
+    private const string _mainMenuWidget = "mainMenu";
+
+    private bool _reload = false;
 
     ReverseSnakeWorld _world = null;
 
     EcsFilter<Wall> _wallsFilter = null;
     EcsFilter<Score> _scoreFilter = null;
     EcsFilter<GameOver> _gameOverFilter = null;
+    EcsFilter<Target> _targetFilter = null;
 
     EcsFilter<CheckGameEndEvent> _gameEndEventFilter = null;
 
@@ -45,8 +50,15 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     public void Run()
     {
+        if (_reload)
+        {
+            _reload = false;
+            OnNewGameClick();
+        }
+
         HandleGameEnd();
         HandleUiClicks();
+        HandleKeyEvents();
     }
 
     public void Destroy()
@@ -100,7 +112,12 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
                     OnNewGameClick();
                     break;
 
+                case _reloadWidget:
+                    OnReloadClick();
+                    break;
+
                 case _goToMainMenuWidget:
+                case _mainMenuWidget:
                     OnGoToMainMenuClick();
                     break;
             }
@@ -172,6 +189,16 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         });
     }
 
+    private void OnReloadClick()
+    {
+        var target = _targetFilter.ToEntitiesList().First();
+
+        _manager.EndGame(target.Round);
+        _stateManager.Clear();
+
+        _reload = true;
+    }
+
     private void OnNewGameClick()
     {
         ShowScoreUI(true);
@@ -199,5 +226,13 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     private void OnGoToMainMenuClick()
     {
         SceneManager.LoadScene(AppConstants.MainMenuScene);
+    }
+
+    private void HandleKeyEvents()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            OnGoToMainMenuClick();
+        }
     }
 }

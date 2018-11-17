@@ -16,6 +16,14 @@ public class LeaderboardComponent : MonoBehaviour
         SaveLeaderboard.Load();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            MainMenu();
+        }
+    }
+
     public void MainMenu()
     {
         SceneManager.LoadScene(mainMenu);
