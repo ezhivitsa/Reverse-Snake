@@ -19,27 +19,28 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
     EcsFilter<Target> _targetFilter = null;
 
     EcsFilter<GameStartEvent> _gameStartFilter = null;
+    EcsFilter<SwipeDoneEvent> _swipeDoneEventFilter = null;
 
     private GameManager _manager;
-    private InputHelper _inputHelper = new InputHelper();
+    private InputHelper _inputHelper;
 
     public void Initialize()
     {
         _manager = new GameManager(_world);
-        _isGameActive = true;
+        _inputHelper = new InputHelper(_world);
 
-        _inputHelper.Swipe += SwipeDone;
+        _isGameActive = true;
     }
 
     public void Destroy()
     {
-        _inputHelper.Swipe -= SwipeDone;
     }
 
     public void Run()
     {
         var isGameActive = _isGameActive;
         HandleGameStartEvent();
+        HandleSwipeDoneEvent();
 
         if (!isGameActive)
         {
@@ -49,14 +50,30 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
         _inputHelper.Update();
     }
 
-    private void SwipeDone(object sender, SwipeEventArgs e)
+    private void HandleSwipeDoneEvent()
+    {
+        _swipeDoneEventFilter.HandleEvents(_world, (eventData) =>
+        {
+            SwipeDone(eventData.Direction);
+        });
+    }
+
+    private void HandleGameStartEvent()
+    {
+        _gameStartFilter.HandleEvents(_world, (gameStart) =>
+        {
+            _inputHelper.Clear();
+            _isGameActive = gameStart.IsActive;
+        });
+    }
+
+    private void SwipeDone(DirectionEnum direction)
     {
         if (!_isGameActive)
         {
             return;
         }
 
-        var direction = e.direction;
         if (direction != DirectionEnum.None)
         {
             var lastStep = GetLastStep();
@@ -93,15 +110,6 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
                 }
             }
         }
-    }
-
-    private void HandleGameStartEvent()
-    {
-        _gameStartFilter.HandleEvents(_world, (gameStart) =>
-        {
-            _inputHelper.Clear();
-            _isGameActive = gameStart.IsActive;
-        });
     }
 
     private Step GetLastStep()
