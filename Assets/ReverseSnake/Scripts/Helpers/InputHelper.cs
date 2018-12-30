@@ -4,21 +4,21 @@ using UnityEngine;
 
 namespace Assets.ReverseSnake.Scripts.Helpers
 {
-    public class SwipeEventArgs : EventArgs
+    class InputHelper
     {
-        public DirectionEnum direction { get; set; }
-    }
-
-    public class InputHelper
-    {
-        public event EventHandler<SwipeEventArgs> Swipe;
-
         public bool detectSwipeOnlyAfterRelease = true;
         public float SWIPE_THRESHOLD = 100f;
         public float TOP_BOTTOM_GAP = 100f;
 
         private static Vector2 fingerDown;
         private static Vector2? fingerUp;
+
+        private ReverseSnakeWorld _world;
+
+        public InputHelper(ReverseSnakeWorld world)
+        {
+            _world = world;
+        }
 
         public void Update()
         {
@@ -140,43 +140,28 @@ namespace Assets.ReverseSnake.Scripts.Helpers
 
         private void OnSwipeUp()
         {
-            SwipeEventArgs args = new SwipeEventArgs
-            {
-                direction = DirectionEnum.Top
-            };
-            OnSwipe(args);
+            OnSwipe(DirectionEnum.Top);
         }
 
         private void OnSwipeDown()
         {
-            SwipeEventArgs args = new SwipeEventArgs
-            {
-                direction = DirectionEnum.Bottom
-            };
-            OnSwipe(args);
+            OnSwipe(DirectionEnum.Bottom);
         }
 
         private void OnSwipeLeft()
         {
-            SwipeEventArgs args = new SwipeEventArgs
-            {
-                direction = DirectionEnum.Left
-            };
-            OnSwipe(args);
+            OnSwipe(DirectionEnum.Left);
         }
 
         private void OnSwipeRight()
         {
-            SwipeEventArgs args = new SwipeEventArgs
-            {
-                direction = DirectionEnum.Right
-            };
-            OnSwipe(args);
+            OnSwipe(DirectionEnum.Right);
         }
 
-        protected virtual void OnSwipe(SwipeEventArgs e)
+        protected virtual void OnSwipe(DirectionEnum direction)
         {
-            Swipe?.Invoke(this, e);
+            var eventData = _world.CreateEntityWith<SwipeDoneEvent>();
+            eventData.Direction = direction;
         }
     }
 }
