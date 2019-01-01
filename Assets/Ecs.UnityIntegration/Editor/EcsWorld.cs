@@ -2,7 +2,7 @@
 // The MIT License
 // Unity integration https://github.com/Leopotam/ecs-unityintegration
 // for ECS framework https://github.com/Leopotam/ecs
-// Copyright (c) 2018 Leopotam <leopotam@gmail.com>
+// Copyright (c) 2017-2018 Leopotam <leopotam@gmail.com>
 // ----------------------------------------------------------------------------
 
 using UnityEditor;
@@ -18,6 +18,7 @@ namespace Leopotam.Ecs.UnityIntegration.Editor {
             GUI.enabled = true;
             GUILayout.BeginVertical (GUI.skin.box);
             EditorGUILayout.LabelField ("Components", stats.Components.ToString ());
+            EditorGUILayout.LabelField ("OneFrame components", stats.OneFrameComponents.ToString ());
             EditorGUILayout.LabelField ("Filters", stats.Filters.ToString ());
             EditorGUILayout.LabelField ("Active entities", stats.ActiveEntities.ToString ());
             EditorGUILayout.LabelField ("Reserved entities", stats.ReservedEntities.ToString ());

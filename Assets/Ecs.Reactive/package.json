@@ -1,0 +1,19 @@
+{
+    "name": "com.leopotam.ecs-reactive",
+    "author": "Leopotam",
+    "displayName": "LeoECS Reactive",
+    "description": "Reactive behaviour for LeoECS Entity Component System framework.",
+    "unity": "2018.3",
+    "version": "2018.12.22",
+    "keywords": [
+        "leoecs",
+        "ecs",
+        "performance",
+        "reactive"
+    ],
+    "dependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Leopotam/ecs-reactive.git"
+    }
+}

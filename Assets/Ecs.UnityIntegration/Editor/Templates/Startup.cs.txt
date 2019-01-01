@@ -24,6 +24,8 @@ namespace #NS# {
 
         void Update () {
             _systems.Run ();
+            // Optional: One-frame components cleanup.
+            _world.RemoveOneFrameComponents();
         }
 
         void OnDisable () {

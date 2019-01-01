@@ -2,7 +2,7 @@
 // The MIT License
 // Ui extension https://github.com/Leopotam/ecs-ui
 // for ECS framework https://github.com/Leopotam/ecs
-// Copyright (c) 2018 Leopotam <leopotam@gmail.com>
+// Copyright (c) 2017-2018 Leopotam <leopotam@gmail.com>
 // ----------------------------------------------------------------------------
 
 using Leopotam.Ecs.Ui.Systems;
@@ -55,7 +55,7 @@ namespace Leopotam.Ecs.Ui.Actions {
             if ((object) Emitter == null) {
                 Emitter = GetComponentInParent<EcsUiEmitter> ();
             }
-#if DEBUG && !ECS_PERF_TEST
+#if DEBUG
             if ((object) Emitter == null) {
                 Debug.LogError ("EcsUiEmitter not found in hierarchy", this);
             }

@@ -1,16 +1,33 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
 using Assets.ReverseSnake.Scripts.Helpers;
+using Assets.ReverseSnake.Scripts.Systems;
 using Leopotam.Ecs;
+using UnityEngine;
 
 namespace Assets.ReverseSnake.Scripts.Managers
 {
     sealed class GameManager
     {
-        private EcsWorld _world;
+        private static GameManager _instance;
+        private static EcsWorld _instanceWorld;
 
-        public GameManager(EcsWorld world)
+        private EcsWorld _world;
+        private EcsFilter<Step> _stepsFilter = null;
+
+        private GameManager(EcsWorld world, EcsFilter<Step> stepsFilter)
         {
             _world = world;
+            _stepsFilter = stepsFilter;
+        }
+
+        public static GameManager GetInstance(EcsWorld world, EcsFilter<Step> stepsFilter)
+        {
+            if (_instance == null || world != _instanceWorld)
+            {
+                _instance = new GameManager(world, stepsFilter);
+                _instanceWorld = world;
+            }
+            return _instance;
         }
 
         public void NewStep(Step lastStep, DirectionEnum direction)
@@ -94,12 +111,13 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             var newPosition = PositionHelper.GetNextPosition(rowPosition, columnPosition, direction);
 
-            var movementEvent = _world.CreateEntityWith<MovementEvent>();
-            movementEvent.Row = newPosition.Row;
-            movementEvent.Column = newPosition.Column;
-            movementEvent.Number = number;
-            movementEvent.StartNumber = startNumber;
-            movementEvent.Round = round;
+            var stepEvent = _world.CreateEntityWith<Step>();
+            stepEvent.Row = newPosition.Row;
+            stepEvent.Column = newPosition.Column;
+            stepEvent.Number = number;
+            stepEvent.StartNumber = startNumber;
+            stepEvent.Round = round;
+            stepEvent.Silent = false;
         }
 
         private void TriggerUpdateTargetEvent(int round)
@@ -117,8 +135,16 @@ namespace Assets.ReverseSnake.Scripts.Managers
             var eventData =_world.CreateEntityWith<ClearBoardEvent>();
             eventData.Round = round;
 
-            var stepEventData = _world.CreateEntityWith<ClearStepEvent>();
-            stepEventData.Round = round;
+            for (var i = 0; i < _stepsFilter.EntitiesCount; i++)
+            {
+                var component = _stepsFilter.Components1[i];
+                if (component.Round == round)
+                {
+                    var entity = _stepsFilter.Entities[i];
+                    StepReactiveSystemOnRemove.CachedSteps[entity] = component;
+                    _world.RemoveEntity(entity);
+                }
+            }
         }
 
         private void TriggerAddWallEvent()
