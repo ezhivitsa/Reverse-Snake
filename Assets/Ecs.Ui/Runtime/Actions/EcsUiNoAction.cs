@@ -2,7 +2,7 @@
 // The MIT License
 // Ui extension https://github.com/Leopotam/ecs-ui
 // for ECS framework https://github.com/Leopotam/ecs
-// Copyright (c) 2018 Leopotam <leopotam@gmail.com>
+// Copyright (c) 2017-2018 Leopotam <leopotam@gmail.com>
 // ----------------------------------------------------------------------------
 
 namespace Leopotam.Ecs.Ui.Actions {

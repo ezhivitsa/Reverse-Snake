@@ -1,9 +1,9 @@
 [![gitter](https://img.shields.io/gitter/room/leopotam/ecs.svg)](https://gitter.im/leopotam/ecs)
 [![license](https://img.shields.io/github/license/Leopotam/ecs.svg)](https://github.com/Leopotam/ecs/blob/develop/LICENSE)
-# LeoECS - Another one Entity Component System framework
-Performance and zero memory allocation / small size, no dependencies on any game engine - main goals of this project.
+# LeoECS - Simple lightweight C# Entity Component System framework
+Performance, zero/small memory allocations/footprint, no dependencies on any game engine - main goals of this project.
 
-> Tested on unity 2018.1 (not dependent on it) and contains assembly definition for compiling to separate assembly file for performance reason.
+> Tested on unity 2018.3 (not dependent on it) and contains assembly definition for compiling to separate assembly file for performance reason.
 
 > **Important!** Dont forget to use `DEBUG` builds for development and `RELEASE` builds in production: all internal error checks / exception throwing works only in `DEBUG` builds and eleminated for performance reasons in `RELEASE`.
 
@@ -29,6 +29,13 @@ class WeaponComponent {
 ```csharp
 WeaponComponent myWeapon;
 int entityId = _world.CreateEntityWith<WeaponComponent> (out myWeapon);
+_world.RemoveEntity (entityId);
+```
+Dont forget that `EcsWorld.CreateEntityWith` method has multiple overloaded versions:
+```csharp
+Component1 c1;
+Component2 c2;
+int entityId = _world.CreateEntityWith<Component1, Component2> (out c1, out c2);
 _world.RemoveEntity (entityId);
 ```
 
@@ -93,7 +100,7 @@ Each system will be scanned for compatible fields (can contains all of them or n
 # Special classes
 
 ## EcsFilter<T>
-Container for keep filtered entities with specified component list:
+Container for keeping filtered entities with specified component list:
 ```csharp
 [EcsInject]
 class WeaponSystem : IEcsInitSystem, IEcsRunSystem {
@@ -172,6 +179,8 @@ class Startup : MonoBehaviour {
     void Update() {
         // process all dependent systems.
         _systems.Run ();
+        // optional behaviour for one-frame components.
+        _world.RemoveOneFrameComponents ();
     }
 
     void OnDisable() {
@@ -303,6 +312,8 @@ systems.Initialize ();
 
 [Reactive filters / systems](https://github.com/Leopotam/ecs-reactive)
 
+[Multithreading support](https://github.com/Leopotam/ecs-threads)
+
 [Unity integration](https://github.com/Leopotam/ecs-unityintegration)
 
 [Unity uGui event bindings](https://github.com/Leopotam/ecs-ui)
@@ -424,74 +435,36 @@ can be replaced with
 for (int i = 0, iMax = _filter.EntitiesCount; i < iMax; i++)
 ```
 
-### I used reactive systems and filter events before, but now I can't find them. How I can get it back?
+### I copy&paste my reset components code again and again. How I can do it in other manner?
 
-Reactive filters / systems can be found at [separate repo](https://github.com/Leopotam/ecs-reactive).
-
-### I need more than 4 components in filter, how i can do it?
-
-First of all - looks like there are problems in architecture and better to rethink it. Anyway, custom filter can be implemented it this way:
-
+If you want to simplify your code and keep reset-code in one place, you can use `IEcsAutoResetComponent` interface for components:
 ```csharp
-// Custom class should be inherited from EcsFilter.
-public class CustomEcsFilter<Inc1> : EcsFilter where Inc1 : class, new () {
-    public Inc1[] Components1;
-    bool _allow1;
+class MyComponent : IEcsAutoResetComponent {
+    public object LinkToAnotherComponent;
 
-    // Access can be any, even non-public.
-    protected CustomEcsFilter () {
-        // We should check - is requested type should be not auto-filled in Components1 array.
-        _allow1 = !EcsComponentPool<Inc1>.Instance.IsIgnoreInFilter;
-        Components1 = _allow1 ? new Inc1[MinSize] : null;
-
-        // And set valid bit of required component at IncludeMask.
-        IncludeMask.SetBit (EcsComponentPool<Inc1>.Instance.GetComponentTypeIndex (), true);
-
-        // Its recommended method for masks validation (will be auto-removed in RELEASE-mode).
-        ValidateMasks (1, 0);
-    }
-
-    // This method will be called for new compatible entities.
-    public override void RaiseOnAddEvent (int entity) {
-        if (Entities.Length == EntitiesCount) {
-            Array.Resize (ref Entities, EntitiesCount << 1);
-            if (_allow1) {
-                Array.Resize (ref Components1, EntitiesCount << 1);
-            }
-        }
-        if (_allow1) {
-            Components1[EntitiesCount] = World.GetComponent<Inc1> (entity);
-        }
-        Entities[EntitiesCount++] = entity;
-    }
-
-    // This method will be called for added before, but already non-compatible entities.
-    public override void RaiseOnRemoveEvent (int entity) {
-        for (var i = 0; i < EntitiesCount; i++) {
-            if (Entities[i] == entity) {
-                EntitiesCount--;
-                Array.Copy (Entities, i + 1, Entities, i, EntitiesCount - i);
-                if (_allow1) {
-                    Array.Copy (Components1, i + 1, Components1, i, EntitiesCount - i);
-                }
-                break;
-            }
-        }
-    }
-
-    // Even exclude filters can be declared in this way.
-    public class Exclude<Exc1, Exc2> : CustomEcsFilter<Inc1> where Exc1 : class, new () {
-        internal Exclude () {
-            // Update ExcludeMask for 2 denied types.
-            ExcludeMask.SetBit (EcsComponentPool<Exc1>.Instance.GetComponentTypeIndex (), true);
-            ExcludeMask.SetBit (EcsComponentPool<Exc2>.Instance.GetComponentTypeIndex (), true);
-            // And validate all masks (1 included type, 2 excluded type).
-            ValidateMasks (1, 2);
-        }
+    void IEcsAutoResetComponent.Reset() {
+        // Cleanup all marshal-by-reference fields here.
+        LinkToAnotherComponent = null;
     }
 }
 ```
+This method will be automatically called after component removing from entity and before recycling to component pool.
 
-### How it fast relative to Entitas?
+### I use components as events that works only one frame, then remove it at last system in execution sequence. It's boring, how I can automate it?
 
-[Previous version](https://github.com/Leopotam/ecs/releases/tag/v20180422) was benchmarked at [this repo](https://github.com/echeg/unityecs_speedtest). Current version works in slightly different manner, better to grab last versions of ECS frameworks and check boths locally on your code.
+If you want to remove one-frame components without additional custom code, you can use `EcsOneFrame` attribute:
+```csharp
+[EcsOneFrame]
+class MyComponent { }
+```
+> Important: Do not forget to call `EcsWorld.RemoveOneFrameComponents` method once after all `EcsSystems.Run` calls.
+
+> Important: Do not forget that if one-frame component contains `marshal-by-reference` typed fields - this component should implements `IEcsAutoResetComponent` interface.
+
+### I used reactive systems and filter events before, but now I can't find them. How I can get it back?
+
+You can implement them by yourself with `EcsFilter.AddListener` / `EcsFilter.RemoveListener` methods or use default implementation, that can be found at [separate repo](https://github.com/Leopotam/ecs-reactive).
+
+### I need more than 4 components in filter, how i can do it?
+
+Check `EcsFilter<Inc1, Inc2, Inc3, Inc4>` class and create new class with more components in same manner.

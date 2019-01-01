@@ -115,11 +115,24 @@ namespace Assets.ReverseSnake.Scripts.Managers
             targetEventData.Value = target.Value;
             targetEventData.Silent = true;
 
-            var stepsEventData = _world.CreateEntityWith<CreateStepsEvent>();
-            stepsEventData.Steps = state.Steps;
+            CreateSteps(state.Steps);
 
             var wallsEventData = _world.CreateEntityWith<CreateWallsEvent>();
             wallsEventData.Walls = state.ActiveWalls;
+        }
+
+        private void CreateSteps(List<Step> steps)
+        {
+            foreach (var step in steps)
+            {
+                var stepEvent = _world.CreateEntityWith<Step>();
+                stepEvent.Row = step.Row;
+                stepEvent.Column = step.Column;
+                stepEvent.Number = step.Number;
+                stepEvent.StartNumber = step.StartNumber;
+                stepEvent.Round = step.Round;
+                stepEvent.Silent = true;
+            }
         }
     }
 }

@@ -32,6 +32,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<Score> _scoreFilter = null;
     EcsFilter<GameOver> _gameOverFilter = null;
     EcsFilter<Target> _targetFilter = null;
+    EcsFilter<Step> _stepFilter = null;
 
     EcsFilter<CheckGameEndEvent> _gameEndEventFilter = null;
 
@@ -39,7 +40,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     public void Initialize()
     {
-        _manager = new GameStartManager(_world);
+        _manager = GameStartManager.GetInstance(_world, _stepFilter);
         _stateManager = StateManager.GetInstance(_world);
 
         var ui = GameObject.FindGameObjectWithTag(AppConstants.GameOverTag);

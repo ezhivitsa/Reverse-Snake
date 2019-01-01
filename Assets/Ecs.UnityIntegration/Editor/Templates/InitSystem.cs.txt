@@ -3,6 +3,7 @@
 namespace #NS# {
     [EcsInject]
     sealed class #SCRIPTNAME# : IEcsInitSystem {
+        // Auto-injected fields.
         EcsWorld _world = null;
         
         void IEcsInitSystem.Initialize () {

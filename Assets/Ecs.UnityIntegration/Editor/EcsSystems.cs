@@ -2,9 +2,10 @@
 // The MIT License
 // Unity integration https://github.com/Leopotam/ecs-unityintegration
 // for ECS framework https://github.com/Leopotam/ecs
-// Copyright (c) 2018 Leopotam <leopotam@gmail.com>
+// Copyright (c) 2017-2018 Leopotam <leopotam@gmail.com>
 // ----------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,8 +13,8 @@ namespace Leopotam.Ecs.UnityIntegration.Editor {
     [CustomEditor (typeof (EcsSystemsObserver))]
     sealed class EcsSystemsObserverInspector : UnityEditor.Editor {
         static IEcsPreInitSystem[] _preInitList = new IEcsPreInitSystem[32];
-        static IEcsInitSystem[] _initList = new IEcsInitSystem[32];
-        static IEcsRunSystem[] _runList = new IEcsRunSystem[32];
+        static Stack<IEcsInitSystem[]> _initList = new Stack<IEcsInitSystem[]> (8);
+        static Stack<IEcsRunSystem[]> _runList = new Stack<IEcsRunSystem[]> (8);
 
         public override void OnInspectorGUI () {
             var savedState = GUI.enabled;
@@ -35,36 +36,58 @@ namespace Leopotam.Ecs.UnityIntegration.Editor {
                 GUILayout.EndVertical ();
             }
 
-            count = systems.GetInitSystems (ref _initList);
-            if (count > 0) {
-                GUILayout.BeginVertical (GUI.skin.box);
-                EditorGUILayout.LabelField ("Initialize systems", EditorStyles.boldLabel);
-                EditorGUI.indentLevel++;
-                for (var i = 0; i < count; i++) {
-                    EditorGUILayout.LabelField (_initList[i].GetType ().Name);
-                    _initList[i] = null;
-                }
-                EditorGUI.indentLevel--;
-                GUILayout.EndVertical ();
-            }
+            GUILayout.BeginVertical (GUI.skin.box);
+            EditorGUILayout.LabelField ("Initialize systems", EditorStyles.boldLabel);
+            OnInitSystemsGUI (systems);
+            GUILayout.EndVertical ();
 
-            count = systems.GetRunSystems (ref _runList);
+            GUILayout.BeginVertical (GUI.skin.box);
+            EditorGUILayout.LabelField ("Run systems", EditorStyles.boldLabel);
+            OnRunSystemsGUI (systems);
+            GUILayout.EndVertical ();
+
+            GUI.enabled = savedState;
+        }
+
+        void OnInitSystemsGUI (EcsSystems systems) {
+            var initList = _initList.Count > 0 ? _initList.Pop () : null;
+            var count = systems.GetInitSystems (ref initList);
             if (count > 0) {
-                GUILayout.BeginVertical (GUI.skin.box);
-                EditorGUILayout.LabelField ("Run systems", EditorStyles.boldLabel);
                 EditorGUI.indentLevel++;
                 for (var i = 0; i < count; i++) {
-                    if (systems.DisabledInDebugSystems != null) {
-                        systems.DisabledInDebugSystems[i] = !EditorGUILayout.Toggle (_runList[i].GetType ().Name, !systems.DisabledInDebugSystems[i]);
-                    } else {
-                        EditorGUILayout.LabelField (_runList[i].GetType ().Name);
+                    var asSystems = initList[i] as EcsSystems;
+                    EditorGUILayout.LabelField (asSystems != null ? asSystems.Name : initList[i].GetType ().Name);
+                    if (asSystems != null) {
+                        OnInitSystemsGUI (asSystems);
                     }
-                    _runList[i] = null;
+                    initList[i] = null;
                 }
                 EditorGUI.indentLevel--;
-                GUILayout.EndVertical ();
             }
-            GUI.enabled = savedState;
+            _initList.Push (initList);
+        }
+
+        void OnRunSystemsGUI (EcsSystems systems) {
+            var runList = _runList.Count > 0 ? _runList.Pop () : null;
+            var count = systems.GetRunSystems (ref runList);
+            if (count > 0) {
+                EditorGUI.indentLevel++;
+                for (var i = 0; i < count; i++) {
+                    var asSystems = runList[i] as EcsSystems;
+                    var name = asSystems != null ? asSystems.Name : runList[i].GetType ().Name;
+                    systems.DisabledInDebugSystems[i] = !EditorGUILayout.ToggleLeft (name, !systems.DisabledInDebugSystems[i]);
+                    if (asSystems != null) {
+                        GUI.enabled = !systems.DisabledInDebugSystems[i];
+                        OnRunSystemsGUI (asSystems);
+                        if (systems.DisabledInDebugSystems[i]) {
+                            GUI.enabled = true;
+                        }
+                    }
+                    runList[i] = null;
+                }
+                EditorGUI.indentLevel--;
+            }
+            _runList.Push (runList);
         }
     }
 }

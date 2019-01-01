@@ -3,6 +3,7 @@
 namespace #NS# {
     [EcsInject]
     sealed class #SCRIPTNAME# : IEcsRunSystem {
+        // Auto-injected fields.
         EcsWorld _world = null;
         
         void IEcsRunSystem.Run () {

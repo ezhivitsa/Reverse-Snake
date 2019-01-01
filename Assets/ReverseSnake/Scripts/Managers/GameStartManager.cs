@@ -1,4 +1,5 @@
 ﻿using Assets.ReverseSnake.Scripts.Models;
+using Assets.ReverseSnake.Scripts.Systems;
 using Assets.src;
 using Leopotam.Ecs;
 
@@ -6,11 +7,26 @@ namespace Assets.ReverseSnake.Scripts.Managers
 {
     sealed class GameStartManager
     {
-        private EcsWorld _world;
+        private static GameStartManager _instance;
+        private static EcsWorld _instanceWorld;
 
-        public GameStartManager(EcsWorld world)
+        private EcsWorld _world;
+        private EcsFilter<Step> _stepsFilter = null;
+
+        private GameStartManager(EcsWorld world, EcsFilter<Step> stepsFilter)
         {
             _world = world;
+            _stepsFilter = stepsFilter;
+        }
+
+        public static GameStartManager GetInstance(EcsWorld world, EcsFilter<Step> stepsFilter)
+        {
+            if (_instance == null || world != _instanceWorld)
+            {
+                _instance = new GameStartManager(world, stepsFilter);
+                _instanceWorld = world;
+            }
+            return _instance;
         }
 
         public void EndGame(int round)
@@ -39,8 +55,13 @@ namespace Assets.ReverseSnake.Scripts.Managers
             var eventData = _world.CreateEntityWith<ClearBoardEvent>();
             eventData.Round = round;
 
-            var stepEventData = _world.CreateEntityWith<ClearStepEvent>();
-            stepEventData.Round = round;
+            for (var i = 0; i < _stepsFilter.EntitiesCount; i++)
+            {
+                var component = _stepsFilter.Components1[i];
+                var entity = _stepsFilter.Entities[i];
+                StepReactiveSystemOnRemove.CachedSteps[entity] = component;
+                _world.RemoveEntity(entity);
+            }
 
             _world.CreateEntityWith<ClearWallEvent>();
 
@@ -74,12 +95,13 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void TriggerMovementEvent(PositionModel position)
         {
-            var eventData = _world.CreateEntityWith<MovementEvent>();
+            var eventData = _world.CreateEntityWith<Step>();
             eventData.Round = AppConstants.FirstRound;
             eventData.Column = position.Column;
             eventData.Row = position.Row;
             eventData.StartNumber = AppConstants.StartStepsCount;
             eventData.Number = AppConstants.StartStepsCount;
+            eventData.Silent = false;
         }
     }
 }
