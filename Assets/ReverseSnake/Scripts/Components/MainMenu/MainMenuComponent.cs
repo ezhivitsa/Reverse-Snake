@@ -5,6 +5,7 @@ public class MainMenuComponent : MonoBehaviour
 {
     public string gameScene;
     public string leaderboardScene;
+    public string settingsScene;
 
     public void NewGame()
     {
@@ -21,6 +22,11 @@ public class MainMenuComponent : MonoBehaviour
     public void Leaderboard()
     {
         SceneManager.LoadScene(leaderboardScene);
+    }
+
+    public void Settings()
+    {
+        SceneManager.LoadScene(settingsScene);
     }
 
     public void QuitGame()
