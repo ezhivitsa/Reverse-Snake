@@ -42,6 +42,8 @@ namespace Assets.ReverseSnake.Scripts.Managers
             stepEvent.Number = AppConstants.StartStepsCount;
             stepEvent.StartNumber = AppConstants.StartStepsCount;
             stepEvent.Round = AppConstants.FirstRound;
+            stepEvent.DontUseSound = true;
+            stepEvent.Silent = false;
         }
 
         private void TriggerStepCreatedEvent(int column, int row, int number, int round)
