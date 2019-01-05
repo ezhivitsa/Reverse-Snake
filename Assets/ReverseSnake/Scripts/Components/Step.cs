@@ -19,6 +19,8 @@ sealed class Step
 
     public bool Silent = false;
 
+    public bool DontUseSound = false;
+
     [NonSerialized]
     [EcsIgnoreNullCheck]
     public Transform Transform;

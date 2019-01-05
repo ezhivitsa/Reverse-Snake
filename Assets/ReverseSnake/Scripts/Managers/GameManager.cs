@@ -118,6 +118,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             stepEvent.StartNumber = startNumber;
             stepEvent.Round = round;
             stepEvent.Silent = false;
+            stepEvent.DontUseSound = false;
         }
 
         private void TriggerUpdateTargetEvent(int round)

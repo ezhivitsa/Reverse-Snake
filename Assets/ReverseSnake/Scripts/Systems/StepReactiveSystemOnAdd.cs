@@ -1,4 +1,6 @@
-﻿using Assets.ReverseSnake.Scripts.Managers;
+﻿using Assets.ReverseSnake.Scripts.IO;
+using Assets.ReverseSnake.Scripts.Managers;
+using Assets.ReverseSnake.Scripts.Models;
 using Assets.src;
 using Leopotam.Ecs;
 using Leopotam.Ecs.Reactive;
@@ -18,6 +20,9 @@ namespace Assets.ReverseSnake.Scripts.Systems
         private DisabledStepsManager _disabledStepsManager;
 
         private GameObject _gameElements;
+        private AudioSource _drawAudio;
+
+        private SettingsModel _settings;
 
         public void Initialize()
         {
@@ -26,11 +31,21 @@ namespace Assets.ReverseSnake.Scripts.Systems
             _disabledStepsManager = DisabledStepsManager.GetInstance();
 
             _gameElements = GameObject.FindGameObjectWithTag(AppConstants.GameElementsTag);
+            _drawAudio = GameObject.FindObjectOfType<AudioSource>();
+
+            SaveSettings.OnLoaded += OnSettingsLoaded;
+            SaveSettings.Load();
         }
 
         public void Destroy()
         {
+            SaveSettings.OnLoaded -= OnSettingsLoaded;
             _disabledStepsManager.Clear();
+        }
+
+        private void OnSettingsLoaded()
+        {
+            _settings = SaveSettings.Settings;
         }
 
         protected override EcsReactiveType GetReactiveType()
@@ -40,6 +55,20 @@ namespace Assets.ReverseSnake.Scripts.Systems
 
         protected override void RunReactive()
         {
+            var dontUseSound = true;
+            for (var i = 0; i < ReactedEntitiesCount; i++)
+            {
+                var entity = ReactedEntities[i];
+                var step = _world.GetComponent<Step>(entity);
+
+                dontUseSound = dontUseSound && step.DontUseSound;
+            }
+
+            if (_settings.UseSounds && !dontUseSound)
+            {
+                _drawAudio.Play();
+            }
+
             for (var i = 0; i < ReactedEntitiesCount; i++)
             {
                 var entity = ReactedEntities[i];
@@ -79,6 +108,9 @@ namespace Assets.ReverseSnake.Scripts.Systems
             
             element.Active = true;
             element.Transform = transform;
+
+            var animator = element.Transform.GetChild(1).GetComponent<Animator>();
+            animator.enabled = !element.DontUseSound;
 
             element.Transform.position = GetPositionVector(boardElement.Row, boardElement.Column);
 

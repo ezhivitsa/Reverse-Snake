@@ -132,6 +132,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
                 stepEvent.StartNumber = step.StartNumber;
                 stepEvent.Round = step.Round;
                 stepEvent.Silent = true;
+                stepEvent.DontUseSound = true;
             }
         }
     }
