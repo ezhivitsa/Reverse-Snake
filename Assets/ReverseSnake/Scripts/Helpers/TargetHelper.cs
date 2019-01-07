@@ -51,6 +51,17 @@ namespace Assets.ReverseSnake.Scripts.Helpers
             }
         }
 
+        static public Vector3 GetPositionVector(int rowPos, int columnPos)
+        {
+            var result = new Vector3(
+                AppConstants.BoardElementWidth * columnPos + AppConstants.BorderWidth * (columnPos + 1),
+                0.1F,
+                AppConstants.BoardElementWidth * rowPos + AppConstants.BorderWidth * (rowPos + 1)
+            );
+
+            return result - new Vector3(AppConstants.OffsetX, 0, AppConstants.OffsetZ);
+        }
+
         static private float AddWallProbability(float value)
         {
             var values = new List<TargetValueEnum> { TargetValueEnum.AddWall };

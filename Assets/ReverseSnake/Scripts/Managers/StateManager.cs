@@ -108,9 +108,9 @@ namespace Assets.ReverseSnake.Scripts.Managers
             scoreEventData.Silent = true;
 
             var target = state.Targets[0];
-            var targetEventData = _world.CreateEntityWith<UpdateTargetEvent>();
-            targetEventData.Column = target.Column;
+            var targetEventData = _world.CreateEntityWith<Target>();
             targetEventData.Row = target.Row;
+            targetEventData.Column = target.Column;
             targetEventData.Round = target.Round;
             targetEventData.Value = target.Value;
             targetEventData.Silent = true;

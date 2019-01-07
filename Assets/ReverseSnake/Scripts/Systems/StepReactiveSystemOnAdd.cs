@@ -17,7 +17,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
 
         private StepManager _manager;
         private StateManager _stateManager;
-        private DisabledStepsManager _disabledStepsManager;
+        private CachedComponentsManager _cacheManager;
 
         private GameObject _gameElements;
         private AudioSource _drawAudio;
@@ -28,7 +28,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
         {
             _manager = StepManager.GetInstance(_world);
             _stateManager = StateManager.GetInstance(_world);
-            _disabledStepsManager = DisabledStepsManager.GetInstance();
+            _cacheManager = CachedComponentsManager.GetInstance();
 
             _gameElements = GameObject.FindGameObjectWithTag(AppConstants.GameElementsTag);
             _drawAudio = GameObject.FindObjectOfType<AudioSource>();
@@ -40,7 +40,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
         public void Destroy()
         {
             SaveSettings.OnLoaded -= OnSettingsLoaded;
-            _disabledStepsManager.Clear();
+            _cacheManager.Clear();
         }
 
         private void OnSettingsLoaded()
@@ -94,7 +94,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
             
             Transform transform = null;
 
-            var stepGameObject = _disabledStepsManager.GetAvailableStep();
+            var stepGameObject = _cacheManager.GetAvailableStep();
             if (stepGameObject != null)
             {
                 transform = stepGameObject.transform;

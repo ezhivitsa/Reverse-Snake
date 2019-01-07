@@ -1,4 +1,5 @@
-﻿using Assets.ReverseSnake.Scripts.Models;
+﻿using Assets.ReverseSnake.Scripts.Enums;
+using Assets.ReverseSnake.Scripts.Models;
 using Assets.ReverseSnake.Scripts.Systems;
 using Assets.src;
 using Leopotam.Ecs;
@@ -29,18 +30,16 @@ namespace Assets.ReverseSnake.Scripts.Managers
             return _instance;
         }
 
-        public void EndGame(int round)
+        public void EndGame()
         {
             TriggerStartGameEvent(false);
-            TriggerClearBoardEvents(round);
+            TriggerClearBoardEvents();
         }
 
-        public void StartGame(PositionModel targetModel, PositionModel stepModel)
+        public void StartGame()
         {
             TriggerShowEvents(true);
             TriggerResetScoreEvent();
-            TriggerUpdateTargetEvent(targetModel);
-            TriggerMovementEvent(stepModel);
             TriggerStartGameEvent(true);
         }
 
@@ -50,19 +49,8 @@ namespace Assets.ReverseSnake.Scripts.Managers
             eventData.IsActive = isActive;
         }
 
-        private void TriggerClearBoardEvents(int round)
+        private void TriggerClearBoardEvents()
         {
-            var eventData = _world.CreateEntityWith<ClearBoardEvent>();
-            eventData.Round = round;
-
-            for (var i = 0; i < _stepsFilter.EntitiesCount; i++)
-            {
-                var component = _stepsFilter.Components1[i];
-                var entity = _stepsFilter.Entities[i];
-                StepReactiveSystemOnRemove.CachedSteps[entity] = component;
-                _world.RemoveEntity(entity);
-            }
-
             _world.CreateEntityWith<ClearWallEvent>();
 
             TriggerShowEvents(false);
@@ -70,9 +58,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void TriggerShowEvents(bool isActive)
         {
-            var targetEventData = _world.CreateEntityWith<ShowTargetEvent>();
-            targetEventData.IsActive = isActive;
-
             var wallEventData = _world.CreateEntityWith<ShowWallEvent>();
             wallEventData.IsActive = isActive;
         }
@@ -81,26 +66,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             var eventData = _world.CreateEntityWith<ScoreSetEvent>();
             eventData.Amount = 0;
-            eventData.Silent = false;
-        }
-
-        private void TriggerUpdateTargetEvent(PositionModel position)
-        {
-            var eventData = _world.CreateEntityWith<UpdateTargetEvent>();
-            eventData.Round = AppConstants.FirstRound;
-            eventData.Column = position.Column;
-            eventData.Row = position.Row;
-            eventData.Silent = false;
-        }
-
-        private void TriggerMovementEvent(PositionModel position)
-        {
-            var eventData = _world.CreateEntityWith<Step>();
-            eventData.Round = AppConstants.FirstRound;
-            eventData.Column = position.Column;
-            eventData.Row = position.Row;
-            eventData.StartNumber = AppConstants.StartStepsCount;
-            eventData.Number = AppConstants.StartStepsCount;
             eventData.Silent = false;
         }
     }

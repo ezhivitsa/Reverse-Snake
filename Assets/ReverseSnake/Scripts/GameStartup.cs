@@ -10,6 +10,7 @@ public class GameStartup : MonoBehaviour
     public static bool LoadState { get; set; }
 
     private StateManager _stateManager;
+    private GameManager _gameManager;
 
     ReverseSnakeWorld _world;
     EcsSystems _systems;
@@ -24,6 +25,8 @@ public class GameStartup : MonoBehaviour
         Leopotam.Ecs.UnityIntegration.EcsWorldObserver.Create(_world);
 #endif
 
+        _gameManager = GameManager.GetInstance(_world);
+
         _systems = new EcsSystems(_world)
             .Add(_uiEmitter)
             .Add(new BoardElementsSystem())
@@ -31,8 +34,9 @@ public class GameStartup : MonoBehaviour
             .Add(new StepReactiveSystemOnAdd())
             .Add(new StepReactiveSystemOnRemove())
             .Add(new WallSystem())
-            .Add(new StepSystem())
-            .Add(new TargetSystem())
+            .Add(new TargetReactivitySystemOnAdd())
+            .Add(new TargetReactivitySystemOnUpdate())
+            .Add(new TargetReactiveSystemOnRemove())
             .Add(new ScoreSystem())
             .Add(new UserInputSystem())
             .Add(new GameEndSystem());
@@ -47,6 +51,10 @@ public class GameStartup : MonoBehaviour
         if (LoadState)
         {
             SaveState.Load();
+        }
+        else
+        {
+            _gameManager.StartNewGame();
         }
     }
 
