@@ -18,6 +18,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 {
     private GameStartManager _manager;
     private StateManager _stateManager;
+    private GameManager _gameManager;
 
     private const string _tryAgainWidget = "tryAgain";
     private const string _goToMainMenuWidget = "goToMainMenu";
@@ -42,6 +43,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     {
         _manager = GameStartManager.GetInstance(_world, _stepFilter);
         _stateManager = StateManager.GetInstance(_world);
+        _gameManager = GameManager.GetInstance(_world);
 
         var ui = GameObject.FindGameObjectWithTag(AppConstants.GameOverTag);
         var gameOver = _world.CreateEntityWith<GameOver>();
@@ -92,7 +94,8 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
                 ShowScoreUI(false);
                 ShowGameOverScreen(true);
 
-                _manager.EndGame(eventData.Round);
+                _gameManager.ClearAll();
+                _manager.EndGame();
 
                 var scoreEntity = _scoreFilter.ToEntitiesList().First();
                 SaveLeaderboard.AddResultAndSave(scoreEntity.Amount);
@@ -192,9 +195,8 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     private void OnReloadClick()
     {
-        var target = _targetFilter.ToEntitiesList().First();
-
-        _manager.EndGame(target.Round);
+        _gameManager.ClearAll();
+        _manager.EndGame();
         _stateManager.Clear();
 
         _reload = true;
@@ -205,23 +207,8 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         ShowScoreUI(true);
         ShowGameOverScreen(false);
 
-        var boardElements = _world.BoardElements;
-
-        var targetElement = boardElements.RandomElement();
-        var stepElement = boardElements.Where(e => e != targetElement).RandomElement();
-
-        var targetPosition = new PositionModel
-        {
-            Row = targetElement.Row,
-            Column = targetElement.Column,
-        };
-        var stepPosition = new PositionModel
-        {
-            Row = stepElement.Row,
-            Column = stepElement.Column,
-        };
-
-        _manager.StartGame(targetPosition, stepPosition);
+        _gameManager.StartNewGame();
+        _manager.StartGame();
     }
 
     private void OnGoToMainMenuClick()

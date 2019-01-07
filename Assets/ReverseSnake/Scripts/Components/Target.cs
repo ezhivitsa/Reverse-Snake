@@ -17,4 +17,6 @@ sealed class Target
     [NonSerialized]
     [EcsIgnoreNullCheck]
     public Transform Transform;
+
+    public bool Silent = false;
 }

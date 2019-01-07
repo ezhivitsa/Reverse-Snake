@@ -26,7 +26,7 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
 
     public void Initialize()
     {
-        _manager = GameManager.GetInstance(_world, _stepFilter);
+        _manager = GameManager.GetInstance(_world);
         _inputHelper = new InputHelper(_world);
 
         _isGameActive = true;

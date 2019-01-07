@@ -10,14 +10,14 @@ namespace Assets.ReverseSnake.Scripts.Systems
     {
         ReverseSnakeWorld _world = null;
 
-        private DisabledStepsManager _disabledStepsManager;
+        private CachedComponentsManager _disabledStepsManager;
         private StateManager _stateManager;
 
         static public Dictionary<int, Step> CachedSteps = new Dictionary<int, Step>();
 
         public void Initialize()
         {
-            _disabledStepsManager = DisabledStepsManager.GetInstance();
+            _disabledStepsManager = CachedComponentsManager.GetInstance();
             _stateManager = StateManager.GetInstance(_world);
         }
 
@@ -42,6 +42,13 @@ namespace Assets.ReverseSnake.Scripts.Systems
                 element.Active = false;
                 element.Transform.gameObject.SetActive(false);
                 _disabledStepsManager.AddAvailableStep(element.Transform.gameObject);
+
+                var boardElement = _world.BoardElements
+                    .Find(el => el.Row == element.Row && el.Column == element.Column && el.Round == element.Round);
+                if (boardElement != null)
+                {
+                    boardElement.ContainsSnakeStep = false;
+                }
 
                 stepsToRemove.Add(element);
 
