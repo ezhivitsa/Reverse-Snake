@@ -32,7 +32,6 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<Wall> _wallsFilter = null;
     EcsFilter<Score> _scoreFilter = null;
     EcsFilter<GameOver> _gameOverFilter = null;
-    EcsFilter<Target> _targetFilter = null;
     EcsFilter<Step> _stepFilter = null;
 
     EcsFilter<CheckGameEndEvent> _gameEndEventFilter = null;
