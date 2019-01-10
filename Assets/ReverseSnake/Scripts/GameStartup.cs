@@ -29,7 +29,6 @@ public class GameStartup : MonoBehaviour
 
         _systems = new EcsSystems(_world)
             .Add(_uiEmitter)
-            .Add(new BoardElementsSystem())
             .Add(new StateSystem())
             .Add(new StepReactiveSystemOnAdd())
             .Add(new StepReactiveSystemOnRemove())

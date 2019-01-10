@@ -126,6 +126,11 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             var newPosition = PositionHelper.GetNextPosition(rowPosition, columnPosition, direction);
 
+            var boardElement = _world.BoardElements
+                .Find((el) => el.Column == newPosition.Column && el.Row == newPosition.Row);
+            boardElement.ContainsSnakeStep = true;
+            boardElement.Round = round;
+
             var stepEvent = _world.CreateEntityWith<Step>();
             stepEvent.Row = newPosition.Row;
             stepEvent.Column = newPosition.Column;
@@ -167,8 +172,15 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void TriggerClearBoardEvent(int round)
         {
-            var eventData =_world.CreateEntityWith<ClearBoardEvent>();
-            eventData.Round = round;
+            foreach (var element in _world.BoardElements)
+            {
+                if (element.Round == round)
+                {
+                    element.ContainsSnakeStep = false;
+                    element.ContainsTarget = false;
+                    element.Round = -1;
+                }
+            }
 
             var stepsFilter = _world.GetFilter<EcsFilter<Step>>();
 

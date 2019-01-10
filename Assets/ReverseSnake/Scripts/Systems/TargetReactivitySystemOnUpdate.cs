@@ -43,10 +43,11 @@ namespace Assets.ReverseSnake.Scripts.Systems
         {
             element.Transform.gameObject.SetActive(false);
 
+            element.Value = GetTargetValue();
+
             var target = element.GetTargetElement();
             target.gameObject.SetActive(true);
             element.Transform = target.transform;
-            element.Value = GetTargetValue();
 
             target.transform.position = TargetHelper.GetPositionVector(element.Row, element.Column);
             element.SetTexture();
