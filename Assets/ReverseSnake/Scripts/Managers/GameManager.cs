@@ -63,8 +63,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
             TriggerClearBoardEvent(lastStep.Round);
 
-            TriggerUpdateTargetEvent(round);
-
             var stepChange = 0;
             switch (targetValue)
             {
@@ -95,6 +93,8 @@ namespace Assets.ReverseSnake.Scripts.Managers
                 round,
                 direction
             );
+
+            TriggerUpdateTargetEvent(round);
 
             TriggerIncreaseScoreEvent();
         }
