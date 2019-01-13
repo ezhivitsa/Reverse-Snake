@@ -14,4 +14,6 @@ sealed class Score
 
     [EcsIgnoreNullCheck]
     public Text Result;
+
+    public bool Silent = false;
 }

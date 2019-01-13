@@ -11,8 +11,8 @@ namespace Assets.ReverseSnake.Scripts.Models
 
         public SettingsModel()
         {
-            UseMusic = true;
-            UseSounds = true;
+            UseMusic = false;
+            UseSounds = false;
         }
     }
 }

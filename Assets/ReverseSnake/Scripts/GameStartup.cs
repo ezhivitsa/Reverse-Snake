@@ -36,7 +36,7 @@ public class GameStartup : MonoBehaviour
             .Add(new TargetReactivitySystemOnAdd())
             .Add(new TargetReactivitySystemOnUpdate())
             .Add(new TargetReactiveSystemOnRemove())
-            .Add(new ScoreSystem())
+            .Add(new ScoreReactivitySystemOnUpdate())
             .Add(new UserInputSystem())
             .Add(new GameEndSystem());
 

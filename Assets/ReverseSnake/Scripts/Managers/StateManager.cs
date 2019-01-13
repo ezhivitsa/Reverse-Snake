@@ -9,14 +9,14 @@ namespace Assets.ReverseSnake.Scripts.Managers
         private static StateManager instance;
         private static EcsWorld instanceWorld;
 
-        private EcsWorld _world;
+        private ReverseSnakeWorld _world;
 
-        private StateManager(EcsWorld world)
+        private StateManager(ReverseSnakeWorld world)
         {
             _world = world;
         }
 
-        public static StateManager GetInstance(EcsWorld world)
+        public static StateManager GetInstance(ReverseSnakeWorld world)
         {
             if (instance == null || world != instanceWorld)
             {
@@ -103,9 +103,12 @@ namespace Assets.ReverseSnake.Scripts.Managers
             var stateEventData = _world.CreateEntityWith<StateLoadEvent>();
             stateEventData.State = state;
 
-            var scoreEventData = _world.CreateEntityWith<ScoreSetEvent>();
-            scoreEventData.Amount = state.Score;
-            scoreEventData.Silent = true;
+            var scoreFilter = _world.GetFilter<EcsFilter<Score>>();
+            var score = scoreFilter.Components1[0];
+
+            score.Amount = state.Score;
+            score.Silent = true;
+            _world.MarkComponentAsUpdated<Score>(scoreFilter.Entities[0]);
 
             var target = state.Targets[0];
             var targetEventData = _world.CreateEntityWith<Target>();
@@ -114,6 +117,11 @@ namespace Assets.ReverseSnake.Scripts.Managers
             targetEventData.Round = target.Round;
             targetEventData.Value = target.Value;
             targetEventData.Silent = true;
+
+            var targetBoardElement = _world.BoardElements
+                .Find(el => el.Row == target.Row && el.Column == target.Column);
+            targetBoardElement.ContainsTarget = true;
+            targetBoardElement.Round = target.Round;
 
             CreateSteps(state.Steps);
 
@@ -133,6 +141,11 @@ namespace Assets.ReverseSnake.Scripts.Managers
                 stepEvent.Round = step.Round;
                 stepEvent.Silent = true;
                 stepEvent.DontUseSound = true;
+
+                var boardElement = _world.BoardElements
+                    .Find(el => el.Row == step.Row && el.Column == step.Column);
+                boardElement.ContainsSnakeStep = true;
+                boardElement.Round = step.Round;
             }
         }
     }

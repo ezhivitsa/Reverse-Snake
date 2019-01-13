@@ -43,6 +43,8 @@ namespace Assets.ReverseSnake.Scripts.Managers
             targetBoardElement.ContainsTarget = true;
             targetBoardElement.Round = AppConstants.FirstRound;
             CreateFirstTarget(targetBoardElement);
+
+            SetScore(0);
         }
 
         public void NewStep(Step lastStep, DirectionEnum direction)
@@ -95,8 +97,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             );
 
             TriggerUpdateTargetEvent(round);
-
-            TriggerIncreaseScoreEvent();
+            IncreaseScore();
         }
 
         public void NewRound(Step lastStep, DirectionEnum direction)
@@ -138,7 +139,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             stepEvent.StartNumber = startNumber;
             stepEvent.Round = round;
             stepEvent.Silent = false;
-            stepEvent.DontUseSound = false;
+            stepEvent.DontUseSound = true;
         }
 
         private void TriggerUpdateTargetEvent(int round)
@@ -207,12 +208,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
             data.Walls = wallsToRemove;
         }
 
-        private void TriggerIncreaseScoreEvent()
-        {
-            var data = _world.CreateEntityWith<ScoreChangeEvent>();
-            data.Amount = 1;
-        }
-
         private void CreateFirstStep(BoardElement boardElement)
         {
             var stepEvent = _world.CreateEntityWith<Step>();
@@ -233,6 +228,26 @@ namespace Assets.ReverseSnake.Scripts.Managers
             target.Round = AppConstants.FirstRound;
             target.Value = TargetValueEnum.AddWall;
             target.Silent = false;
+        }
+
+        private void SetScore(int amount)
+        {
+            var scoreFilter = _world.GetFilter<EcsFilter<Score>>();
+            var score = scoreFilter.Components1[0];
+
+            score.Amount = amount;
+            score.Silent = false;
+            _world.MarkComponentAsUpdated<Score>(scoreFilter.Entities[0]);
+        }
+
+        private void IncreaseScore()
+        {
+            var scoreFilter = _world.GetFilter<EcsFilter<Score>>();
+            var score = scoreFilter.Components1[0];
+
+            score.Amount += 1;
+            score.Silent = false;
+            _world.MarkComponentAsUpdated<Score>(scoreFilter.Entities[0]);
         }
 
         public void ClearAll()

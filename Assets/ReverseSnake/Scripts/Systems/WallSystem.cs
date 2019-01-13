@@ -9,11 +9,12 @@ using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts.Managers;
 using System;
 using Assets.ReverseSnake.Scripts.WallAlgorithm;
+using Assets.ReverseSnake.Scripts;
 
 [EcsInject]
 public class WallSystem : IEcsInitSystem, IEcsRunSystem
 {
-    EcsWorld _world = null;
+    ReverseSnakeWorld _world = null;
 
     EcsFilter<Wall> _wallFilter = null;
 

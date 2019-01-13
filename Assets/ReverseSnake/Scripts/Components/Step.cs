@@ -19,7 +19,7 @@ sealed class Step
 
     public bool Silent = false;
 
-    public bool DontUseSound = false;
+    public bool DontUseSound = true;
 
     [NonSerialized]
     [EcsIgnoreNullCheck]

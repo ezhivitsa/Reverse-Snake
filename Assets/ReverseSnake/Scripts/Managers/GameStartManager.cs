@@ -1,8 +1,4 @@
-﻿using Assets.ReverseSnake.Scripts.Enums;
-using Assets.ReverseSnake.Scripts.Models;
-using Assets.ReverseSnake.Scripts.Systems;
-using Assets.src;
-using Leopotam.Ecs;
+﻿using Leopotam.Ecs;
 
 namespace Assets.ReverseSnake.Scripts.Managers
 {
@@ -39,7 +35,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
         public void StartGame()
         {
             TriggerShowEvents(true);
-            TriggerResetScoreEvent();
             TriggerStartGameEvent(true);
         }
 
@@ -60,13 +55,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             var wallEventData = _world.CreateEntityWith<ShowWallEvent>();
             wallEventData.IsActive = isActive;
-        }
-
-        private void TriggerResetScoreEvent()
-        {
-            var eventData = _world.CreateEntityWith<ScoreSetEvent>();
-            eventData.Amount = 0;
-            eventData.Silent = false;
         }
     }
 }
