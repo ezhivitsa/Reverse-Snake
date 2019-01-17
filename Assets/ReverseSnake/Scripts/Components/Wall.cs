@@ -1,6 +1,7 @@
 ﻿using Assets.ReverseSnake.Scripts.Enums;
 using Leopotam.Ecs;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -12,9 +13,9 @@ sealed class Wall
 
     public DirectionEnum Direction;
 
-    public bool IsActive;
-
     [NonSerialized]
     [EcsIgnoreNullCheck]
-    public Transform Transform;
+    public List<Transform> Transforms;
+
+    public bool Silent = false;
 }

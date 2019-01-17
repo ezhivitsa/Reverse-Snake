@@ -130,21 +130,15 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
 
     private bool IsWallOnWay(int row, int column, DirectionEnum direction)
     {
-        return GetWall(row, column, direction).IsActive;
+        return GetWall(row, column, direction) != null;
     }
 
     private Wall GetWall(int row, int column, DirectionEnum direction)
     {
-        List<Wall> wallsList = new List<Wall>();
-        for (var i = 0; i < _wallFilter.EntitiesCount; i++)
-        {
-            wallsList.Add(_wallFilter.Components1[i]);
-        }
-
         var nextPosition = PositionHelper.GetNextPosition(row, column, direction);
         var reverseDirection = DirectionHelper.GetReverseDirection(direction);
 
-        return wallsList.Find(w => {
+        return _wallFilter.ToEntitiesList().FirstOrDefault(w => {
             return (w.Row == row && w.Column == column && w.Direction == direction) ||
              (w.Row == nextPosition.Row && w.Column == nextPosition.Column && w.Direction == reverseDirection);
         });

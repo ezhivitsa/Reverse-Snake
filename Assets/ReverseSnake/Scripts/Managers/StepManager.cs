@@ -1,5 +1,4 @@
-﻿using Assets.src;
-using Leopotam.Ecs;
+﻿using Leopotam.Ecs;
 
 namespace Assets.ReverseSnake.Scripts.Managers
 {
@@ -31,19 +30,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
             {
                 TriggerStepCreatedEvent(column, row, number, round);
             }
-        }
-
-        public void CreateFirstStep(BoardElement boardElement)
-        {
-            var stepEvent = _world.CreateEntityWith<Step>();
-
-            stepEvent.Row = boardElement.Row;
-            stepEvent.Column = boardElement.Column;
-            stepEvent.Number = AppConstants.StartStepsCount;
-            stepEvent.StartNumber = AppConstants.StartStepsCount;
-            stepEvent.Round = AppConstants.FirstRound;
-            stepEvent.DontUseSound = true;
-            stepEvent.Silent = false;
         }
 
         private void TriggerStepCreatedEvent(int column, int row, int number, int round)

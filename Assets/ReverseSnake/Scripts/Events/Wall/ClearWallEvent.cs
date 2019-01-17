@@ -1,3 +1,0 @@
-﻿sealed class ClearWallEvent
-{
-}

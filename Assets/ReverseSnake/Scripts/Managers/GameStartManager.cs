@@ -1,4 +1,5 @@
-﻿using Leopotam.Ecs;
+﻿using Assets.ReverseSnake.Scripts.Systems;
+using Leopotam.Ecs;
 
 namespace Assets.ReverseSnake.Scripts.Managers
 {
@@ -30,6 +31,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             TriggerStartGameEvent(false);
             TriggerClearBoardEvents();
+            TriggerShowEvents(false);
         }
 
         public void StartGame()
@@ -46,9 +48,13 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void TriggerClearBoardEvents()
         {
-            _world.CreateEntityWith<ClearWallEvent>();
-
-            TriggerShowEvents(false);
+            var wallsFilter = _world.GetFilter<EcsFilter<Wall>>();
+            for (var i = wallsFilter.EntitiesCount - 1; i >= 0; i -= 1)
+            {
+                var entity = wallsFilter.Entities[i];
+                WallReactivitySystemOnRemove.CachedWalls[entity] = wallsFilter.Components1[i];
+                _world.RemoveEntity(entity);
+            }
         }
 
         private void TriggerShowEvents(bool isActive)

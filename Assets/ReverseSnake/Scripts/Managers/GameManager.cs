@@ -145,7 +145,8 @@ namespace Assets.ReverseSnake.Scripts.Managers
         private void TriggerUpdateTargetEvent(int round)
         {
             var boardElement = _world.BoardElements
-                .Where((el) => {
+                .Where((el) =>
+                {
                     return !el.ContainsSnakeStep || el.Round != round;
                 })
                 .RandomElement();
@@ -199,13 +200,22 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void TriggerAddWallEvent()
         {
-            _world.CreateEntityWith<AddWallEvent>();
+            var wall = _world.CreateEntityWith<Wall>();
+            wall.Silent = false;
+            wall.Row = -1;
+            wall.Column = -1;
         }
 
         private void TriggerRemoveWallEvent(int wallsToRemove)
         {
-            var data = _world.CreateEntityWith<RemoveWallEvent>();
-            data.Walls = wallsToRemove;
+            var wallsFilter = _world.GetFilter<EcsFilter<Wall>>();
+            for (var i = 0; i < wallsToRemove; i += 1)
+            {
+                var num = Enumerable.Range(0, wallsFilter.EntitiesCount).RandomElement();
+                var entity = wallsFilter.Entities[num];
+                WallReactivitySystemOnRemove.CachedWalls[entity] = wallsFilter.Components1[num];
+                _world.RemoveEntity(entity);
+            }
         }
 
         private void CreateFirstStep(BoardElement boardElement)

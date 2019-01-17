@@ -4,14 +4,26 @@ namespace Assets.ReverseSnake.Scripts.WallAlgorithm
 {
     public static class GraphGenertor
     {
+        private static Graph _graph;
+
         public static Graph Generate()
         {
-            var graph = new Graph();
+            if (_graph != null)
+            {
+                return _graph;
+            }
 
-            GenerateVertices(graph);
-            GenerateEdges(graph);
+            _graph = new Graph();
 
-            return graph;
+            GenerateVertices(_graph);
+            GenerateEdges(_graph);
+
+            return _graph;
+        }
+
+        public static void Clear()
+        {
+            _graph = null;
         }
 
         private static void GenerateVertices(Graph graph)

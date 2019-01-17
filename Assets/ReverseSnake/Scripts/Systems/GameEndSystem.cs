@@ -139,7 +139,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         var wall = GetWall(position, DirectionHelper.GetReverseDirection(direction));
 
         if (
-            wall.IsActive ||
+            wall != null ||
             (element.ContainsSnakeStep && element.Round == round) ||
             (element.ContainsTarget && element.Round == round && !TargetHelper.CanGetTargetElement(number))
         )
@@ -162,7 +162,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
         return _wallsFilter
             .ToEntitiesList()
-            .Find(e =>
+            .FirstOrDefault(e =>
                 (
                     e.Row == position.Row &&
                     e.Column == position.Column &&

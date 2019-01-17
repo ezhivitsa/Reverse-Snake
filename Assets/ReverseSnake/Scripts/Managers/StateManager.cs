@@ -124,9 +124,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             targetBoardElement.Round = target.Round;
 
             CreateSteps(state.Steps);
-
-            var wallsEventData = _world.CreateEntityWith<CreateWallsEvent>();
-            wallsEventData.Walls = state.ActiveWalls;
+            CreateWalls(state.ActiveWalls);
         }
 
         private void CreateSteps(List<Step> steps)
@@ -146,6 +144,18 @@ namespace Assets.ReverseSnake.Scripts.Managers
                     .Find(el => el.Row == step.Row && el.Column == step.Column);
                 boardElement.ContainsSnakeStep = true;
                 boardElement.Round = step.Round;
+            }
+        }
+
+        private void CreateWalls(List<Wall> walls)
+        {
+            foreach (var wall in walls)
+            {
+                var wallEvent = _world.CreateEntityWith<Wall>();
+                wallEvent.Row = wall.Row;
+                wallEvent.Column = wall.Column;
+                wallEvent.Direction = wall.Direction;
+                wallEvent.Silent = true;
             }
         }
     }

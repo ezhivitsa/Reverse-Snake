@@ -52,10 +52,6 @@ namespace Assets.ReverseSnake.Scripts.Systems
             target.transform.position = TargetHelper.GetPositionVector(element.Row, element.Column);
             element.SetTexture();
 
-            var oldBoardElement = _world.BoardElements
-                .Find((el) => el.Row == OldTarget.Row && el.Column == OldTarget.Column);
-            oldBoardElement.ContainsTarget = false;
-
             _stateManager.RemoveTarget(OldTarget.Row, OldTarget.Column, OldTarget.Value, OldTarget.Round);
             _stateManager.AddTarget(element.Row, element.Column, element.Value, element.Round);
         }
@@ -64,7 +60,6 @@ namespace Assets.ReverseSnake.Scripts.Systems
         {
             var activeWalls = _wallFilter
                 .ToEntitiesList()
-                .Where(e => e.IsActive)
                 .ToList()
                 .Count;
 
