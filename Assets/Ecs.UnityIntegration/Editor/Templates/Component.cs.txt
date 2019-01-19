@@ -1,5 +1,0 @@
-﻿namespace #NS# {
-    sealed class #SCRIPTNAME# {
-        // Add your data here.
-    }
-}

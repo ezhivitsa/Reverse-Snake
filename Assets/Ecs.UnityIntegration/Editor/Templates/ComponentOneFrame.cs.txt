@@ -1,6 +1,0 @@
-﻿using Leopotam.Ecs;
-
-namespace #NS# {
-    [EcsOneFrame]
-    sealed class #SCRIPTNAME# { }
-}

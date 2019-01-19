@@ -138,12 +138,13 @@ namespace Assets.ReverseSnake.Scripts.Systems
             var wallsOnPosition = new List<Wall>();
 
             var bottomPosition = PositionHelper.GetNextPosition(row, column, DirectionEnum.Bottom);
+            var leftPosition = PositionHelper.GetNextPosition(row, column, DirectionEnum.Left);
             var positions = new List<Tuple<int, int, DirectionEnum>>
             {
                 Tuple.Create(row, column, DirectionEnum.Top),
                 Tuple.Create(row, column, DirectionEnum.Right),
-                Tuple.Create(bottomPosition.Row, bottomPosition.Column, DirectionEnum.Bottom),
-                Tuple.Create(bottomPosition.Row, bottomPosition.Column, DirectionEnum.Left)
+                Tuple.Create(bottomPosition.Row, bottomPosition.Column, DirectionEnum.Top),
+                Tuple.Create(leftPosition.Row, leftPosition.Column, DirectionEnum.Right)
             };
 
             foreach (var position in positions)

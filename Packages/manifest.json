@@ -1,10 +1,11 @@
 {
   "dependencies": {
-    "com.unity.ads": "2.3.1",
+    "com.leopotam.ecs": "https://github.com/Leopotam/ecs.git#v20181222",
+    "com.leopotam.ecs-reactive": "https://github.com/Leopotam/ecs-reactive.git#v20181222",
+    "com.leopotam.ecs-ui": "https://github.com/Leopotam/ecs-ui.git#v20181222",
+    "com.leopotam.ecs-unityintegration": "https://github.com/Leopotam/ecs-unityintegration.git#v20181222",
     "com.unity.analytics": "3.2.2",
-    "com.unity.collab-proxy": "1.2.15",
     "com.unity.package-manager-ui": "2.0.3",
-    "com.unity.purchasing": "2.0.3",
     "com.unity.textmeshpro": "1.3.0",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -36,5 +37,23 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
+  },
+  "lock": {
+    "com.leopotam.ecs": {
+      "hash": "54a389e245ec6d6edb7314c7399bf1e134294e39",
+      "revision": "v20181222"
+    },
+    "com.leopotam.ecs-reactive": {
+      "hash": "d4b88167ec28a66dbffdd86b554fadef90052d9e",
+      "revision": "v20181222"
+    },
+    "com.leopotam.ecs-ui": {
+      "hash": "2e32d2f27085606ff07109c0300bb402cb424add",
+      "revision": "v20181222"
+    },
+    "com.leopotam.ecs-unityintegration": {
+      "hash": "f493e9643c3c24742677566d77ed4da54255c443",
+      "revision": "v20181222"
+    }
   }
 }
