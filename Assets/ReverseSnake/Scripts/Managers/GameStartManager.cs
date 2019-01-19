@@ -9,19 +9,17 @@ namespace Assets.ReverseSnake.Scripts.Managers
         private static EcsWorld _instanceWorld;
 
         private EcsWorld _world;
-        private EcsFilter<Step> _stepsFilter = null;
 
-        private GameStartManager(EcsWorld world, EcsFilter<Step> stepsFilter)
+        private GameStartManager(EcsWorld world)
         {
             _world = world;
-            _stepsFilter = stepsFilter;
         }
 
-        public static GameStartManager GetInstance(EcsWorld world, EcsFilter<Step> stepsFilter)
+        public static GameStartManager GetInstance(EcsWorld world)
         {
             if (_instance == null || world != _instanceWorld)
             {
-                _instance = new GameStartManager(world, stepsFilter);
+                _instance = new GameStartManager(world);
                 _instanceWorld = world;
             }
             return _instance;
@@ -31,12 +29,10 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             TriggerStartGameEvent(false);
             TriggerClearBoardEvents();
-            TriggerShowEvents(false);
         }
 
         public void StartGame()
         {
-            TriggerShowEvents(true);
             TriggerStartGameEvent(true);
         }
 
@@ -55,12 +51,6 @@ namespace Assets.ReverseSnake.Scripts.Managers
                 WallReactivitySystemOnRemove.CachedWalls[entity] = wallsFilter.Components1[i];
                 _world.RemoveEntity(entity);
             }
-        }
-
-        private void TriggerShowEvents(bool isActive)
-        {
-            var wallEventData = _world.CreateEntityWith<ShowWallEvent>();
-            wallEventData.IsActive = isActive;
         }
     }
 }

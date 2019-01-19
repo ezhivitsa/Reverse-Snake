@@ -88,10 +88,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
         }
 
         private void CreateStep(BoardElement boardElement, Step element)
-        {
-            boardElement.ContainsSnakeStep = true;
-            boardElement.Round = element.Round;
-            
+        {            
             Transform transform = null;
 
             var stepGameObject = _cacheManager.GetAvailableStep();

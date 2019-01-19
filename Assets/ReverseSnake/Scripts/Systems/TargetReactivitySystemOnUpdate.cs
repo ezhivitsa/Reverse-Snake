@@ -60,8 +60,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
         {
             var activeWalls = _wallFilter
                 .ToEntitiesList()
-                .ToList()
-                .Count;
+                .Count();
 
             return TargetHelper.GetTargetValue(activeWalls / 2);
         }

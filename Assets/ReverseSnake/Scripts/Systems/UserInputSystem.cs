@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using Assets.ReverseSnake.Scripts.Managers;
 using Assets.ReverseSnake.Scripts.Extensions;
 using Assets.ReverseSnake.Scripts;
+using UnityEngine;
+using Assets.src;
 
 [EcsInject]
 sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
@@ -23,11 +25,14 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
 
     private GameManager _manager;
     private InputHelper _inputHelper;
+    private GameObject _grid;
 
     public void Initialize()
     {
         _manager = GameManager.GetInstance(_world);
         _inputHelper = new InputHelper(_world);
+
+        _grid = GameObject.FindGameObjectWithTag(AppConstants.GridTag);
 
         _isGameActive = true;
     }
@@ -64,6 +69,7 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
         {
             _inputHelper.Clear();
             _isGameActive = gameStart.IsActive;
+            _grid.SetActive(gameStart.IsActive);
         });
     }
 

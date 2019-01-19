@@ -18,6 +18,18 @@ namespace Assets.ReverseSnake.Scripts
             InitializeState();
         }
 
+        public T FirstComponent<T>() where T : class, new()
+        {
+            var filter = GetFilter<EcsFilter<T>>();
+            return filter.Components1[0];
+        }
+
+        public int FirstEntity<T>() where T : class, new()
+        {
+            var filter = GetFilter<EcsFilter<T>>();
+            return filter.Entities[0];
+        }
+
         private void InitializeElements()
         {
             for (var i = 0; i < AppConstants.Rows; i++)

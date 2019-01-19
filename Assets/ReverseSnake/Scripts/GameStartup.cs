@@ -32,7 +32,6 @@ public class GameStartup : MonoBehaviour
             .Add(new StateSystem())
             .Add(new StepReactiveSystemOnAdd())
             .Add(new StepReactiveSystemOnRemove())
-            .Add(new WallSystem())
             .Add(new WallReactivitySystemOnAdd())
             .Add(new WallReactivitySystemOnRemove())
             .Add(new TargetReactivitySystemOnAdd())

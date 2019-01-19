@@ -32,7 +32,6 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
     EcsFilter<Wall> _wallsFilter = null;
     EcsFilter<Score> _scoreFilter = null;
     EcsFilter<GameOver> _gameOverFilter = null;
-    EcsFilter<Step> _stepFilter = null;
 
     EcsFilter<CheckGameEndEvent> _gameEndEventFilter = null;
 
@@ -40,7 +39,7 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     public void Initialize()
     {
-        _manager = GameStartManager.GetInstance(_world, _stepFilter);
+        _manager = GameStartManager.GetInstance(_world);
         _stateManager = StateManager.GetInstance(_world);
         _gameManager = GameManager.GetInstance(_world);
 

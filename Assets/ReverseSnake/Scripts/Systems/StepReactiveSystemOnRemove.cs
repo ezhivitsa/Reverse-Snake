@@ -43,13 +43,6 @@ namespace Assets.ReverseSnake.Scripts.Systems
                 element.Transform.gameObject.SetActive(false);
                 _disabledStepsManager.AddAvailableStep(element.Transform.gameObject);
 
-                var boardElement = _world.BoardElements
-                    .Find(el => el.Row == element.Row && el.Column == element.Column && el.Round == element.Round);
-                if (boardElement != null)
-                {
-                    boardElement.ContainsSnakeStep = false;
-                }
-
                 stepsToRemove.Add(element);
 
                 CachedSteps.Remove(entity);

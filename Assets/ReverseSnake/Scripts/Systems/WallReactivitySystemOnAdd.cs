@@ -6,6 +6,7 @@ using Assets.ReverseSnake.Scripts.WallAlgorithm;
 using Assets.src;
 using Leopotam.Ecs;
 using Leopotam.Ecs.Reactive;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -136,42 +137,27 @@ namespace Assets.ReverseSnake.Scripts.Systems
             var activeWalls = _wallsFilter.ToEntitiesList();
             var wallsOnPosition = new List<Wall>();
 
-            var topWall = activeWalls
-                .FirstOrDefault(w => w.Row == row && w.Column == column && w.Direction == DirectionEnum.Top);
-            if (topWall != null)
-            {
-                wallsOnPosition.Add(topWall);
-            }
-
-            var rightWall = activeWalls
-                .FirstOrDefault(w => w.Row == row && w.Column == column && w.Direction == DirectionEnum.Right);
-            if (rightWall != null)
-            {
-                wallsOnPosition.Add(rightWall);
-            }
-
             var bottomPosition = PositionHelper.GetNextPosition(row, column, DirectionEnum.Bottom);
-            var bottomWall = activeWalls
-                .FirstOrDefault(w =>
-                    w.Row == bottomPosition.Row &&
-                    w.Column == bottomPosition.Column &&
-                    w.Direction == DirectionEnum.Bottom
-                );
-            if (bottomWall != null)
+            var positions = new List<Tuple<int, int, DirectionEnum>>
             {
-                wallsOnPosition.Add(bottomWall);
-            }
+                Tuple.Create(row, column, DirectionEnum.Top),
+                Tuple.Create(row, column, DirectionEnum.Right),
+                Tuple.Create(bottomPosition.Row, bottomPosition.Column, DirectionEnum.Bottom),
+                Tuple.Create(bottomPosition.Row, bottomPosition.Column, DirectionEnum.Left)
+            };
 
-            var leftPosition = PositionHelper.GetNextPosition(row, column, DirectionEnum.Left);
-            var leftWall = activeWalls
-                .FirstOrDefault(w =>
-                    w.Row == bottomPosition.Row &&
-                    w.Column == bottomPosition.Column &&
-                    w.Direction == DirectionEnum.Left
-                );
-            if (leftWall != null)
+            foreach (var position in positions)
             {
-                wallsOnPosition.Add(leftWall);
+                var wall = activeWalls
+                    .FirstOrDefault(w =>
+                        w.Row == position.Item1 &&
+                        w.Column == position.Item2 &&
+                        w.Direction == position.Item3
+                    );
+                if (wall != null)
+                {
+                    wallsOnPosition.Add(wall);
+                }
             }
 
             return wallsOnPosition;

@@ -145,16 +145,12 @@ namespace Assets.ReverseSnake.Scripts.Managers
         private void TriggerUpdateTargetEvent(int round)
         {
             var boardElement = _world.BoardElements
-                .Where((el) =>
-                {
-                    return !el.ContainsSnakeStep || el.Round != round;
-                })
+                .Where((el) => !el.ContainsSnakeStep || el.Round != round)
                 .RandomElement();
             boardElement.ContainsTarget = true;
             boardElement.Round = round;
-
-            var targetFilter = _world.GetFilter<EcsFilter<Target>>();
-            var target = targetFilter.Components1[0];
+            
+            var target = _world.FirstComponent<Target>();
 
             TargetReactivitySystemOnUpdate.OldTarget = new Target
             {
@@ -169,20 +165,12 @@ namespace Assets.ReverseSnake.Scripts.Managers
             target.Round = round;
             target.Silent = false;
 
-            _world.MarkComponentAsUpdated<Target>(targetFilter.Entities[0]);
+            _world.MarkComponentAsUpdated<Target>(_world.FirstEntity<Target>());
         }
 
         private void TriggerClearBoardEvent(int round)
         {
-            foreach (var element in _world.BoardElements)
-            {
-                if (element.Round == round)
-                {
-                    element.ContainsSnakeStep = false;
-                    element.ContainsTarget = false;
-                    element.Round = -1;
-                }
-            }
+            _world.BoardElements.ClearElements(round);
 
             var stepsFilter = _world.GetFilter<EcsFilter<Step>>();
 
@@ -242,31 +230,22 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void SetScore(int amount)
         {
-            var scoreFilter = _world.GetFilter<EcsFilter<Score>>();
-            var score = scoreFilter.Components1[0];
+            var score = _world.FirstComponent<Score>();
 
             score.Amount = amount;
             score.Silent = false;
-            _world.MarkComponentAsUpdated<Score>(scoreFilter.Entities[0]);
+            _world.MarkComponentAsUpdated<Score>(_world.FirstEntity<Score>());
         }
 
         private void IncreaseScore()
         {
-            var scoreFilter = _world.GetFilter<EcsFilter<Score>>();
-            var score = scoreFilter.Components1[0];
-
-            score.Amount += 1;
-            score.Silent = false;
-            _world.MarkComponentAsUpdated<Score>(scoreFilter.Entities[0]);
+            var score = _world.FirstComponent<Score>();
+            SetScore(score.Amount + 1);
         }
 
         public void ClearAll()
         {
-            foreach (var el in _world.BoardElements)
-            {
-                el.ContainsSnakeStep = false;
-                el.ContainsTarget = false;
-            }
+            _world.BoardElements.ClearElements();
 
             var stepsFilter = _world.GetFilter<EcsFilter<Step>>();
             for (var i = 0; i < stepsFilter.EntitiesCount; i++)
