@@ -50,7 +50,6 @@ namespace Assets.ReverseSnake.Scripts.Systems
             element.Transform = target.transform;
 
             target.transform.position = TargetHelper.GetPositionVector(element.Row, element.Column);
-            element.SetTexture();
 
             _stateManager.RemoveTarget(OldTarget.Row, OldTarget.Column, OldTarget.Value, OldTarget.Round);
             _stateManager.AddTarget(element.Row, element.Column, element.Value, element.Round);

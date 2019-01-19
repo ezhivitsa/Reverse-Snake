@@ -13,7 +13,8 @@ namespace Assets.ReverseSnake.Scripts.Systems
     {
         ReverseSnakeWorld _world = null;
 
-        const string DefaultTargetPath = "Objects/DefaultTarget";
+        const string AddWallTargetPath = "Objects/AddWallTarget";
+        const string RemoveWallTargetPath = "Objects/RemoveWallTarget";
         const string AddTailRemoveTwoWallTarget = "Objects/AddTailRemoveTwoWallTarget";
         const string RemoveTailAddWallTarget = "Objects/RemoveTailAddWallTarget";
 
@@ -65,15 +66,19 @@ namespace Assets.ReverseSnake.Scripts.Systems
             element.Transform = target.transform;
 
             target.transform.position = TargetHelper.GetPositionVector(element.Row, element.Column);
-            element.SetTexture();
         }
 
         private void InitializeTargets()
         {
-            var defaultTarget = (GameObject)Resources.Load(DefaultTargetPath, typeof(GameObject));
-            _cacheManager.DefaultTarget = GameObject.Instantiate(defaultTarget);
-            _cacheManager.DefaultTarget.transform.parent = _gameElements.transform;
-            _cacheManager.DefaultTarget.SetActive(false);
+            var addWallTarget = (GameObject)Resources.Load(AddWallTargetPath, typeof(GameObject));
+            _cacheManager.AddWallTarget = GameObject.Instantiate(addWallTarget);
+            _cacheManager.AddWallTarget.transform.parent = _gameElements.transform;
+            _cacheManager.AddWallTarget.SetActive(false);
+
+            var removeWallTarget = (GameObject)Resources.Load(RemoveWallTargetPath, typeof(GameObject));
+            _cacheManager.RemoveWallTarget = GameObject.Instantiate(removeWallTarget);
+            _cacheManager.RemoveWallTarget.transform.parent = _gameElements.transform;
+            _cacheManager.RemoveWallTarget.SetActive(false);
 
             var addTailRemoveTwoWallTarget = (GameObject)Resources.Load(AddTailRemoveTwoWallTarget, typeof(GameObject));
             _cacheManager.AddTailRemoveTwoWallTarget = GameObject.Instantiate(addTailRemoveTwoWallTarget);

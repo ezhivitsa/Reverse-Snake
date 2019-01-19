@@ -8,18 +8,31 @@ namespace Assets.ReverseSnake.Scripts.Managers
         private static CachedComponentsManager _instance;
         private static List<GameObject> _steps = new List<GameObject>();
 
-        private static GameObject _defaultTarget;
+        private static GameObject _addWallTarget;
+        private static GameObject _removeWallTarget;
         private static GameObject _addTailRemoveTwoWallTarget;
         private static GameObject _removeTailAddWallTarget;
 
-        public GameObject DefaultTarget {
+        public GameObject AddWallTarget {
             get
             {
-                return _defaultTarget;
+                return _addWallTarget;
             }
             set
             {
-                _defaultTarget = value;
+                _addWallTarget = value;
+            }
+        }
+
+        public GameObject RemoveWallTarget
+        {
+            get
+            {
+                return _removeWallTarget;
+            }
+            set
+            {
+                _removeWallTarget = value;
             }
         }
 
@@ -99,7 +112,8 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         public void ClearTargets()
         {
-            _defaultTarget = null;
+            _addWallTarget = null;
+            _removeWallTarget = null;
             _addTailRemoveTwoWallTarget = null;
             _removeTailAddWallTarget = null;
         }
