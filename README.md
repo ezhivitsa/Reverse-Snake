@@ -23,3 +23,6 @@ In our game we used:
 ## LICENSE
 GNU General Public License v3.0
 See [LICENSE](https://github.com/ezhivitsa/Reverse-Snake/blob/master/LICENSE) to see the full text.
+
+## PRIVACY POLICY
+See [PRIVACY POLICY](https://github.com/ezhivitsa/Reverse-Snake/blob/master/PRIVACY_POLICY.md) to see the full text.
