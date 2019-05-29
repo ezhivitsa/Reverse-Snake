@@ -16,7 +16,7 @@ public class GameStartup : MonoBehaviour
     EcsSystems _systems;
 
     [SerializeField]
-    EcsUiEmitter _uiEmitter;
+    readonly EcsUiEmitter _uiEmitter;
 
     void OnEnable ()
     {

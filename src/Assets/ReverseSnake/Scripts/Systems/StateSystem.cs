@@ -20,13 +20,13 @@ public class StateSystem : IEcsRunSystem
 
     public void Run()
     {
-        var hasEvents = _setScoreEvents.EntitiesCount > 0 ||
-            _addStepsEvents.EntitiesCount > 0 ||
-            _removeStepsEvent.EntitiesCount > 0 ||
-            _addTargetsEvents.EntitiesCount > 0 ||
-            _removeTargetsEvents.EntitiesCount > 0 ||
-            _addWallsEvents.EntitiesCount > 0 ||
-            _removeWallsEvents.EntitiesCount > 0;
+        var hasEvents = !_setScoreEvents.IsEmpty() ||
+            !_addStepsEvents.IsEmpty() ||
+            !_removeStepsEvent.IsEmpty() ||
+            !_addTargetsEvents.IsEmpty() ||
+            !_removeTargetsEvents.IsEmpty() ||
+            !_addWallsEvents.IsEmpty() ||
+            !_removeWallsEvents.IsEmpty();
 
         HandleSetScoreEvent();
 

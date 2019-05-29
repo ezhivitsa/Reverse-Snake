@@ -34,7 +34,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void TriggerStepCreatedEvent(int column, int row, int number, int round)
         {
-            var eventData = _world.CreateEntityWith<CheckGameEndEvent>();
+            _world.CreateEntityWith<CheckGameEndEvent>(out CheckGameEndEvent eventData);
             eventData.Column = column;
             eventData.Row = row;
             eventData.Round = round;

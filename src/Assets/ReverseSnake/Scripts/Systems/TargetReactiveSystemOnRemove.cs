@@ -8,7 +8,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
     [EcsInject]
     sealed class TargetReactiveSystemOnRemove : EcsReactiveSystem<Target>, IEcsInitSystem
     {
-        static public Dictionary<int, Target> CachedTargets = new Dictionary<int, Target>();
+        static public Dictionary<EcsEntity, Target> CachedTargets = new Dictionary<EcsEntity, Target>();
 
         ReverseSnakeWorld _world = null;
 
@@ -30,10 +30,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
 
         protected override void RunReactive()
         {
-            for (var i = 0; i < ReactedEntitiesCount; i++)
-            {
-                var entity = ReactedEntities[i];
-
+            foreach (var entity in this) {
                 var element = CachedTargets[entity];
                 element.Transform.gameObject.SetActive(false);
 

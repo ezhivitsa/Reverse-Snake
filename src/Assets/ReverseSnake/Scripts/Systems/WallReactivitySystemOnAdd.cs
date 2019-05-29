@@ -16,8 +16,8 @@ namespace Assets.ReverseSnake.Scripts.Systems
     [EcsInject]
     sealed class WallReactivitySystemOnAdd : EcsReactiveSystem<Wall>, IEcsInitSystem
     {
-        ReverseSnakeWorld _world;
-        EcsFilter<Wall> _wallsFilter;
+        ReverseSnakeWorld _world = null;
+        EcsFilter<Wall> _wallsFilter = null;
 
         private StateManager _stateManager;
         private Graph _graph;
@@ -47,9 +47,8 @@ namespace Assets.ReverseSnake.Scripts.Systems
 
         protected override void RunReactive()
         {
-            for (var i = 0; i < ReactedEntitiesCount; i++)
+            foreach (var entity in this)
             {
-                var entity = ReactedEntities[i];
                 var wall = _world.GetComponent<Wall>(entity);
 
                 CreateWall(wall);
@@ -117,9 +116,9 @@ namespace Assets.ReverseSnake.Scripts.Systems
                 }
             }
 
-            for (var i = 0; i < _wallsFilter.EntitiesCount; i++)
+            foreach (var idx in _wallsFilter)
             {
-                var wall = _wallsFilter.Components1[i];
+                var wall = _wallsFilter.Components1[idx];
                 var component = result
                     .FirstOrDefault(w => w.Row == wall.Row && w.Column == wall.Column && w.Direction == wall.Direction);
 

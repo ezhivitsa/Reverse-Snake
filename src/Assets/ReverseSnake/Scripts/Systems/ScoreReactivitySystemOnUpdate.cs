@@ -10,7 +10,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
     [EcsInject]
     sealed class ScoreReactivitySystemOnUpdate : EcsUpdateReactiveSystem<Score>, IEcsInitSystem
     {
-        ReverseSnakeWorld _world;
+        new ReverseSnakeWorld _world = null;
 
         private StateManager _stateManager = null;
 
@@ -21,7 +21,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
             var scoreElement = GameObject.FindGameObjectWithTag(AppConstants.ScoreTag);
             var ui = GameObject.FindGameObjectWithTag(AppConstants.UITag);
 
-            var score = _world.CreateEntityWith<Score>();
+            var entity = _world.CreateEntityWith<Score>(out Score score);
             score.GameObject = scoreElement;
             score.UI = ui;
             score.Result = scoreElement.GetComponent<Text>();
@@ -33,11 +33,8 @@ namespace Assets.ReverseSnake.Scripts.Systems
 
         protected override void RunUpdateReactive()
         {
-            for (var i = 0; i < ReactedEntitiesCount; i++)
-            {
-                var entity = ReactedEntities[i];
+            foreach (var entity in this) {
                 var score = _world.GetComponent<Score>(entity);
-
                 UpdateScore(score);
             }
         }

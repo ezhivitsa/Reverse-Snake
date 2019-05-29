@@ -132,7 +132,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             boardElement.ContainsSnakeStep = true;
             boardElement.Round = round;
 
-            var stepEvent = _world.CreateEntityWith<Step>();
+            var entity = _world.CreateEntityWith<Step>(out Step stepEvent);
             stepEvent.Row = newPosition.Row;
             stepEvent.Column = newPosition.Column;
             stepEvent.Number = number;
@@ -174,12 +174,12 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
             var stepsFilter = _world.GetFilter<EcsFilter<Step>>();
 
-            for (var i = 0; i < stepsFilter.EntitiesCount; i++)
+            foreach (var idx in stepsFilter)
             {
-                var component = stepsFilter.Components1[i];
+                var component = stepsFilter.Components1[idx];
                 if (component.Round == round)
                 {
-                    var entity = stepsFilter.Entities[i];
+                    var entity = stepsFilter.Entities[idx];
                     StepReactiveSystemOnRemove.CachedSteps[entity] = component;
                     _world.RemoveEntity(entity);
                 }
@@ -188,7 +188,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void TriggerAddWallEvent()
         {
-            var wall = _world.CreateEntityWith<Wall>();
+            var entity = _world.CreateEntityWith<Wall>(out Wall wall);
             wall.Silent = false;
             wall.Row = -1;
             wall.Column = -1;
@@ -199,7 +199,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             var wallsFilter = _world.GetFilter<EcsFilter<Wall>>();
             for (var i = 0; i < wallsToRemove; i += 1)
             {
-                var num = Enumerable.Range(0, wallsFilter.EntitiesCount).RandomElement();
+                var num = Enumerable.Range(0, wallsFilter.Entities.Count()).RandomElement();
                 var entity = wallsFilter.Entities[num];
                 WallReactivitySystemOnRemove.CachedWalls[entity] = wallsFilter.Components1[num];
                 _world.RemoveEntity(entity);
@@ -208,7 +208,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void CreateFirstStep(BoardElement boardElement)
         {
-            var stepEvent = _world.CreateEntityWith<Step>();
+            var entity = _world.CreateEntityWith<Step>(out Step stepEvent);
             stepEvent.Row = boardElement.Row;
             stepEvent.Column = boardElement.Column;
             stepEvent.Number = AppConstants.StartStepsCount;
@@ -220,7 +220,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void CreateFirstTarget(BoardElement boardElement)
         {
-            var target = _world.CreateEntityWith<Target>();
+            var entity = _world.CreateEntityWith<Target>(out Target target);
             target.Row = boardElement.Row;
             target.Column = boardElement.Column;
             target.Round = AppConstants.FirstRound;
@@ -248,18 +248,18 @@ namespace Assets.ReverseSnake.Scripts.Managers
             _world.BoardElements.ClearElements();
 
             var stepsFilter = _world.GetFilter<EcsFilter<Step>>();
-            for (var i = 0; i < stepsFilter.EntitiesCount; i++)
+            foreach (var idx in stepsFilter)
             {
-                var entity = stepsFilter.Entities[i];
-                StepReactiveSystemOnRemove.CachedSteps[entity] = stepsFilter.Components1[i];
+                var entity = stepsFilter.Entities[idx];
+                StepReactiveSystemOnRemove.CachedSteps[entity] = stepsFilter.Components1[idx];
                 _world.RemoveEntity(entity);
             }
 
             var targetsFilter = _world.GetFilter<EcsFilter<Target>>();
-            for (var i = 0; i < targetsFilter.EntitiesCount; i++)
+            foreach (var idx in targetsFilter)
             {
-                var entity = targetsFilter.Entities[i];
-                TargetReactiveSystemOnRemove.CachedTargets[entity] = targetsFilter.Components1[i];
+                var entity = targetsFilter.Entities[idx];
+                TargetReactiveSystemOnRemove.CachedTargets[entity] = targetsFilter.Components1[idx];
                 _world.RemoveEntity(entity);
             }
         }

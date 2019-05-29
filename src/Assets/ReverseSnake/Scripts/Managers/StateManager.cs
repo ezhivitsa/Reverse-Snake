@@ -28,13 +28,13 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         public void SetScore(int score)
         {
-            var eventData = _world.CreateEntityWith<StateSetScoreEvent>();
+            var entity = _world.CreateEntityWith<StateSetScoreEvent>(out StateSetScoreEvent eventData);
             eventData.Score = score;
         }
 
         public void AddStep(int row, int column, int number, int startNumber, int round)
         {
-            var eventData = _world.CreateEntityWith<StateAddStepsEvent>();
+            var entity = _world.CreateEntityWith<StateAddStepsEvent>(out StateAddStepsEvent eventData);
             var step = new Step
             {
                 Active = true,
@@ -49,13 +49,13 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         public void RemoveSteps(List<Step> steps)
         {
-            var eventData = _world.CreateEntityWith<StateRemoveStepsEvent>();
+            var entity = _world.CreateEntityWith<StateRemoveStepsEvent>(out StateRemoveStepsEvent eventData);
             eventData.Steps = steps;
         }
 
         public void AddTarget(int row, int column, TargetValueEnum value, int round)
         {
-            var eventData = _world.CreateEntityWith<StateAddTargetsEvent>();
+            var entity = _world.CreateEntityWith<StateAddTargetsEvent>(out StateAddTargetsEvent eventData);
 
             var target = new Target
             {
@@ -69,7 +69,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         public void RemoveTarget(int row, int column, TargetValueEnum value, int round)
         {
-            var eventData = _world.CreateEntityWith<StateRemoveTargetsEvent>();
+            var entity = _world.CreateEntityWith<StateRemoveTargetsEvent>(out StateRemoveTargetsEvent eventData);
 
             var target = new Target
             {
@@ -83,24 +83,24 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         public void AddWalls(List<Wall> walls)
         {
-            var eventData = _world.CreateEntityWith<StateAddWallsEvent>();
+            var entity = _world.CreateEntityWith<StateAddWallsEvent>(out StateAddWallsEvent eventData);
             eventData.Walls = walls;
         }
 
         public void RemoveWalls(List<Wall> walls)
         {
-            var eventData = _world.CreateEntityWith<StateRemoveWallsEvent>();
+            var entity = _world.CreateEntityWith<StateRemoveWallsEvent>(out StateRemoveWallsEvent eventData);
             eventData.Walls = walls;
         }
 
         public void Clear()
         {
-            _world.CreateEntityWith<StateClearEvent>();
+            _world.CreateEntityWith<StateClearEvent>(out StateClearEvent clearEvent);
         }
 
         public void LoadFromState(State state)
         {
-            var stateEventData = _world.CreateEntityWith<StateLoadEvent>();
+            var entity = _world.CreateEntityWith<StateLoadEvent>(out StateLoadEvent stateEventData);
             stateEventData.State = state;
 
             var scoreFilter = _world.GetFilter<EcsFilter<Score>>();
@@ -111,7 +111,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
             _world.MarkComponentAsUpdated<Score>(scoreFilter.Entities[0]);
 
             var target = state.Targets[0];
-            var targetEventData = _world.CreateEntityWith<Target>();
+            _world.CreateEntityWith<Target>(out Target targetEventData);
             targetEventData.Row = target.Row;
             targetEventData.Column = target.Column;
             targetEventData.Round = target.Round;
@@ -131,7 +131,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             foreach (var step in steps)
             {
-                var stepEvent = _world.CreateEntityWith<Step>();
+                var entity = _world.CreateEntityWith<Step>(out Step stepEvent);
                 stepEvent.Row = step.Row;
                 stepEvent.Column = step.Column;
                 stepEvent.Number = step.Number;
@@ -151,7 +151,7 @@ namespace Assets.ReverseSnake.Scripts.Managers
         {
             foreach (var wall in walls)
             {
-                var wallEvent = _world.CreateEntityWith<Wall>();
+                var entity = _world.CreateEntityWith<Wall>(out Wall wallEvent);
                 wallEvent.Row = wall.Row;
                 wallEvent.Column = wall.Column;
                 wallEvent.Direction = wall.Direction;

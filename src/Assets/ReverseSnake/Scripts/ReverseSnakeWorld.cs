@@ -24,7 +24,7 @@ namespace Assets.ReverseSnake.Scripts
             return filter.Components1[0];
         }
 
-        public int FirstEntity<T>() where T : class, new()
+        public EcsEntity FirstEntity<T>() where T : class, new()
         {
             var filter = GetFilter<EcsFilter<T>>();
             return filter.Entities[0];

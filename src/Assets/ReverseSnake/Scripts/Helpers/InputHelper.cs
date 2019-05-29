@@ -160,7 +160,7 @@ namespace Assets.ReverseSnake.Scripts.Helpers
 
         protected virtual void OnSwipe(DirectionEnum direction)
         {
-            var eventData = _world.CreateEntityWith<SwipeDoneEvent>();
+            var entity = _world.CreateEntityWith<SwipeDoneEvent>(out SwipeDoneEvent eventData);
             eventData.Direction = direction;
         }
     }
