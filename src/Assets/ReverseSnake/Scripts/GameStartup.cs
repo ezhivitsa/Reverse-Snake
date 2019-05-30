@@ -3,6 +3,7 @@ using Assets.ReverseSnake.Scripts.Managers;
 using Assets.ReverseSnake.Scripts.Systems;
 using Leopotam.Ecs;
 using Leopotam.Ecs.Ui.Systems;
+using System.Collections;
 using UnityEngine;
 
 public class GameStartup : MonoBehaviour
@@ -16,12 +17,12 @@ public class GameStartup : MonoBehaviour
     EcsSystems _systems;
 
     [SerializeField]
-    readonly EcsUiEmitter _uiEmitter;
+    EcsUiEmitter _uiEmitter;
 
-    void OnEnable ()
+    void OnEnable()
     {
         _world = new ReverseSnakeWorld();
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
         Leopotam.Ecs.UnityIntegration.EcsWorldObserver.Create(_world);
 #endif
 
@@ -43,9 +44,9 @@ public class GameStartup : MonoBehaviour
 
         _systems.Initialize();
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
         Leopotam.Ecs.UnityIntegration.EcsSystemsObserver.Create(_systems);
-    #endif
+#endif
 
         SaveState.OnLoaded += OnLoadState;
         if (LoadState)

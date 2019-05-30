@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "com.leopotam.ecs": "https://github.com/Leopotam/ecs.git#v20190422",
-    "com.leopotam.ecs-reactive": "https://github.com/Leopotam/ecs-reactive.git#v20190422",
-    "com.leopotam.ecs-ui": "https://github.com/Leopotam/ecs-ui.git#v20190422",
-    "com.leopotam.ecs-unityintegration": "https://github.com/Leopotam/ecs-unityintegration.git#v20190422",
+    "com.leopotam.ecs": "https://github.com/Leopotam/ecs.git#v20190522",
+    "com.leopotam.ecs-reactive": "https://github.com/Leopotam/ecs-reactive.git#v20190522",
+    "com.leopotam.ecs-ui": "https://github.com/Leopotam/ecs-ui.git#v20190522",
+    "com.leopotam.ecs-unityintegration": "https://github.com/Leopotam/ecs-unityintegration.git#v20190522",
     "com.unity.analytics": "3.2.2",
     "com.unity.package-manager-ui": "2.0.3",
     "com.unity.textmeshpro": "1.3.0",
@@ -40,20 +40,20 @@
   },
   "lock": {
     "com.leopotam.ecs": {
-      "hash": "8626883db1215b3b1e8e7d6238cb441360e4c261",
-      "revision": "v20190422"
+      "hash": "8fa86f04b0d41ea6ec13925a0a52c7b3a503cb26",
+      "revision": "v20190522"
     },
     "com.leopotam.ecs-unityintegration": {
-      "hash": "2b6f42f65a4d050aa46a2eebab7435bc9d5cedf4",
-      "revision": "v20190422"
+      "hash": "a494e7daddd91d0f787625e9a3c6a2f7afba5fa5",
+      "revision": "v20190522"
     },
     "com.leopotam.ecs-reactive": {
-      "hash": "e3dad6969d765d00c78a21c1d992f3afebe73cdf",
-      "revision": "v20190422"
+      "hash": "f1ed931b7db309881a81650e4615f1441c1791d5",
+      "revision": "v20190522"
     },
     "com.leopotam.ecs-ui": {
-      "hash": "e494598ae1d23843707cd694064f103206bfb48f",
-      "revision": "v20190422"
+      "hash": "c8aa6202f11a22ea7b12dce66ae09f2ee0bc454b",
+      "revision": "v20190522"
     }
   }
 }
