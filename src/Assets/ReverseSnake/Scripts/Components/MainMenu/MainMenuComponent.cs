@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.ReverseSnake.Scripts.IO;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MainMenuComponent : MonoBehaviour
@@ -9,6 +10,12 @@ public class MainMenuComponent : MonoBehaviour
 
     public void NewGame()
     {
+        // add leaderboard item if have not finished game
+        if (SaveState.State != null && SaveState.State.Score != 0)
+        {
+            SaveLeaderboard.AddResultAndSave(SaveState.State.Score);
+        }
+
         GameStartup.LoadState = false;
         SceneManager.LoadScene(gameScene);
     }

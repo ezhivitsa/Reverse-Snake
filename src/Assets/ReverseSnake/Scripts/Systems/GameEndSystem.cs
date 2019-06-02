@@ -194,6 +194,11 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     private void OnReloadClick()
     {
+        if (SaveState.State != null && SaveState.State.Score != 0)
+        {
+            SaveLeaderboard.AddResultAndSave(SaveState.State.Score);
+        }
+
         _gameManager.ClearAll();
         _manager.EndGame();
         _stateManager.Clear();

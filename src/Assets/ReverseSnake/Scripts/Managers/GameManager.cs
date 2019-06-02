@@ -4,7 +4,9 @@ using Assets.ReverseSnake.Scripts.Helpers;
 using Assets.ReverseSnake.Scripts.Systems;
 using Assets.src;
 using Leopotam.Ecs;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Assets.ReverseSnake.Scripts.Managers
 {
@@ -197,11 +199,25 @@ namespace Assets.ReverseSnake.Scripts.Managers
         private void TriggerRemoveWallEvent(int wallsToRemove)
         {
             var wallsFilter = _world.GetFilter<EcsFilter<Wall>>();
+
+            var ids = new List<int>();
+            var idsToRemove = new List<int>();
+            foreach (var idx in wallsFilter)
+            {
+                ids.Add(idx);
+            }
+
             for (var i = 0; i < wallsToRemove; i += 1)
             {
-                var num = Enumerable.Range(0, wallsFilter.Entities.Count()).RandomElement();
-                var entity = wallsFilter.Entities[num];
-                WallReactivitySystemOnRemove.CachedWalls[entity] = wallsFilter.Components1[num];
+                var num = ids.RandomElement();
+                idsToRemove.Add(num);
+                ids.Remove(num);
+            }
+
+            foreach (var idx in idsToRemove)
+            {
+                var entity = wallsFilter.Entities[idx];
+                WallReactivitySystemOnRemove.CachedWalls[entity] = wallsFilter.Components1[idx];
                 _world.RemoveEntity(entity);
             }
         }
