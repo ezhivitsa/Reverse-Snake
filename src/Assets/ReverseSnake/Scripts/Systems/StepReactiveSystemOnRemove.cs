@@ -13,7 +13,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
         private CachedComponentsManager _disabledStepsManager;
         private StateManager _stateManager;
 
-        static public Dictionary<int, Step> CachedSteps = new Dictionary<int, Step>();
+        static public Dictionary<EcsEntity, Step> CachedSteps = new Dictionary<EcsEntity, Step>();
 
         public void Initialize()
         {
@@ -33,10 +33,8 @@ namespace Assets.ReverseSnake.Scripts.Systems
         protected override void RunReactive()
         {
             var stepsToRemove = new List<Step>();
-            for (var i = 0; i < ReactedEntitiesCount; i++)
+            foreach (var entity in this)
             {
-                var entity = ReactedEntities[i];
-
                 var element = CachedSteps[entity];
 
                 element.Active = false;

@@ -38,17 +38,18 @@ namespace Assets.ReverseSnake.Scripts.Managers
 
         private void TriggerStartGameEvent(bool isActive)
         {
-            var eventData = _world.CreateEntityWith<GameStartEvent>();
+            GameStartEvent eventData;
+            var entity = _world.CreateEntityWith<GameStartEvent>(out eventData);
             eventData.IsActive = isActive;
         }
 
         private void TriggerClearBoardEvents()
         {
             var wallsFilter = _world.GetFilter<EcsFilter<Wall>>();
-            for (var i = wallsFilter.EntitiesCount - 1; i >= 0; i -= 1)
+            foreach (var ids in wallsFilter)
             {
-                var entity = wallsFilter.Entities[i];
-                WallReactivitySystemOnRemove.CachedWalls[entity] = wallsFilter.Components1[i];
+                var entity = wallsFilter.Entities[ids];
+                WallReactivitySystemOnRemove.CachedWalls[entity] = wallsFilter.Components1[ids];
                 _world.RemoveEntity(entity);
             }
         }

@@ -45,9 +45,8 @@ namespace Assets.ReverseSnake.Scripts.Systems
 
         protected override void RunReactive()
         {
-            for (var i = 0; i < ReactedEntitiesCount; i++)
+            foreach (var entity in this)
             {
-                var entity = ReactedEntities[i];
                 var target = _world.GetComponent<Target>(entity);
 
                 CreateTarget(target);

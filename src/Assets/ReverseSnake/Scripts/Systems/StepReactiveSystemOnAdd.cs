@@ -56,11 +56,9 @@ namespace Assets.ReverseSnake.Scripts.Systems
         protected override void RunReactive()
         {
             var dontUseSound = true;
-            for (var i = 0; i < ReactedEntitiesCount; i++)
+            foreach (var entity in this)
             {
-                var entity = ReactedEntities[i];
                 var step = _world.GetComponent<Step>(entity);
-
                 dontUseSound = dontUseSound && step.DontUseSound;
             }
 
@@ -69,9 +67,8 @@ namespace Assets.ReverseSnake.Scripts.Systems
                 _drawAudio.Play();
             }
 
-            for (var i = 0; i < ReactedEntitiesCount; i++)
+            foreach (var entity in this)
             {
-                var entity = ReactedEntities[i];
                 var step = _world.GetComponent<Step>(entity);
 
                 var boardElement = _world.BoardElements

@@ -44,7 +44,8 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
         _gameManager = GameManager.GetInstance(_world);
 
         var ui = GameObject.FindGameObjectWithTag(AppConstants.GameOverTag);
-        var gameOver = _world.CreateEntityWith<GameOver>();
+        GameOver gameOver;
+        var entity = _world.CreateEntityWith<GameOver>(out gameOver);
         gameOver.GameObject = ui;
         ui.SetActive(false);
     }
@@ -105,9 +106,9 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     private void HandleUiClicks()
     {
-        for (var i = 0; i < _clickEvents.EntitiesCount; i++)
+        foreach (var idx in _clickEvents)
         {
-            EcsUiClickEvent data = _clickEvents.Components1[i];
+            EcsUiClickEvent data = _clickEvents.Components1[idx];
             switch (data.WidgetName)
             {
                 case _tryAgainWidget:
@@ -193,6 +194,11 @@ public class GameEndSystem : IEcsInitSystem, IEcsRunSystem
 
     private void OnReloadClick()
     {
+        if (SaveState.State != null && SaveState.State.Score != 0)
+        {
+            SaveLeaderboard.AddResultAndSave(SaveState.State.Score);
+        }
+
         _gameManager.ClearAll();
         _manager.EndGame();
         _stateManager.Clear();

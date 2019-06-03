@@ -121,14 +121,15 @@ sealed class UserInputSystem : IEcsRunSystem, IEcsInitSystem
     private Step GetLastStep()
     {
         List<Step> stepsList = new List<Step>();
-        for (var i = 0; i < _stepFilter.EntitiesCount; i++)
+        foreach (var idx in _stepFilter)
         {
-            var entityData = _stepFilter.Components1[i];
+            var entityData = _stepFilter.Components1[idx];
             if (entityData.Active)
             {
                 stepsList.Add(entityData);
             }
         }
+
         return stepsList
             .OrderBy(data => data.Number)
             .First();

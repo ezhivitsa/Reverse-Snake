@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace Assets.ReverseSnake.Scripts
+namespace Assets.ReverseSnake.Scripts.IO
 {
     sealed class SaveState
     {

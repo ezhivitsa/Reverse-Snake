@@ -11,7 +11,7 @@ namespace Assets.ReverseSnake.Scripts.Systems
     [EcsInject]
     sealed class TargetReactivitySystemOnUpdate : EcsUpdateReactiveSystem<Target>, IEcsInitSystem
     {
-        ReverseSnakeWorld _world = null;
+        new ReverseSnakeWorld _world = null;
         EcsFilter<Wall> _wallFilter = null;
 
         // ToDo: remove this static field
@@ -30,11 +30,9 @@ namespace Assets.ReverseSnake.Scripts.Systems
 
         protected override void RunUpdateReactive()
         {
-            for (var i = 0; i < ReactedEntitiesCount; i++)
+            foreach (var entity in this)
             {
-                var entity = ReactedEntities[i];
                 var target = _world.GetComponent<Target>(entity);
-
                 UpdateTarget(target);
             }
         }

@@ -4,5 +4,5 @@ using System.Collections.Generic;
 sealed class BoardElements
 {
     [EcsIgnoreNullCheck]
-    public List<BoardElement> Elements;
+    public List<BoardElement> Elements = null;
 }

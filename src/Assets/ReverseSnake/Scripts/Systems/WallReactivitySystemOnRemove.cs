@@ -10,9 +10,9 @@ namespace Assets.ReverseSnake.Scripts.Systems
     [EcsInject]
     sealed class WallReactivitySystemOnRemove : EcsReactiveSystem<Wall>, IEcsInitSystem
     {
-        ReverseSnakeWorld _world;
+        ReverseSnakeWorld _world = null;
 
-        static public Dictionary<int, Wall> CachedWalls = new Dictionary<int, Wall>();
+        static public Dictionary<EcsEntity, Wall> CachedWalls = new Dictionary<EcsEntity, Wall>();
 
         private StateManager _stateManager;
         private Graph _graph;
@@ -36,9 +36,8 @@ namespace Assets.ReverseSnake.Scripts.Systems
         {
             var wallsToRemove = new List<Wall>();
 
-            for (var i = 0; i < ReactedEntitiesCount; i++)
+            foreach (var entity in this)
             {
-                var entity = ReactedEntities[i];
                 var wall = CachedWalls[entity];
 
                 foreach (var transform in wall.Transforms)
